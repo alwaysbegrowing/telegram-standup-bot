@@ -1,0 +1,39 @@
+{
+  "scripts": {
+    "clean:dist": "npx shx rm -rf build",
+    "clean:modules": "npx shx rm -rf node_modules",
+    "clean": "npm run clean:dist && npm run clean:modules",
+    "build:clean": "npm run clean:all && npm run build",
+    "build:clean:dist": "npm run clean:dist && npm run build",
+    "dev": "snowpack dev",
+    "build": "npm install && snowpack build",
+    "test": "web-test-runner \"src/**/*.test.js\""
+  },
+  "dependencies": {
+    "svelte": "^3.24.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.7",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-transform-runtime": "^7.12.1",
+    "@babel/preset-env": "^7.12.7",
+    "@snowpack/plugin-babel": "^2.1.4",
+    "@snowpack/plugin-dotenv": "^2.0.4",
+    "@snowpack/plugin-postcss": "^1.0.7",
+    "@snowpack/plugin-svelte": "^3.3.0",
+    "@snowpack/plugin-webpack": "^2.1.1",
+    "@snowpack/web-test-runner-plugin": "^0.1.4",
+    "@testing-library/svelte": "^3.0.0",
+    "@web/test-runner": "^0.9.7",
+    "autoprefixer": "^10.0.2",
+    "chai": "^4.2.0",
+    "cssnano": "^4.1.10",
+    "postcss": "^8.1.9",
+    "postcss-cli": "^8.3.0",
+    "postcss-preset-env": "^6.7.0",
+    "sass": "^1.29.0",
+    "snowpack": "^2.17.1",
+    "svelte-preprocess": "^4.0.8",
+    "tailwindcss": "^2.0.1"
+  }
+}
