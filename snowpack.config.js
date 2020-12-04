@@ -10,9 +10,6 @@ module.exports = {
 		'@snowpack/plugin-svelte',
 		'@snowpack/plugin-dotenv',
 
-		// https://www.skypack.dev/view/@snowpack/plugin-webpack
-		"@snowpack/plugin-webpack",
-
 		// https://www.skypack.dev/view/@snowpack/plugin-babel
 		'@snowpack/plugin-babel',
 
