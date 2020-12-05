@@ -5,12 +5,11 @@
     "clean": "npm run clean:dist && npm run clean:modules",
     "build:clean": "npm run clean:all && npm run build",
     "build:clean:dist": "npm run clean:dist && npm run build",
-    "dev": "snowpack dev",
-    "build": "npm install && snowpack build",
     "test": "web-test-runner \"src/**/*.test.js\""
   },
   "dependencies": {
     "mongodb": "^3.6.3",
+    "node-fetch": "^2.6.1",
     "svelte": "^3.24.0"
   },
   "devDependencies": {

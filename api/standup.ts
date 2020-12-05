@@ -1,13 +1,100 @@
 import { NowRequest, NowResponse } from "@vercel/node";
+import fetch from "node-fetch";
+const connectToDatabase = require("./_connectToDatabase");
 
-const sendMsg = async (chatId: string) => {
+interface StandupGroup {
+  chatId: string;
+  updateTime: string;
+  members: Member[];
+}
+
+interface Member {
+  submitted: boolean;
+  lastSubmittedAt: string;
+  update: string;
+  about: About;
+}
+interface About {
+  id: number;
+  is_bot: boolean;
+  first_name: string;
+  last_name: string;
+  username: string;
+}
+
+const leaveStandupGroup = async (
+  chatId: string,
+  userId: string,
+  about: About,
+  messageId: string
+) => {
+  const db = await connectToDatabase();
+  const removedUserFromGroup = await db.collection("groups").updateOne({
+    chatId},
+   {$pull: { members: {'about.id': userId }},
+  });
+  if (removedUserFromGroup.modifiedCount) {
+    return sendMsg("You have left the group.", chatId, messageId);
+  }
+
+  return sendMsg(
+    "You aren't currently in a group. Join with /join !",
+    chatId,
+    messageId
+  );
+};
+
+const addToStandupGroup = async (
+  chatId: string,
+  userId: string,
+  about: About,
+  messageId: string
+) => {
+  const member: Member = {
+    submitted: false,
+    lastSubmittedAt: "",
+    update: "",
+    about,
+  };
+  const db = await connectToDatabase();
+
+  const userExistsInGroup = await db.collection("groups").findOne({
+    chatId,
+    "members.about.id": userId,
+  });
+  if (userExistsInGroup) {
+    return sendMsg("You are already in the group.", chatId, messageId);
+  }
+
+  const groupExists = await db.collection("groups").findOne({ chatId });
+  if (!groupExists) {
+    const group: StandupGroup = {
+      chatId,
+      updateTime: "",
+      members: [member],
+    };
+    db.collection("groups").insertOne(group);
+  } else {
+    db.collection("groups").updateOne(
+      { chatId },
+      { $push: { members: member } }
+    );
+  }
+
+  return sendMsg("Welcome to the standup group! :)", chatId, messageId);
+};
+
+const sendMsg = async (
+  text: string,
+  chat_id: string,
+  reply_to_message_id: string
+) => {
   const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/sendMessage`;
   const data = {
-    parse_mode: "MarkdownV2",
-    chat_id: chatId,
-    text: "Welcome to standup :)",
+    reply_to_message_id,
+    chat_id,
+    text,
   };
-  console.log(data);
   return fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -16,16 +103,22 @@ const sendMsg = async (chatId: string) => {
 };
 
 module.exports = async (req: NowRequest, res: NowResponse) => {
-    console.log('sent')
+  console.log("msg");
   const { body } = req;
-  const { message, chat } = body || {};
-  console.log(req.body);
+  const { message } = body || {};
+  const { chat, entities, text, message_id, from } = message || {};
   const isGroupCommand =
-    message?.entities?.[0]?.type === "bot_command" && chat?.type === "group";
-  const isJoinCommand = isGroupCommand && message?.text?.find("join");
+    entities?.[0]?.type === "bot_command" && chat?.type === "group";
+  const isJoinCommand = isGroupCommand && text?.search("join") !== -1;
+  const isLeaveCommand = isGroupCommand && text?.search("leave") !== -1;
+
   if (isJoinCommand) {
-    console.log("should join the chat");
-    const r = await sendMsg(chat?.id);
+    const r = await addToStandupGroup(chat.id, from.id, from, message_id);
     res.json({ status: r.status });
+  } else if (isLeaveCommand) {
+    const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
+    res.json({ status: r.status });
+  } else {
+    res.json({ status: 500 });
   }
 };
