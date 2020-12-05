@@ -2,8 +2,8 @@ import { NowRequest, NowResponse } from "@vercel/node";
 import { connectToDatabase } from "./_connectToDatabase";
 import { sendMsg, StandupGroup, Member, About } from "./_helpers";
 
-const standupTemplate = `Welcome! Please use the below template for your standups. Standups are due at 10m. You will recieve a few reminders if you do not submit your standup.
-
+const standupTemplate = `Welcome! Simply post your standup here and it will automatically be posted to your group at 10m. You will recieve a few reminders if you do not submit your standup before 8am the day of.
+Please use the following template for your standups:
 Yesterday - 
 
 Today -
