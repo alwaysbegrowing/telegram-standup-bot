@@ -1,38 +1,21 @@
 import { NowRequest, NowResponse } from "@vercel/node";
-import fetch from "node-fetch";
-const connectToDatabase = require("./_connectToDatabase");
+import { connectToDatabase } from "./_connectToDatabase";
+import { sendMsg, StandupGroup, Member, About } from "./_helpers";
 
-interface StandupGroup {
-  chatId: string;
-  updateTime: string;
-  members: Member[];
-}
-
-interface Member {
-  submitted: boolean;
-  lastSubmittedAt: string;
-  update: string;
-  about: About;
-}
-interface About {
-  id: number;
-  is_bot: boolean;
-  first_name: string;
-  last_name: string;
-  username: string;
-}
-
+console.log(connectToDatabase)
 const leaveStandupGroup = async (
-  chatId: string,
-  userId: string,
+  chatId: number,
+  userId: number,
   about: About,
-  messageId: string
+  messageId: number
 ) => {
   const db = await connectToDatabase();
-  const removedUserFromGroup = await db.collection("groups").updateOne({
-    chatId},
-   {$pull: { members: {'about.id': userId }},
-  });
+  const removedUserFromGroup = await db.collection("groups").updateOne(
+    {
+      chatId,
+    },
+    { $pull: { members: { "about.id": userId } } }
+  );
   if (removedUserFromGroup.modifiedCount) {
     return sendMsg("You have left the group.", chatId, messageId);
   }
@@ -44,14 +27,45 @@ const leaveStandupGroup = async (
   );
 };
 
-const addToStandupGroup = async (
-  chatId: string,
-  userId: string,
+const submitStandup = async (
+  chatId: number,
+  userId: number,
   about: About,
-  messageId: string
+  messageId: number,
+  message
+) => {
+  const db = await connectToDatabase();
+  const addUpdate = await db.collection("groups").updateOne(
+    { "members.about.id": userId },
+    {
+      $set: {
+        "members.$[elem].submitted": true,
+        "members.$[elem].lastSubmittedAt": Date.now(),
+        "members.$[elem].update": message,
+      },
+    },
+    { arrayFilters: [{ "elem.about.id": userId }] }
+  );
+
+  if (addUpdate.modifiedCount) {
+    return sendMsg("Your update has been submitted.", chatId, messageId);
+  }
+  return sendMsg(
+    "You aren't currently part of a standup group. Add this bot to your group, then use the /join comand to create a standup group",
+    chatId,
+    messageId
+  );
+};
+
+const addToStandupGroup = async (
+  chatId: number,
+  userId: number,
+  about: About,
+  messageId: number
 ) => {
   const member: Member = {
     submitted: false,
+    botCanMessage: false,
     lastSubmittedAt: "",
     update: "",
     about,
@@ -84,24 +98,6 @@ const addToStandupGroup = async (
   return sendMsg("Welcome to the standup group! :)", chatId, messageId);
 };
 
-const sendMsg = async (
-  text: string,
-  chat_id: string,
-  reply_to_message_id: string
-) => {
-  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/sendMessage`;
-  const data = {
-    reply_to_message_id,
-    chat_id,
-    text,
-  };
-  return fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-};
-
 module.exports = async (req: NowRequest, res: NowResponse) => {
   console.log("msg");
   const { body } = req;
@@ -111,6 +107,19 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
     entities?.[0]?.type === "bot_command" && chat?.type === "group";
   const isJoinCommand = isGroupCommand && text?.search("join") !== -1;
   const isLeaveCommand = isGroupCommand && text?.search("leave") !== -1;
+  const isPrivateMessage = chat?.type === "private";
+
+  //   const isPrivateCommand =
+  //     entities?.[0]?.type === "bot_command" && chat?.type === "private";
+  //   const isPrivateStartCommand =
+  //     isPrivateCommand && text?.search("start") !== -1;
+
+  //   if (isPrivateCommand) {
+  //   }
+
+  if (isPrivateMessage) {
+    await submitStandup(chat.id, from.id, from, message_id, text);
+  }
 
   if (isJoinCommand) {
     const r = await addToStandupGroup(chat.id, from.id, from, message_id);

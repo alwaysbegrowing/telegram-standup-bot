@@ -6,7 +6,7 @@ let cachedDb: any = null;
 
 // A function for connecting to MongoDB,
 // taking a single parameter of the connection string
-async function connectCached() {
+export async function connectToDatabase() {
   // If the database connection is cached,
   // use it instead of creating a new connection
   if (cachedDb) {
@@ -28,4 +28,5 @@ async function connectCached() {
   return db;
 }
 
-module.exports = connectCached;
+
+
