@@ -106,21 +106,19 @@ const addToStandupGroup = async (
 
 export default async (req: NowRequest, res: NowResponse) => {
   const { body } = req;
-  //   console.log(body)
 
   const { message } = body || {};
   const { chat, entities, text, message_id, from } = message || {};
-  console.log(text);
   const isGroupCommand =
-    entities?.[0]?.type === "bot_command" && chat?.type === "group";
-  const isJoinCommand = isGroupCommand && text?.search("/join") !== -1;
-  const isLeaveCommand = isGroupCommand && text?.search("/leave") !== -1;
-  const isPrivateMessage = chat?.type === "private";
+  entities && entities[0] && entities[0].type === "bot_command" && chat.type === "group";
+  const isJoinCommand = isGroupCommand && text.search("/join") !== -1;
+  const isLeaveCommand = isGroupCommand && text.search("/leave") !== -1;
+  const isPrivateMessage = chat.type === "private";
 
   const isPrivateCommand =
-    entities?.[0]?.type === "bot_command" && chat?.type === "private";
+   entities && entities[0] && entities[0].type === "bot_command" && chat.type === "private";
   const isPrivateStartCommand =
-    isPrivateCommand && text?.search("/start") !== -1;
+    isPrivateCommand && text.search("/start") !== -1;
 
   if (isPrivateStartCommand) {
     const r = await sendMsg(standupTemplate, chat.id, message_id);
