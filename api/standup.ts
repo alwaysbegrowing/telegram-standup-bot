@@ -101,7 +101,7 @@ const addToStandupGroup = async (
     );
   }
 
-  return sendMsg("Welcome to the standup group! :)", chatId, messageId);
+  return sendMsg("You've been added to the standup group! Send me a private message @SuperSimpleStandupBot to recieve reminders.", chatId, messageId);
 };
 
 export default async (req: NowRequest, res: NowResponse) => {
@@ -113,10 +113,10 @@ export default async (req: NowRequest, res: NowResponse) => {
   entities && entities[0] && entities[0].type === "bot_command" && chat.type === "group";
   const isJoinCommand = isGroupCommand && text.search("/join") !== -1;
   const isLeaveCommand = isGroupCommand && text.search("/leave") !== -1;
-  const isPrivateMessage = chat.type === "private";
+  const isPrivateMessage = chat && chat.type === "private";
 
   const isPrivateCommand =
-   entities && entities[0] && entities[0].type === "bot_command" && chat.type === "private";
+   entities && entities[0] && entities[0].type === "bot_command" && chat && chat.type === "private";
   const isPrivateStartCommand =
     isPrivateCommand && text.search("/start") !== -1;
 
