@@ -2,7 +2,13 @@ import { NowRequest, NowResponse } from "@vercel/node";
 import { connectToDatabase } from "./_connectToDatabase";
 import { sendMsg, StandupGroup, Member, About } from "./_helpers";
 
-console.log(connectToDatabase)
+const standupTemplate = `Welcome! Please use the below template for your standups. Standups are due at 10m. You will recieve a few reminders if you do not submit your standup.
+
+Yesterday - 
+
+Today -
+
+Roadblocks - `;
 const leaveStandupGroup = async (
   chatId: number,
   userId: number,
@@ -98,36 +104,46 @@ const addToStandupGroup = async (
   return sendMsg("Welcome to the standup group! :)", chatId, messageId);
 };
 
-module.exports = async (req: NowRequest, res: NowResponse) => {
-  console.log("msg");
+export default async (req: NowRequest, res: NowResponse) => {
   const { body } = req;
+  //   console.log(body)
+
   const { message } = body || {};
   const { chat, entities, text, message_id, from } = message || {};
+  console.log(text);
   const isGroupCommand =
     entities?.[0]?.type === "bot_command" && chat?.type === "group";
-  const isJoinCommand = isGroupCommand && text?.search("join") !== -1;
-  const isLeaveCommand = isGroupCommand && text?.search("leave") !== -1;
+  const isJoinCommand = isGroupCommand && text?.search("/join") !== -1;
+  const isLeaveCommand = isGroupCommand && text?.search("/leave") !== -1;
   const isPrivateMessage = chat?.type === "private";
 
-  //   const isPrivateCommand =
-  //     entities?.[0]?.type === "bot_command" && chat?.type === "private";
-  //   const isPrivateStartCommand =
-  //     isPrivateCommand && text?.search("start") !== -1;
+  const isPrivateCommand =
+    entities?.[0]?.type === "bot_command" && chat?.type === "private";
+  const isPrivateStartCommand =
+    isPrivateCommand && text?.search("/start") !== -1;
 
-  //   if (isPrivateCommand) {
-  //   }
-
-  if (isPrivateMessage) {
-    await submitStandup(chat.id, from.id, from, message_id, text);
+  if (isPrivateStartCommand) {
+    const r = await sendMsg(standupTemplate, chat.id, message_id);
+    return res.json({ status: r.status });
+  } else if (isPrivateCommand) {
+    const r = await sendMsg(
+      "This command will not work in a private message. Please add me to a group to use this command.",
+      chat.id,
+      message_id
+    );
+    return res.json({ status: r.status });
+  } else if (isPrivateMessage) {
+    const r = await submitStandup(chat.id, from.id, from, message_id, text);
+    return res.json({ status: r.status });
   }
 
   if (isJoinCommand) {
     const r = await addToStandupGroup(chat.id, from.id, from, message_id);
-    res.json({ status: r.status });
+    return res.json({ status: r.status });
   } else if (isLeaveCommand) {
     const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
-    res.json({ status: r.status });
+    return res.json({ status: r.status });
   } else {
-    res.json({ status: 500 });
+    return res.json({ status: 500 });
   }
 };
