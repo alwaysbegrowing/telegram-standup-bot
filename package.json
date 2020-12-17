@@ -5,7 +5,8 @@
     "clean": "npm run clean:dist && npm run clean:modules",
     "build:clean": "npm run clean:all && npm run build",
     "build:clean:dist": "npm run clean:dist && npm run build",
-    "test": "web-test-runner \"src/**/*.test.js\""
+    "test": "web-test-runner \"src/**/*.test.js\"",
+    "start": "snowpack dev"
   },
   "dependencies": {
     "mongodb": "^3.6.3",
