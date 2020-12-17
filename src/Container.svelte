@@ -59,9 +59,10 @@
               {#each bots as { src, href, name }}
                 <a
                   {href}
+                  on:click={() => (menuOpen = false)}
                   class=" hover: hover: group flex items-center px-2 py-2  font-medium rounded-md">
                   <!-- Heroicon name: users -->
-                  <img class="w-24" {src} alt="standup" />
+                  <img class="w-24" {src} alt={name} />
                   {name}
                 </a>
               {/each}
@@ -87,6 +88,7 @@
             {#each bots as { src, href, name }}
               <a
                 {href}
+                on:click={() => (menuOpen = false)}
                 class="flex flex-col items-center px-2 py-2  font-medium rounded-md">
                 <img class="w-24" {src} alt={name} />
                 {name}
