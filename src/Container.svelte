@@ -15,7 +15,9 @@
           <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 flex">
             <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
               <div>Simple</div>
-              <div class="text-xl font-thin text-right pr-1 -mt-2">Bots</div>
+              <div class="text-xl font-thin text-right pr-1 -mt-3 -mr-20 -ml-3">
+                Bots
+              </div>
             </div>
             <button
               on:click={() => (menuOpen = false)}
@@ -61,7 +63,9 @@
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
           <div class="flex flex-col items-center flex-shrink-0 px-4 text-5xl">
             <div>Simple</div>
-            <div class="text-2xl font-thin text-right pr-1 -mt-2">Bots</div>
+            <div class="text-2xl font-thin text-right pr-1 -mt-3 -mr-20 ml-2">
+              Bots
+            </div>
           </div>
           <nav class="mt-5 flex-1 px-2  space-y-1">
             {#each bots as { logo, href, name }}
@@ -82,7 +86,9 @@
     <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 flex">
       <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
         <div>Simple</div>
-        <div class="text-xl font-thin text-right pr-1 -mt-2">Bots</div>
+        <div class="text-xl font-thin text-right pr-1 -mt-3 -mr-20 -ml-3">
+          Bots
+        </div>
       </div>
       <button
         on:click={() => (menuOpen = true)}

@@ -14,7 +14,7 @@
 <style>
   circle,
   path {
-    stroke: #fff;
+    stroke: rgba(209, 213, 219, var(--tw-text-opacity));
     fill: none;
     stroke-width: 5px;
   }

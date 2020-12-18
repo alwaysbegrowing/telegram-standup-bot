@@ -15,15 +15,23 @@
 
 <svelte:head>
   <style>
-    @import url("https://use.typekit.net/thw2wbk.css");
+    @font-face {
+      font-family: "Titillium Web";
+      src: url("fonts/TitilliumWeb-Regular.woff2") format("woff2"),
+        url("fonts/TitilliumWeb-Regular.woff") format("woff");
+    }
+    @font-face {
+      font-family: "Titillium Web";
+      font-weight: 100;
+      src: url("fonts/TitilliumWeb-Light.woff2") format("woff2"),
+        url("fonts/TitilliumWeb-Light.woff") format("woff");
+    }
     * {
-      font-family: nimbus-sans, sans-serif;
-      font-weight: 300;
-      font-style: normal;
+      font-family: "Titillium Web";
     }
   </style>
 </svelte:head>
 
-<div class="text-white bg-black">
+<div class="text-gray-300 bg-black">
   <Container {bots} />
 </div>
