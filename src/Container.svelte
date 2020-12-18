@@ -33,7 +33,10 @@
       -->
         <div class="relative flex-1 flex flex-col bg-black">
           <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 flex">
-            <div class="text-4xl">Simple</div>
+            <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
+              <div>Simple</div>
+              <div class="text-xl font-thin text-right pr-1 -mt-2">Bots</div>
+            </div>
             <button
               on:click={() => (menuOpen = false)}
               class="ml-1 flex items-center justify-center h-12 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
@@ -81,9 +84,11 @@
       <!-- Sidebar component, swap this element with another sidebar if you like -->
       <div class="flex flex-col h-0 flex-1 border-r border-gray-200 ">
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-          <div class="flex items-center flex-shrink-0 px-4 text-4xl">
-            Simple
-          </div>
+          
+      <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
+        <div>Simple</div>
+        <div class="text-xl font-thin text-right pr-1 -mt-2">Bots</div>
+      </div>
           <nav class="mt-5 flex-1 px-2  space-y-1">
             {#each bots as { src, href, name }}
               <a
@@ -101,7 +106,10 @@
   </div>
   <div class="flex flex-col w-0 flex-1 overflow-hidden">
     <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 flex">
-      <div class="text-4xl">Simple</div>
+      <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
+        <div>Simple</div>
+        <div class="text-xl font-thin text-right pr-1 -mt-2">Bots</div>
+      </div>
       <button
         on:click={() => (menuOpen = true)}
         class="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md  hover: focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
