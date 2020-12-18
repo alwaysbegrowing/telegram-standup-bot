@@ -59,13 +59,13 @@
           </div>
           <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
             <nav class="mt-5 px-2 space-y-1">
-              {#each bots as { src, href, name }}
+              {#each bots as { logo, href, name }}
                 <a
                   {href}
                   on:click={() => (menuOpen = false)}
-                  class=" hover: hover: group flex items-center px-2 py-2  font-medium rounded-md">
+                  class="transition hover:scale-110 hover: group flex items-center px-2 py-2  font-medium rounded-md">
                   <!-- Heroicon name: users -->
-                  <img class="w-24" {src} alt={name} />
+                  <svelte:component this={logo} />
                   {name}
                 </a>
               {/each}
@@ -84,19 +84,18 @@
       <!-- Sidebar component, swap this element with another sidebar if you like -->
       <div class="flex flex-col h-0 flex-1 border-r border-gray-200 ">
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-          
-      <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
-        <div>Simple</div>
-        <div class="text-xl font-thin text-right pr-1 -mt-2">Bots</div>
-      </div>
+          <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
+            <div>Simple</div>
+            <div class="text-xl font-thin text-right pr-1 -mt-2">Bots</div>
+          </div>
           <nav class="mt-5 flex-1 px-2  space-y-1">
-            {#each bots as { src, href, name }}
+            {#each bots as { logo, href, name }}
               <a
                 {href}
                 on:click={() => (menuOpen = false)}
-                class="flex flex-col items-center px-2 py-2  font-medium rounded-md">
-                <img class="w-24" {src} alt={name} />
-                {name}
+                class="transition-all transform hover:scale-125 flex flex-col items-center px-2 py-2  font-medium rounded-md">
+                <svelte:component this={logo} />
+                <span class="hover:animate-bounce">{name}</span>
               </a>
             {/each}
           </nav>
