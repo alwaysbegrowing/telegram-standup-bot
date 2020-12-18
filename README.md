@@ -1,5 +1,9 @@
 # About 
-Super simple standup bot brings standup functionality to Telegram. Group members are able to submit updates, and they are all sent to a shared channel at a set time. This project is actively maintained.
+Super simple standup bot brings standup functionality to Telegram. Group members are able to submit updates, and they are all sent to a shared channel at a set time. 
+
+There are many good standup bots for Slack - [GeekBot](https://geekbot.com/), [Standuply](https://standuply.com/), [Polly](https://www.polly.ai/template/daily-standup) but there are not any good alternatives for Telegram. 
+
+
 
 # How to use 
 1. Send a message to [@SuperSimpleStandupBot](https://t.me/supersimplestandupbot) on telegram.
