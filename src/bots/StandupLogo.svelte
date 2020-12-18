@@ -5,7 +5,7 @@
 
   let frame = 0;
   onMount(() => {
-    frame ++;
+    frame++;
     const lastIntervalId = setInterval(() => frame++, 10000);
     return () => clearInterval(lastIntervalId);
   });
@@ -20,11 +20,11 @@
   }
 </style>
 
-<div class="h-32 w-32">
+<div class="h-64 w-64">
   {#key frame}
     <svg
       out:fade={{ duration: FADE_TIME }}
-      class="h-32 w-32"
+      class="h-64 w-64"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 601 601">
       <defs />

@@ -1,36 +1,16 @@
 <script>
+  import { fade } from "svelte/transition";
   export let bots = [];
   let menuOpen = false;
 </script>
 
 <div class="h-screen flex overflow-hidden bg-black">
   {#if menuOpen}
-    <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
     <div class="md:hidden">
       <div class="fixed inset-0 flex z-40">
-        <!--
-        Off-canvas menu overlay, show/hide based on off-canvas menu state.
-
-        Entering: "transition-opacity ease-linear duration-300"
-          From: "opacity-0"
-          To: "opacity-100"
-        Leaving: "transition-opacity ease-linear duration-300"
-          From: "opacity-100"
-          To: "opacity-0"
-      -->
         <div class="fixed inset-0">
           <div class="absolute inset-0  opacity-75" />
         </div>
-        <!--
-        Off-canvas menu, show/hide based on off-canvas menu state.
-
-        Entering: "transition ease-in-out duration-300 transform"
-          From: "-translate-x-full"
-          To: "translate-x-0"
-        Leaving: "transition ease-in-out duration-300 transform"
-          From: "translate-x-0"
-          To: "-translate-x-full"
-      -->
         <div class="relative flex-1 flex flex-col bg-black">
           <div class="md:hidden pl-1 pt-1 sm:pl-3 sm:pt-3 flex">
             <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
@@ -41,7 +21,6 @@
               on:click={() => (menuOpen = false)}
               class="ml-1 flex items-center justify-center h-12 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
               <span class="sr-only">Close sidebar</span>
-              <!-- Heroicon name: x -->
               <svg
                 class="h-6 w-6 "
                 xmlns="http://www.w3.org/2000/svg"
@@ -63,30 +42,26 @@
                 <a
                   {href}
                   on:click={() => (menuOpen = false)}
-                  class="transition hover:scale-110 hover: group flex items-center px-2 py-2  font-medium rounded-md">
-                  <!-- Heroicon name: users -->
+                  class="transition hover:scale-110 hover: group flex-col flex items-center px-2 py-2  font-medium rounded-md">
                   <svelte:component this={logo} />
-                  {name}
+                  <span transition:fade class="text-2xl -mt-10">{name}</span>
                 </a>
               {/each}
             </nav>
           </div>
         </div>
-        <div class="flex-shrink-0 w-2">
-          <!-- Force sidebar to shrink to fit close icon -->
-        </div>
+        <div class="flex-shrink-0 w-2" />
       </div>
     </div>
   {/if}
-  <!-- Static sidebar for desktop -->
-  <div class="hidden md:flex md:flex-shrink-0">
+  <div
+    class="absolute invisible md:visible md:relative md:flex md:flex-shrink-0">
     <div class="flex flex-col w-34">
-      <!-- Sidebar component, swap this element with another sidebar if you like -->
       <div class="flex flex-col h-0 flex-1 border-r border-gray-200 ">
         <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-          <div class="flex flex-col items-center flex-shrink-0 px-4 text-4xl">
+          <div class="flex flex-col items-center flex-shrink-0 px-4 text-5xl">
             <div>Simple</div>
-            <div class="text-xl font-thin text-right pr-1 -mt-2">Bots</div>
+            <div class="text-2xl font-thin text-right pr-1 -mt-2">Bots</div>
           </div>
           <nav class="mt-5 flex-1 px-2  space-y-1">
             {#each bots as { logo, href, name }}
@@ -95,7 +70,7 @@
                 on:click={() => (menuOpen = false)}
                 class="transition-all transform hover:scale-125 flex flex-col items-center px-2 py-2  font-medium rounded-md">
                 <svelte:component this={logo} />
-                <span class="hover:animate-bounce">{name}</span>
+                <span class="text-3xl -mt-10">{name}</span>
               </a>
             {/each}
           </nav>
@@ -113,7 +88,6 @@
         on:click={() => (menuOpen = true)}
         class="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md  hover: focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
         <span class="sr-only">Open sidebar</span>
-        <!-- Heroicon name: menu -->
         <svg
           class={`h-6 w-6 ${menuOpen ? 'invisible' : ''}`}
           xmlns="http://www.w3.org/2000/svg"
