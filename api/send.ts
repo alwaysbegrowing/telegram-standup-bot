@@ -9,7 +9,7 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
     
   const db = await connectToDatabase();
 
-    const addUpdate = async () => { await db.collection("groups").updateOne(
+    const addUpdate = async () => { await db.collection("groups").updateMany(
     {  },
     {
       $set: {
