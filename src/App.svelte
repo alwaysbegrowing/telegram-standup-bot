@@ -1,13 +1,14 @@
 <script>
   import Standup from "./bots/Standup.svelte";
+  import StandupLogo from "./bots/StandupLogo.svelte";
   import Container from "./Container.svelte";
 
   let bots = [
     {
       name: "Standup",
-      src: "./standup.png",
+      logo: StandupLogo,
       href: "#standup",
-      component: Standup 
+      component: Standup,
     },
   ];
 </script>
