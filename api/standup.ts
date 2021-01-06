@@ -84,7 +84,7 @@ const submitStandup = async (
   );
 
   if (addUpdate.modifiedCount) {
-    return sendMsg("Your update has been submitted.", chatId, messageId);
+    return sendMsg("Your update has been submitted.", chatId, messageId, true);
   }
   return sendMsg(
     "You aren't currently part of a standup group. Add this bot to your group, then use the /join comand to create a standup group",

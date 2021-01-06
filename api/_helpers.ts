@@ -24,13 +24,15 @@ export interface StandupGroup {
 export const sendMsg = async (
     text: string,
     chat_id: number,
-    reply_to_message_id: number = null
+    reply_to_message_id: number = null,
+    disable_notification: boolean = false
   ) => {
     const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/sendMessage`;
     const data = {
       reply_to_message_id,
       chat_id,
       text,
+      disable_notification
     };
     return fetch(url, {
       method: "POST",
