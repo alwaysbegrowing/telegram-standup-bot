@@ -20,3 +20,31 @@ Send a message to [@deephire](https://t.me/deephire) or create a github issue if
 
 # Other bots
 Details coming soon...
+
+
+# Self Hosting 
+You are also to self-host this bot so no data is sent to our servers. 
+To self host:
+
+1. Create a telegram bot with botfather - https://core.telegram.org/bots#6-botfather
+2. Create a database instance with mongodb atlas - https://www.mongodb.com/cloud/atlas
+3
+4. Setup a webhook to your vercel URL https://core.telegram.org/bots/webhooks 
+
+
+### How to run (first time) 
+Make sure you have vercel CLI installed. If you don't install it with 
+`yarn global add vercel`
+
+Add your ENV variables to vercel
+`vercel env add TELEGRAM_API_KEY` // then enter your TG API get obtained in step 1
+`vercel env add MONGODB_FULL_URI`// then enter your mongodb connection URL obtained in step 2
+
+Run the application:
+```
+yarn
+vercel dev 
+```
+
+This runs the website at localhost:3000 and runs your lambda functions in the /api folder on localhost:3000/api 
+More info on how this works - https://vercel.com/docs/serverless-functions/introduction
