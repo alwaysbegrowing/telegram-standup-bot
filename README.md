@@ -24,23 +24,34 @@ Details coming soon...
 
 # Self Hosting 
 You are also to self-host this bot so no data is sent to our servers. 
-To self host:
-
-1. Create a telegram bot with botfather - https://core.telegram.org/bots#6-botfather
-2. Create a database instance with mongodb atlas - https://www.mongodb.com/cloud/atlas
-3
-4. Setup a webhook to your vercel URL https://core.telegram.org/bots/webhooks 
 
 
-### How to run (first time) 
-Make sure you have vercel CLI installed. If you don't install it with 
+### Self Hosting Setup
+
+1. Install Vercel CLI
 `yarn global add vercel`
 
-Add your ENV variables to vercel
-`vercel env add TELEGRAM_API_KEY` // then enter your TG API get obtained in step 1
+2. Setup the project with vercel
+`vercel deploy` // go through all the settings, when it asks for the build path, put in `/build` - for everything else - except the default options
+
+3. Create a telegram bot with botfather - https://core.telegram.org/bots#6-botfather
+
+4. Add your telegram bot API key as an env variable 
+`vercel env add TELEGRAM_API_KEY` // then enter your TG API get obtained in step 3
+
+5. Create a database instance with mongodb atlas - https://www.mongodb.com/cloud/atlas
+
+6. Add your MONGODB URI as an env variable
 `vercel env add MONGODB_FULL_URI`// then enter your mongodb connection URL obtained in step 2
 
-Run the application:
+7. Pull down the env variables as a local .env file for local development
+`vercel env pull`
+
+8. Setup a webhook to your vercel URL https://core.telegram.org/bots/webhooks 
+This is how your bot will know when events happen inside of telegram
+
+
+### Run the application:
 ```
 yarn
 vercel dev 
