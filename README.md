@@ -47,7 +47,7 @@ You are also to self-host this bot so no data is sent to our servers.
 7. Pull down the env variables as a local .env file for local development
 `vercel env pull`
 
-8. Setup a webhook to your vercel URL https://core.telegram.org/bots/webhooks 
+8. Setup a webhook to your vercel standup URL https://core.telegram.org/bots/webhooks (example URL: `https://bla-vercel.com/api/standup`)
 
 This is how your bot will know when events happen inside of telegram
 
@@ -58,10 +58,15 @@ yarn
 vercel dev 
 ```
 
+This runs the website at localhost:3000 and runs your lambda functions in the /api folder on localhost:3000/api 
+More info on how this works - https://vercel.com/docs/serverless-functions/introduction
+
+
 ### Self hosting not working? Debugging steps
 1. View your function logs in vercel
 (Go to vercel.com, login, navigate to your bot, click on your functions, then view the function logs) 
 
+2. Ensure your database is named `standup`
 
-This runs the website at localhost:3000 and runs your lambda functions in the /api folder on localhost:3000/api 
-More info on how this works - https://vercel.com/docs/serverless-functions/introduction
+3. Ensure your webhooks are being sent to the correct URL. The URL is 
+
