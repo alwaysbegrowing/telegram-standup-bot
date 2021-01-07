@@ -68,5 +68,5 @@ More info on how this works - https://vercel.com/docs/serverless-functions/intro
 
 2. Ensure your database is named `standup`
 
-3. Ensure your webhooks are being sent to the correct URL. The URL is 
+3. Ensure your webhooks are being sent to the correct URL. Make sure not to use the base URL only. The URL needs to be the `/api/standup` url
 
