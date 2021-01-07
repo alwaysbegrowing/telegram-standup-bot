@@ -39,7 +39,7 @@ You are also to self-host this bot so no data is sent to our servers.
 4. Add your telegram bot API key as an env variable 
 `vercel env add TELEGRAM_API_KEY` // then enter your TG API get obtained in step 3
 
-5. Create a database instance with mongodb atlas - https://www.mongodb.com/cloud/atlas
+5. Create a database instance with mongodb atlas. Name your database `standup` - https://www.mongodb.com/cloud/atlas
 
 6. Add your MONGODB URI as an env variable
 `vercel env add MONGODB_FULL_URI`// then enter your mongodb connection URL obtained in step 2
@@ -57,6 +57,11 @@ This is how your bot will know when events happen inside of telegram
 yarn
 vercel dev 
 ```
+
+### Self hosting not working? Debugging steps
+1. View your function logs in vercel
+(Go to vercel.com, login, navigate to your bot, click on your functions, then view the function logs) 
+
 
 This runs the website at localhost:3000 and runs your lambda functions in the /api folder on localhost:3000/api 
 More info on how this works - https://vercel.com/docs/serverless-functions/introduction
