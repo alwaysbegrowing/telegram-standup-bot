@@ -29,10 +29,10 @@ You are also to self-host this bot so no data is sent to our servers.
 ### Self Hosting Setup
 
 1. Install Vercel CLI
-`yarn global add vercel`
+```yarn global add vercel```
 
 2. Setup the project with vercel
-`vercel deploy` // go through all the settings, when it asks for the build path, put in `/build` - for everything else - except the default options
+`vercel deploy` // go through all the settings, when it asks for the build path, put in ```/build``` - for everything else - except the default options
 
 3. Create a telegram bot with botfather - https://core.telegram.org/bots#6-botfather
 
