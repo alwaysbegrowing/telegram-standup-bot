@@ -70,4 +70,9 @@ More info on how this works - https://vercel.com/docs/serverless-functions/intro
 
 3. Ensure your webhooks are being sent to the correct URL. Make sure not to use the base URL only. The URL needs to be the `/api/standup` url
 
+### How can I test this application locally ???
+1. https://core.telegram.org/bots/webhooks - You can use these example webhooks to test your bot locally with curl or postman.
+2. If you want to see the exact format of your webhooks - you can set your webhook url to http://webhook.site/ for testing. 
+3. If you wanted to test your bot fully locally, you can run the application with `vercel dev` then setup ngrok on the deployment URL - https://ngrok.com/docs then setup your webhooks to go to the ngrok url. (Note, ngrok has rate limiting, so some webhooks may be delayed or not sent)
+
 
