@@ -26,6 +26,7 @@ module.exports = {
     },
     buildOptions: {
 		/* ... */
+	    	out: 'public',
 		sourceMap: false,
     },
     proxy: {
