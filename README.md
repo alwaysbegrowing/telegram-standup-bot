@@ -32,7 +32,7 @@ You are also to self-host this bot so no data is sent to our servers.
 ```yarn global add vercel```
 
 2. Setup the project with vercel
-`vercel deploy` // go through all the settings, when it asks for the build path, put in ```/build``` - for everything else - except the default options
+`vercel deploy` // accept all the default settings
 
 3. Create a telegram bot with botfather - https://core.telegram.org/bots#6-botfather
 
@@ -69,4 +69,5 @@ More info on how this works - https://vercel.com/docs/serverless-functions/intro
 2. Ensure your database is named `standup`
 
 3. Ensure your webhooks are being sent to the correct URL. Make sure not to use the base URL only. The URL needs to be the `/api/standup` url
+
 
