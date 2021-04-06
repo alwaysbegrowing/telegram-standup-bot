@@ -11,7 +11,7 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
   groups.forEach((group: StandupGroup) => {
     group.members.forEach((member: Member) => {
       if (member.submitted === false) {
-        reminders.push(sendMsg("Reminder, please submit an update. Updates are due by 10am est", member.about.id))
+        reminders.push(sendMsg("Reminder, please submit an update. Updates are due by 11 AM EST", member.about.id))
       }
     });
   });
