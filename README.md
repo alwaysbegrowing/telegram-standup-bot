@@ -16,7 +16,7 @@ Standups are currently posted at 10am est.
 Reminders are sent out at 8am est, 9am est, 9:30 est, and 9:45 est if an update has not been submitted. 
 
 # Support
-Send a message to [@deephire](https://t.me/deephire) or create a github issue if you are having problems with the bot. 
+Send a message to [@russeii](https://t.me/russeii) or create a github issue if you are having problems with the bot. 
 
 # Other bots
 Details coming soon...
