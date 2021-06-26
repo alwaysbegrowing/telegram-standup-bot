@@ -145,10 +145,10 @@ export default async (req: NowRequest, res: NowResponse) => {
   const { message } = body || {};
   const { chat, entities, text, message_id, from } = message || {};
   const isGroupCommand =
-    entities &&
+    (entities &&
     entities[0] &&
     entities[0].type === "bot_command" &&
-    chat.type === "group";
+    chat.type === "group") || chat.type === "supergroup";
   const isJoinCommand = isGroupCommand && text.search("/join") !== -1;
   const isLeaveCommand = isGroupCommand && text.search("/leave") !== -1;
   const isAboutCommand = isGroupCommand && text.search("/about") !== -1;
