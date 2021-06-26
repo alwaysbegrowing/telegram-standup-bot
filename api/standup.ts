@@ -140,6 +140,7 @@ const addToStandupGroup = async (
 
 export default async (req: NowRequest, res: NowResponse) => {
   const { body } = req;
+  console.log(body)
 
   const { message } = body || {};
   const { chat, entities, text, message_id, from } = message || {};
@@ -152,6 +153,7 @@ export default async (req: NowRequest, res: NowResponse) => {
   const isLeaveCommand = isGroupCommand && text.search("/leave") !== -1;
   const isAboutCommand = isGroupCommand && text.search("/about") !== -1;
   const isPrivateMessage = chat && chat.type === "private";
+  console.log({isGroupCommand, isJoinCommand, isAboutCommand, isPrivateMessage})
 
   const isPrivateCommand =
     entities &&
