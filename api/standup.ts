@@ -144,6 +144,7 @@ export default async (req: NowRequest, res: NowResponse) => {
 
   const { message } = body || {};
   const { chat, entities, text, message_id, from } = message || {};
+  if (!text) return
   const isGroupCommand =
     (entities &&
     entities[0] &&
