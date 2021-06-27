@@ -82,6 +82,7 @@ const submitStandup = async (
     },
     { arrayFilters: [{ "elem.about.id": userId }] }
   );
+  console.log({addUpdate})
 
   if (addUpdate.modifiedCount) {
     return sendMsg("Your update has been submitted.", chatId, messageId, true);
