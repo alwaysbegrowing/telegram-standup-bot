@@ -47,5 +47,5 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
   await Promise.all(sentStandup);
   await addUpdate();
 
-  res.json({ status: 200 });
+  return res.status(200);
 };

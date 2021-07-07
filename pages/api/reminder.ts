@@ -24,5 +24,5 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
 
   await Promise.all(reminders);
 
-  res.json({ status: 200 });
+  return res.status(200);
 };

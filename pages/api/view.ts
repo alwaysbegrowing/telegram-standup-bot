@@ -30,5 +30,5 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     }
   }
 
-  res.status(401);
+  return res.status(401).json({ message: 'Unauthorized' });
 };
