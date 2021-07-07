@@ -3,7 +3,7 @@ import { connectToDatabase } from './_connectToDatabase';
 import { sendMsg, StandupGroup, Member, About } from './_helpers';
 
 const standupTemplate = `Welcome!
-Add this bot to your group, then use the /join comand to create a standup group for your chat.
+Add this bot to your group, then use the /add comand to create a standup group for your chat.
 
 Then, simply post your standup here and it will automatically be posted to your group at 10m.
 You will recieve a few reminders if you do not submit your standup before 8am the day of.
@@ -37,7 +37,7 @@ const leaveStandupGroup = async (
   }
 
   return sendMsg(
-    "You aren't currently in a group. Join with /join !",
+    "You aren't currently in a group. Join with /add !",
     chatId,
     messageId
   );
@@ -70,7 +70,7 @@ const sendAboutMessage = async (
     return sendMsg(JSON.stringify(group), chatId, messageId);
   }
   return sendMsg(
-    'There is no group for this channel. Create a group with /join',
+    'There is no group for this channel. Create a group with /add',
     chatId,
     messageId
   );
@@ -104,7 +104,7 @@ const submitStandup = async (
     return sendMsg('Your update has been submitted.', chatId, messageId, true);
   }
   return sendMsg(
-    "You aren't currently part of a standup group. Add this bot to your group, then use the /join comand to create a standup group",
+    "You aren't currently part of a standup group. Add this bot to your group, then use the /add comand to create a standup group",
     chatId,
     messageId
   );
@@ -169,13 +169,13 @@ export default async (req: NowRequest, res: NowResponse) => {
       entities[0].type === 'bot_command' &&
       chat.type === 'group') ||
     chat.type === 'supergroup';
-  const isJoinCommand = isGroupCommand && text.search('/join') !== -1;
+  const isAddCommand = isGroupCommand && text.search('/add') !== -1;
   const isLeaveCommand = isGroupCommand && text.search('/leave') !== -1;
   const isAboutCommand = isGroupCommand && text.search('/about') !== -1;
   const isPrivateMessage = chat && chat.type === 'private';
   console.log({
     isGroupCommand,
-    isJoinCommand,
+    isAddCommand,
     isAboutCommand,
     isPrivateMessage,
   });
@@ -205,7 +205,7 @@ export default async (req: NowRequest, res: NowResponse) => {
     return res.json({ status: r.status });
   }
 
-  if (isJoinCommand) {
+  if (isAddCommand) {
     const r = await addToStandupGroup(chat.id, from.id, from, message_id);
     return res.json({ status: r.status });
   } else if (isAboutCommand) {
