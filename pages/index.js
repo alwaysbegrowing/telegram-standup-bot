@@ -1,17 +1,42 @@
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Image from 'next/image';
 import useSWR from 'swr';
 import styles from '../styles/Home.module.css';
+import TelegramLoginButton from 'react-telegram-login';
 
-function Profile() {
-  const { data, error } = useSWR('/api/view');
+async function fetchWithToken(url, data) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+}
+
+export default function Home() {
+  const [user, setUser] = useState({});
+  const { data, error } = useSWR(['/api/view', user], fetchWithToken);
+
+  useEffect(() => {
+    const data = localStorage.getItem('telegram-user');
+
+    if (data) {
+      setUser(JSON.parse(data));
+    }
+  }, []);
+
+  const handleTelegramResponse = (response) => {
+    localStorage.setItem('telegram-user', JSON.stringify(response));
+    setUser(response);
+  };
 
   if (error) return <div>failed to load</div>;
   if (!data) return <div>loading...</div>;
 
-  return <div>{JSON.stringify(data)}</div>;
-}
-
-export default function Home() {
   return (
     <div className={styles.container}>
       <Head>
@@ -25,6 +50,51 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Super Simple Standup Bot</h1>
+
+        {!user.photo_url && (
+          <TelegramLoginButton
+            dataOnauth={handleTelegramResponse}
+            botName='stood_bot'
+          />
+        )}
+
+        {user.photo_url && (
+          <div>
+            <Image src={user?.photo_url} width={40} height={40} alt='Avatar' />
+            {user.first_name}
+
+            <div>
+              <h2>Groups you follow</h2>
+
+              <ol>
+                {data.groups.map((group, i) => {
+                  return (
+                    <li key={group.chatId}>
+                      <h4>{group.title}</h4>
+                      {group.members.map((m) => {
+                        return (
+                          <div key={m.about.first_name + m.chatId}>
+                            <h5>{m.about.first_name}</h5>
+                            <ul>
+                              {m.updateArchive.map((u) => {
+                                if (u.message)
+                                  return (
+                                    <li key={u.createdAt}>
+                                      {u.createdAt} - {u.message}
+                                    </li>
+                                  );
+                              })}
+                            </ul>
+                          </div>
+                        );
+                      })}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          </div>
+        )}
 
         <p className={styles.description}>
           Get started by messaging
