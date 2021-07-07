@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 
 export interface StandupGroup {
   chatId: number;
+  title: string;
   updateTime: string;
   members: Member[];
 }

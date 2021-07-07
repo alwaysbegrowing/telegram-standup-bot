@@ -113,6 +113,7 @@ const submitStandup = async (
 const addToStandupGroup = async (
   chatId: number,
   userId: number,
+  title: string,
   about: About,
   messageId: number
 ) => {
@@ -138,6 +139,7 @@ const addToStandupGroup = async (
   if (!groupExists) {
     const group: StandupGroup = {
       chatId,
+      title,
       updateTime: '',
       members: [member],
     };
@@ -206,7 +208,13 @@ export default async (req: NowRequest, res: NowResponse) => {
   }
 
   if (isAddCommand) {
-    const r = await addToStandupGroup(chat.id, from.id, from, message_id);
+    const r = await addToStandupGroup(
+      chat.id,
+      from.id,
+      chat.title,
+      from,
+      message_id
+    );
     return res.json({ status: r.status });
   } else if (isAboutCommand) {
     const r = await sendAboutMessage(chat.id, from.id, from, message_id);

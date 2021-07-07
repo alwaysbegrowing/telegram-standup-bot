@@ -1,6 +1,6 @@
 import { NowRequest, NowResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-import { sendMsg, StandupGroup, Member, About } from './_helpers';
+import { StandupGroup, Member } from './_helpers';
 
 module.exports = async (req: NowRequest, res: NowResponse) => {
   const db = await connectToDatabase();
