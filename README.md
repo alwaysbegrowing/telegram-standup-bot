@@ -47,10 +47,11 @@ You are also to self-host this bot so no data is sent to our servers.
 7. Pull down the env variables as a local .env file for local development
 `vercel env pull`
 
-8. Setup a webhook to your vercel standup URL https://core.telegram.org/bots/webhooks (example URL: `https://bla-vercel.com/api/standup`)
+8. Setup a webhook to your vercel standup URL https://core.telegram.org/bots/webhooks (example URL: `https://bla-vercel.com/api/standup`).
+
+```https://api.telegram.org/bot${TELEGRAM_API_KEY}/setWebhook?url=https://.../api/standup```
 
 This is how your bot will know when events happen inside of telegram
-
 
 ### Run the application:
 ```
