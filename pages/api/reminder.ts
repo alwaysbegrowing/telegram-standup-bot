@@ -17,9 +17,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       group.members.forEach((member: Member) => {
         if (
           member.submitted === false &&
-          !remindedUserIds.includes(member.about.id)
+          !remindedUserIds.includes(`${member.about.id}`)
         ) {
-          remindedUserIds.push(member.about.id);
+          remindedUserIds.push(`${member.about.id}`);
           reminders.push(
             sendMsg(
               'Reminder, please submit an update. Updates are due by 11 AM EST',
