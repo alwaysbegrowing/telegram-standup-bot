@@ -89,7 +89,6 @@ const submitStandup = async (
       $set: {
         'members.$[elem].submitted': true,
         'members.$[elem].botCanMessage': true,
-        'members.$[elem].lastSubmittedAt': Date.now(),
         'members.$[elem].update': message,
       },
       $push: {
@@ -120,7 +119,6 @@ const addToStandupGroup = async (
   const member: Member = {
     submitted: false,
     botCanMessage: false,
-    lastSubmittedAt: '',
     update: '',
     updateArchive: [],
     about,

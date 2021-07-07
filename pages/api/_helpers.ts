@@ -23,7 +23,6 @@ export interface About {
 export interface Member {
   submitted: boolean;
   botCanMessage: boolean;
-  lastSubmittedAt: string;
   update: string;
   updateArchive: Array<UpdateArchive>;
   about: About;
