@@ -80,7 +80,8 @@ const submitStandup = async (
   userId: number,
   about: About,
   messageId: number,
-  message
+  message: string,
+  body: any
 ) => {
   const db = await connectToDatabase();
   const addUpdate = await db.collection('groups').updateMany(
@@ -89,10 +90,14 @@ const submitStandup = async (
       $set: {
         'members.$[elem].submitted': true,
         'members.$[elem].botCanMessage': true,
-        'members.$[elem].update': message,
+        'members.$[elem].update': message || '',
       },
       $push: {
-        'members.$[elem].updateArchive': { message, createdAt: Date.now() },
+        'members.$[elem].updateArchive': {
+          message: message || '',
+          createdAt: Date.now(),
+          body,
+        },
       },
     },
     { arrayFilters: [{ 'elem.about.id': userId }] }
@@ -161,17 +166,46 @@ export default async (req: NowRequest, res: NowResponse) => {
   console.log(body);
 
   const { message } = body || {};
-  const { chat, entities, text, message_id, from } = message || {};
-  if (!text) return res.json({ status: 200 });
+  const {
+    chat,
+    entities,
+    text,
+    message_id,
+    from,
+    voice,
+    audio,
+    document,
+    poll,
+    video,
+    photo,
+    video_note,
+    caption,
+    animation,
+  } = message || {};
+
+  // Don't try to parse this message if missing info
+  if (
+    !text ||
+    !voice ||
+    !audio ||
+    !document ||
+    !poll ||
+    !video ||
+    !photo ||
+    !video_note ||
+    !caption ||
+    !animation
+  )
+    return res.json({ status: 200 });
   const isGroupCommand =
     (entities &&
       entities[0] &&
       entities[0].type === 'bot_command' &&
       chat.type === 'group') ||
     chat.type === 'supergroup';
-  const isAddCommand = isGroupCommand && text.search('/add') !== -1;
-  const isLeaveCommand = isGroupCommand && text.search('/leave') !== -1;
-  const isAboutCommand = isGroupCommand && text.search('/about') !== -1;
+  const isAddCommand = isGroupCommand && text && text.search('/add') !== -1;
+  const isLeaveCommand = isGroupCommand && text && text.search('/leave') !== -1;
+  const isAboutCommand = isGroupCommand && text && text.search('/about') !== -1;
   const isPrivateMessage = chat && chat.type === 'private';
   console.log({
     isGroupCommand,
@@ -187,7 +221,7 @@ export default async (req: NowRequest, res: NowResponse) => {
     chat &&
     chat.type === 'private';
   const isPrivateStartCommand =
-    isPrivateCommand && text.search('/start') !== -1;
+    isPrivateCommand && text && text.search('/start') !== -1;
 
   if (isPrivateStartCommand) {
     await startBot(from.id);
@@ -201,7 +235,14 @@ export default async (req: NowRequest, res: NowResponse) => {
     );
     return res.json({ status: r.status });
   } else if (isPrivateMessage) {
-    const r = await submitStandup(chat.id, from.id, from, message_id, text);
+    const r = await submitStandup(
+      chat.id,
+      from.id,
+      from,
+      message_id,
+      text,
+      body
+    );
     return res.json({ status: r.status });
   }
 

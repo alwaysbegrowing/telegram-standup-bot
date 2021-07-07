@@ -10,6 +10,7 @@ export interface StandupGroup {
 export interface UpdateArchive {
   update: string;
   createdAt: string;
+  body: any;
 }
 
 export interface About {
