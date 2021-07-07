@@ -8,15 +8,16 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
 
   const reminders = [];
   groups.forEach((group: StandupGroup) => {
-    group.members.forEach((member: Member) => {
-      console.log(member);
-    });
+    group.members
+      .filter((m) => m.update !== '')
+      .forEach((member: Member) => {
+        console.log(member);
+      });
   });
 
   await Promise.all(reminders);
 
   res.json({
     status: 200,
-    groups: groups.filter((g) => g.members.length > 3),
   });
 };

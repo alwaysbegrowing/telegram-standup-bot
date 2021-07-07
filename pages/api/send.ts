@@ -23,18 +23,20 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
   groups
     .filter((g) => !!g.members.length)
     .forEach((group: StandupGroup) => {
-      group.members.forEach((member: Member) => {
-        sentStandup.push(
-          sendMsg(
-            member.about.first_name +
-              ' (@' +
-              member.about.username +
-              '): \n' +
-              member.update,
-            group.chatId
-          )
-        );
-      });
+      group.members
+        .filter((m) => m.update !== '')
+        .forEach((member: Member) => {
+          sentStandup.push(
+            sendMsg(
+              member.about.first_name +
+                ' (@' +
+                member.about.username +
+                '): \n' +
+                member.update,
+              group.chatId
+            )
+          );
+        });
     });
 
   await Promise.all(sentStandup);
