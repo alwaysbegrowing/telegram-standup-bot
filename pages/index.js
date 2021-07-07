@@ -1,17 +1,17 @@
 import Head from 'next/head';
-import Image from 'next/image';
 import useSWR from 'swr';
 import styles from '../styles/Home.module.css';
 
 function Profile() {
-  const { data, error } = useSWR('/api/view', fetch);
+  const { data, error } = useSWR('/api/view');
 
   if (error) return <div>failed to load</div>;
   if (!data) return <div>loading...</div>;
+
   return <div>{JSON.stringify(data)}</div>;
 }
 
-export default function Home({ data }) {
+export default function Home() {
   return (
     <div className={styles.container}>
       <Head>
