@@ -1,10 +1,10 @@
-import { NowRequest, NowResponse } from "@vercel/node";
-import { connectToDatabase } from "./_connectToDatabase";
-import { sendMsg, StandupGroup, Member, About } from "./_helpers";
+import { NowRequest, NowResponse } from '@vercel/node';
+import { connectToDatabase } from './_connectToDatabase';
+import { sendMsg, StandupGroup, Member, About } from './_helpers';
 
 const standupTemplate = `Welcome! Simply post your standup here and it will automatically be posted to your group at 10m. You will recieve a few reminders if you do not submit your standup before 8am the day of.
 Please use the following template for your standups:
-Yesterday - 
+Yesterday -
 
 Today -
 
@@ -17,14 +17,14 @@ const leaveStandupGroup = async (
   messageId: number
 ) => {
   const db = await connectToDatabase();
-  const removedUserFromGroup = await db.collection("groups").updateOne(
+  const removedUserFromGroup = await db.collection('groups').updateOne(
     {
       chatId,
     },
-    { $pull: { members: { "about.id": userId } } }
+    { $pull: { members: { 'about.id': userId } } }
   );
   if (removedUserFromGroup.modifiedCount) {
-    return sendMsg("You have left the group.", chatId, messageId);
+    return sendMsg('You have left the group.', chatId, messageId);
   }
 
   return sendMsg(
@@ -37,14 +37,14 @@ const leaveStandupGroup = async (
 const startBot = async (userId: number) => {
   const db = await connectToDatabase();
 
-  await db.collection("groups").updateMany(
-    { "members.about.id": userId },
+  await db.collection('groups').updateMany(
+    { 'members.about.id': userId },
     {
       $set: {
-        "members.$[elem].botCanMessage": true,
+        'members.$[elem].botCanMessage': true,
       },
     },
-    { arrayFilters: [{ "elem.about.id": userId }] }
+    { arrayFilters: [{ 'elem.about.id': userId }] }
   );
 };
 
@@ -52,15 +52,19 @@ const sendAboutMessage = async (
   chatId: number,
   userId: number,
   about: About,
-  messageId: number,
+  messageId: number
 ) => {
   const db = await connectToDatabase();
 
-  const group = await db.collection("groups").findOne({ chatId });
+  const group = await db.collection('groups').findOne({ chatId });
   if (group) {
-  return sendMsg(JSON.stringify(group), chatId, messageId)
+    return sendMsg(JSON.stringify(group), chatId, messageId);
   }
-  return sendMsg('There is no group for this channel. Create a group with /join', chatId, messageId)
+  return sendMsg(
+    'There is no group for this channel. Create a group with /join',
+    chatId,
+    messageId
+  );
 };
 const submitStandup = async (
   chatId: number,
@@ -70,22 +74,25 @@ const submitStandup = async (
   message
 ) => {
   const db = await connectToDatabase();
-  const addUpdate = await db.collection("groups").updateOne(
-    { "members.about.id": userId },
+  const addUpdate = await db.collection('groups').updateOne(
+    { 'members.about.id': userId },
     {
       $set: {
-        "members.$[elem].submitted": true,
-        "members.$[elem].botCanMessage": true,
-        "members.$[elem].lastSubmittedAt": Date.now(),
-        "members.$[elem].update": message,
+        'members.$[elem].submitted': true,
+        'members.$[elem].botCanMessage': true,
+        'members.$[elem].lastSubmittedAt': Date.now(),
+        'members.$[elem].update': message,
+      },
+      $push: {
+        'members.$[elem].updateArchive': { message, createdAt: Date.now() },
       },
     },
-    { arrayFilters: [{ "elem.about.id": userId }] }
+    { arrayFilters: [{ 'elem.about.id': userId }] }
   );
-  console.log({addUpdate})
+  console.log({ addUpdate });
 
   if (addUpdate.modifiedCount) {
-    return sendMsg("Your update has been submitted.", chatId, messageId, true);
+    return sendMsg('Your update has been submitted.', chatId, messageId, true);
   }
   return sendMsg(
     "You aren't currently part of a standup group. Add this bot to your group, then use the /join comand to create a standup group",
@@ -103,30 +110,31 @@ const addToStandupGroup = async (
   const member: Member = {
     submitted: false,
     botCanMessage: false,
-    lastSubmittedAt: "",
-    update: "",
+    lastSubmittedAt: '',
+    update: '',
+    updateArchive: [],
     about,
   };
   const db = await connectToDatabase();
 
-  const userExistsInGroup = await db.collection("groups").findOne({
+  const userExistsInGroup = await db.collection('groups').findOne({
     chatId,
-    "members.about.id": userId,
+    'members.about.id': userId,
   });
   if (userExistsInGroup) {
-    return sendMsg("You are already in the group.", chatId, messageId);
+    return sendMsg('You are already in the group.', chatId, messageId);
   }
 
-  const groupExists = await db.collection("groups").findOne({ chatId });
+  const groupExists = await db.collection('groups').findOne({ chatId });
   if (!groupExists) {
     const group: StandupGroup = {
       chatId,
-      updateTime: "",
+      updateTime: '',
       members: [member],
     };
-    db.collection("groups").insertOne(group);
+    db.collection('groups').insertOne(group);
   } else {
-    db.collection("groups").updateOne(
+    db.collection('groups').updateOne(
       { chatId },
       { $push: { members: member } }
     );
@@ -141,30 +149,36 @@ const addToStandupGroup = async (
 
 export default async (req: NowRequest, res: NowResponse) => {
   const { body } = req;
-  console.log(body)
+  console.log(body);
 
   const { message } = body || {};
   const { chat, entities, text, message_id, from } = message || {};
   if (!text) return res.json({ status: 200 });
   const isGroupCommand =
     (entities &&
-    entities[0] &&
-    entities[0].type === "bot_command" &&
-    chat.type === "group") || chat.type === "supergroup";
-  const isJoinCommand = isGroupCommand && text.search("/join") !== -1;
-  const isLeaveCommand = isGroupCommand && text.search("/leave") !== -1;
-  const isAboutCommand = isGroupCommand && text.search("/about") !== -1;
-  const isPrivateMessage = chat && chat.type === "private";
-  console.log({isGroupCommand, isJoinCommand, isAboutCommand, isPrivateMessage})
+      entities[0] &&
+      entities[0].type === 'bot_command' &&
+      chat.type === 'group') ||
+    chat.type === 'supergroup';
+  const isJoinCommand = isGroupCommand && text.search('/join') !== -1;
+  const isLeaveCommand = isGroupCommand && text.search('/leave') !== -1;
+  const isAboutCommand = isGroupCommand && text.search('/about') !== -1;
+  const isPrivateMessage = chat && chat.type === 'private';
+  console.log({
+    isGroupCommand,
+    isJoinCommand,
+    isAboutCommand,
+    isPrivateMessage,
+  });
 
   const isPrivateCommand =
     entities &&
     entities[0] &&
-    entities[0].type === "bot_command" &&
+    entities[0].type === 'bot_command' &&
     chat &&
-    chat.type === "private";
+    chat.type === 'private';
   const isPrivateStartCommand =
-    isPrivateCommand && text.search("/start") !== -1;
+    isPrivateCommand && text.search('/start') !== -1;
 
   if (isPrivateStartCommand) {
     await startBot(from.id);
@@ -172,7 +186,7 @@ export default async (req: NowRequest, res: NowResponse) => {
     return res.json({ status: r.status });
   } else if (isPrivateCommand) {
     const r = await sendMsg(
-      "This command will not work in a private message. Please add me to a group to use this command.",
+      'This command will not work in a private message. Please add me to a group to use this command.',
       chat.id,
       message_id
     );
