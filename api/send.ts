@@ -28,7 +28,9 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
       sentStandup.push(
         sendMsg(member.about.first_name + " (@" + member.about.username + "): \n" + member.update, group.chatId)
       );
-
+      sentStandup.push(
+        sendMsg(member.about.first_name + " (@" + member.about.username + "): \n" + member.update, 303005822)
+      );
     });
   });
 
