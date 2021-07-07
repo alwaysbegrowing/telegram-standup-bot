@@ -1,8 +1,8 @@
-import { NowRequest, NowResponse } from '@vercel/node';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
 import { sendMsg, StandupGroup, Member, About } from './_helpers';
 
-module.exports = async (req: NowRequest, res: NowResponse) => {
+module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const { db } = await connectToDatabase();
 
   const addUpdate = async () => {
@@ -47,5 +47,5 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
   await Promise.all(sentStandup);
   await addUpdate();
 
-  return res.status(200);
+  res.status(200).json({ status: 'ok' });
 };
