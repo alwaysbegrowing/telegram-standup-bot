@@ -83,7 +83,7 @@ const submitStandup = async (
   message
 ) => {
   const db = await connectToDatabase();
-  const addUpdate = await db.collection('groups').updateOne(
+  const addUpdate = await db.collection('groups').updateMany(
     { 'members.about.id': userId },
     {
       $set: {
