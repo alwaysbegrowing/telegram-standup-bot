@@ -3,7 +3,7 @@ import { connectToDatabase } from './_connectToDatabase';
 import { sendMsg, StandupGroup, Member, About } from './_helpers';
 
 module.exports = async (req: NowRequest, res: NowResponse) => {
-  const db = await connectToDatabase();
+  const { db } = await connectToDatabase();
 
   const addUpdate = async () => {
     await db.collection('groups').updateMany(

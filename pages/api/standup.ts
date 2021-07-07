@@ -36,7 +36,7 @@ const leaveStandupGroup = async (
   about: About,
   messageId: number
 ) => {
-  const db = await connectToDatabase();
+  const { db } = await connectToDatabase();
   const removedUserFromGroup = await db.collection('groups').updateOne(
     {
       chatId,
@@ -55,7 +55,7 @@ const leaveStandupGroup = async (
 };
 
 const startBot = async (userId: number) => {
-  const db = await connectToDatabase();
+  const { db } = await connectToDatabase();
 
   await db.collection('groups').updateMany(
     { 'members.about.id': userId },
@@ -74,7 +74,7 @@ const sendAboutMessage = async (
   about: About,
   messageId: number
 ) => {
-  const db = await connectToDatabase();
+  const { db } = await connectToDatabase();
 
   const group = await db.collection('groups').findOne({ chatId });
   if (group) {
@@ -95,7 +95,7 @@ const submitStandup = async (
   body: any
 ) => {
   const type = Object.keys(body?.message).find((a) => telegramTypes[a]);
-  const db = await connectToDatabase();
+  const { db } = await connectToDatabase();
   const addUpdate = await db.collection('groups').updateMany(
     { 'members.about.id': userId },
     {
@@ -144,7 +144,7 @@ const addToStandupGroup = async (
     file_id: '',
     type: 'text',
   };
-  const db = await connectToDatabase();
+  const { db } = await connectToDatabase();
 
   const userExistsInGroup = await db.collection('groups').findOne({
     chatId,

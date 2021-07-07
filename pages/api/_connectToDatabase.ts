@@ -1,29 +1,37 @@
 const { MongoClient } = require('mongodb');
 
-// Create cached connection variable
+/**
+ * Global is used here to maintain a cached connection across hot reloads
+ * in development. This prevents connections growing exponentially
+ * during API Route usage.
+ */
+let cached = global.mongo;
 
-let cachedDb: any = null;
+if (!cached) {
+  cached = global.mongo = { conn: null, promise: null };
+}
 
-// A function for connecting to MongoDB,
-// taking a single parameter of the connection string
 export async function connectToDatabase() {
-  // If the database connection is cached,
-  // use it instead of creating a new connection
-  if (cachedDb) {
-    return cachedDb;
+  if (cached.conn) {
+    return cached.conn;
   }
 
-  // If no connection is cached, create a new one
-  const client = await MongoClient.connect(process.env.MONGODB_FULL_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  if (!cached.promise) {
+    const opts = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    };
 
-  // Select the database through the connection,
-  // using the database path of the connection string
-  const db = await client.db(process.env.MONDODB_NAME);
-
-  // Cache the database connection and return the connection
-  cachedDb = db;
-  return db;
+    cached.promise = MongoClient.connect(
+      process.env.MONGODB_FULL_URI,
+      opts
+    ).then((client) => {
+      return {
+        client,
+        db: client.db(process.env.MONDODB_NAME),
+      };
+    });
+  }
+  cached.conn = await cached.promise;
+  return cached.conn;
 }

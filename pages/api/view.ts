@@ -1,13 +1,34 @@
-import { NowRequest, NowResponse } from '@vercel/node';
+const { createHash, createHmac } = require('crypto');
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-import { StandupGroup, Member } from './_helpers';
 
-module.exports = async (req: NowRequest, res: NowResponse) => {
-  const db = await connectToDatabase();
-  const groups = await db.collection('groups').find({}).toArray();
+const secret = createHash('sha256')
+  .update(process.env.TELEGRAM_API_KEY)
+  .digest();
 
-  res.json({
-    data: groups.filter((g: StandupGroup) => !!g.members.length),
-    status: 200,
-  });
+function checkSignature({ hash, ...data }) {
+  const checkString = Object.keys(data)
+    .sort()
+    .map((k) => `${k}=${data[k]}`)
+    .join('\n');
+  const hmac = createHmac('sha256', secret).update(checkString).digest('hex');
+  return hmac === hash;
+}
+
+module.exports = async (req: VercelRequest, res: VercelResponse) => {
+  if (req?.body?.hash) {
+    const isValid = checkSignature(req.body);
+    if (isValid) {
+      const { db } = await connectToDatabase();
+      const groups = await db
+        .collection('groups')
+        .find({ 'members.about.id': req.body.id })
+        .toArray();
+      return res.status(200).json({
+        groups,
+      });
+    }
+  }
+
+  res.status(401);
 };
