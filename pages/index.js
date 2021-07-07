@@ -17,7 +17,7 @@ async function fetchWithToken(url, data) {
   return res.json();
 }
 
-export default function Home() {
+export default function Home({ BOT_NAME }) {
   const [user, setUser] = useState({});
   const { data, error } = useSWR(['/api/view', user], fetchWithToken);
 
@@ -98,11 +98,8 @@ export default function Home() {
 
         <p className={styles.description}>
           Get started by messaging{' '}
-          <a
-            className={styles.code}
-            href={`https://t.me/${process.env.BOT_NAME}`}
-          >
-            @{process.env.BOT_NAME}
+          <a className={styles.code} href={`https://t.me/${BOT_NAME}`}>
+            @{BOT_NAME}
           </a>
         </p>
 
@@ -112,13 +109,16 @@ export default function Home() {
             className={styles.card}
           >
             <h2>Documentation &rarr;</h2>
-            <p>
-              Find in-depth information about {process.env.BOT_NAME} features
-              and API.
-            </p>
+            <p>Find in-depth information about {BOT_NAME} features and API.</p>
           </a>
         </div>
       </main>
     </div>
   );
+}
+
+export async function getStaticProps() {
+  return {
+    props: { BOT_NAME: process.env.BOT_NAME },
+  };
 }
