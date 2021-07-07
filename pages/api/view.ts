@@ -24,11 +24,12 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         .collection('groups')
         .find({ 'members.about.id': req.body.id })
         .toArray();
-      return res.status(200).json({
+      res.status(200).json({
         groups,
       });
+      return;
     }
   }
 
-  return res.status(401).json({ message: 'Unauthorized' });
+  res.status(401).json({ status: 'Unauthorized' });
 };

@@ -1,4 +1,4 @@
-import { NowRequest, NowResponse } from '@vercel/node';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
 import { sendMsg, StandupGroup, Member, About } from './_helpers';
 
@@ -177,7 +177,7 @@ const addToStandupGroup = async (
   );
 };
 
-export default async (req: NowRequest, res: NowResponse) => {
+module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const { body } = req;
   console.log(body);
 
@@ -187,7 +187,7 @@ export default async (req: NowRequest, res: NowResponse) => {
   // Don't try to parse this message if missing info
   if (!message || !Object.keys(message).some((a) => telegramTypes[a])) {
     console.log('Quitting early', message);
-    return res.json({ status: 200 });
+    res.status(200).json({ status: 'ok' });
   }
 
   const isGroupCommand =
@@ -220,14 +220,16 @@ export default async (req: NowRequest, res: NowResponse) => {
   if (isPrivateStartCommand) {
     await startBot(from.id);
     const r = await sendMsg(standupTemplate, chat.id, message_id);
-    return res.json({ status: r.status });
+    res.json({ status: r.status });
+    return;
   } else if (isPrivateCommand) {
     const r = await sendMsg(
       'This command will not work in a private message. Please add me to a group to use this command.',
       chat.id,
       message_id
     );
-    return res.json({ status: r.status });
+    res.json({ status: r.status });
+    return;
   } else if (isPrivateMessage) {
     const r = await submitStandup(
       chat.id,
@@ -237,7 +239,8 @@ export default async (req: NowRequest, res: NowResponse) => {
       text,
       body
     );
-    return res.json({ status: r.status });
+    res.json({ status: r.status });
+    return;
   }
 
   if (isAddCommand) {
@@ -248,14 +251,17 @@ export default async (req: NowRequest, res: NowResponse) => {
       from,
       message_id
     );
-    return res.json({ status: r.status });
+    res.json({ status: r.status });
+    return;
   } else if (isAboutCommand) {
     const r = await sendAboutMessage(chat.id, from.id, from, message_id);
-    return res.json({ status: r.status });
+    res.json({ status: r.status });
+    return;
   } else if (isLeaveCommand) {
     const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
-    return res.json({ status: r.status });
+    res.json({ status: r.status });
+    return;
   } else {
-    return res.status(500);
+    res.status(500).json({ status: 'error' });
   }
 };
