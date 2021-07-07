@@ -49,6 +49,7 @@ export const sendMsg = async (
     chat_id,
     disable_notification,
     caption: body?.message?.caption,
+    [type]: file_id || text,
   };
 
   if (type === 'poll') {
@@ -61,11 +62,6 @@ export const sendMsg = async (
     data = {
       ...data,
       [type]: body?.message?.[type].slice(-1)[0].file_id,
-    };
-  } else {
-    data = {
-      ...data,
-      [type]: file_id || text,
     };
   }
 
