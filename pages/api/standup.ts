@@ -256,6 +256,6 @@ export default async (req: NowRequest, res: NowResponse) => {
     const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
     return res.json({ status: r.status });
   } else {
-    return res.json({ status: 500 });
+    return res.status(500);
   }
 };
