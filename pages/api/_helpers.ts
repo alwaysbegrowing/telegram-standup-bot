@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { telegramTypes } from './standup';
 
 export interface StandupGroup {
   chatId: number;
@@ -27,21 +28,53 @@ export interface Member {
   update: string;
   updateArchive: Array<UpdateArchive>;
   about: About;
+  file_id: string;
+  type: string;
 }
 
 export const sendMsg = async (
   text: string,
   chat_id: number,
   reply_to_message_id: number = null,
-  disable_notification: boolean = false
+  disable_notification: boolean = false,
+  file_id: string = '',
+  type: string = 'text',
+  body: any = {}
 ) => {
-  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/sendMessage`;
-  const data = {
+  const apiUrl = telegramTypes[type] || telegramTypes.text;
+
+  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiUrl}`;
+  let data = {
     reply_to_message_id,
     chat_id,
-    text,
     disable_notification,
+    caption: body?.message?.caption,
   };
+
+  if (type === 'poll') {
+    data = {
+      ...data,
+      ...body?.message?.[type],
+      options: body.message[type].options.map((o) => o.text),
+    };
+  } else if (type === 'photo') {
+    data = {
+      ...data,
+      [type]: body?.message?.[type].slice(-1)[0].file_id,
+    };
+  } else {
+    data = {
+      ...data,
+      [type]: file_id || text,
+    };
+  }
+
+  console.log(data);
+
+  if (type !== 'text' && text.includes('(@')) {
+    await sendMsg(text, chat_id, reply_to_message_id);
+  }
+
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

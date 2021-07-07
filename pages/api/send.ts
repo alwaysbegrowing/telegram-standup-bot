@@ -24,7 +24,7 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
     .filter((g) => !!g.members.length)
     .forEach((group: StandupGroup) => {
       group.members
-        .filter((m) => m.update !== '')
+        .filter((m) => m.submitted)
         .forEach((member: Member) => {
           sentStandup.push(
             sendMsg(
@@ -33,7 +33,12 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
                 member.about.username +
                 '): \n' +
                 member.update,
-              group.chatId
+              group.chatId,
+              null,
+              false,
+              member.file_id,
+              member.type,
+              member.updateArchive.slice(-1)[0].body
             )
           );
         });

@@ -2,11 +2,22 @@ import { NowRequest, NowResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
 import { sendMsg, StandupGroup, Member, About } from './_helpers';
 
-const standupTemplate = `Welcome!
-Add this bot to your group, then use the /add comand to create a standup group for your chat.
+export const telegramTypes = {
+  text: 'sendMessage',
+  voice: 'sendVoice',
+  audio: 'sendAudio',
+  poll: 'sendPoll',
+  video: 'sendVideo',
+  photo: 'sendPhoto',
+  video_note: 'sendVideoNote',
+  animation: 'sendAnimation',
+};
 
-Then, simply post your standup here and it will automatically be posted to your group at 10m.
-You will recieve a few reminders if you do not submit your standup before 8am the day of.
+const standupTemplate = `Welcome!
+
+To get started, add this bot to your group and type /add to create a standup for your chat.
+
+Afterwards, post a message here and it will automatically be sent to your group at 11:00 am. You will recieve a few reminders if you do not submit your standup before 8:00 am the day of.
 
 Please use the following template for your standups:
 
@@ -83,6 +94,7 @@ const submitStandup = async (
   message: string,
   body: any
 ) => {
+  const type = Object.keys(body?.message).find((a) => telegramTypes[a]);
   const db = await connectToDatabase();
   const addUpdate = await db.collection('groups').updateMany(
     { 'members.about.id': userId },
@@ -91,6 +103,8 @@ const submitStandup = async (
         'members.$[elem].submitted': true,
         'members.$[elem].botCanMessage': true,
         'members.$[elem].update': message || '',
+        'members.$[elem].file_id': body.message?.[type]?.file_id,
+        'members.$[elem].type': type,
       },
       $push: {
         'members.$[elem].updateArchive': {
@@ -102,11 +116,11 @@ const submitStandup = async (
     },
     { arrayFilters: [{ 'elem.about.id': userId }] }
   );
-  console.log({ addUpdate });
 
   if (addUpdate.modifiedCount) {
     return sendMsg('Your update has been submitted.', chatId, messageId, true);
   }
+
   return sendMsg(
     "You aren't currently part of a standup group. Add this bot to your group, then use the /add comand to create a standup group",
     chatId,
@@ -127,6 +141,8 @@ const addToStandupGroup = async (
     update: '',
     updateArchive: [],
     about,
+    file_id: '',
+    type: 'text',
   };
   const db = await connectToDatabase();
 
@@ -155,7 +171,7 @@ const addToStandupGroup = async (
   }
 
   return sendMsg(
-    "You've been added to the standup group! Send me a private message @SuperSimpleStandupBot to recieve reminders.",
+    `You've been added to the standup group! Send me a private message @${process.env.BOT_NAME} to recieve reminders.`,
     chatId,
     messageId
   );
@@ -166,37 +182,14 @@ export default async (req: NowRequest, res: NowResponse) => {
   console.log(body);
 
   const { message } = body || {};
-  const {
-    chat,
-    entities,
-    text,
-    message_id,
-    from,
-    voice,
-    audio,
-    document,
-    poll,
-    video,
-    photo,
-    video_note,
-    caption,
-    animation,
-  } = message || {};
+  const { chat, entities, text, message_id, from } = message || {};
 
   // Don't try to parse this message if missing info
-  if (
-    !text ||
-    !voice ||
-    !audio ||
-    !document ||
-    !poll ||
-    !video ||
-    !photo ||
-    !video_note ||
-    !caption ||
-    !animation
-  )
+  if (!message || !Object.keys(message).some((a) => telegramTypes[a])) {
+    console.log('Quitting early', message);
     return res.json({ status: 200 });
+  }
+
   const isGroupCommand =
     (entities &&
       entities[0] &&
@@ -210,6 +203,7 @@ export default async (req: NowRequest, res: NowResponse) => {
   console.log({
     isGroupCommand,
     isAddCommand,
+    isLeaveCommand,
     isAboutCommand,
     isPrivateMessage,
   });

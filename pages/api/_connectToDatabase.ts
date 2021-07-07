@@ -21,7 +21,7 @@ export async function connectToDatabase() {
 
   // Select the database through the connection,
   // using the database path of the connection string
-  const db = await client.db('standup');
+  const db = await client.db(process.env.MONDODB_NAME);
 
   // Cache the database connection and return the connection
   cachedDb = db;
