@@ -6,18 +6,8 @@ module.exports = async (req: NowRequest, res: NowResponse) => {
   const db = await connectToDatabase();
   const groups = await db.collection('groups').find({}).toArray();
 
-  const reminders = [];
-  groups.forEach((group: StandupGroup) => {
-    group.members
-      .filter((m) => m.update !== '')
-      .forEach((member: Member) => {
-        console.log(member);
-      });
-  });
-
-  await Promise.all(reminders);
-
   res.json({
+    data: groups.filter((g: StandupGroup) => !!g.members.length),
     status: 200,
   });
 };
