@@ -97,9 +97,12 @@ export default function Home() {
         )}
 
         <p className={styles.description}>
-          Get started by messaging
-          <a className={styles.code} href='https://t.me/supersimplestandupbot'>
-            @SuperSimpleStandupBot
+          Get started by messaging{' '}
+          <a
+            className={styles.code}
+            href={`https://t.me/${process.env.BOT_NAME}`}
+          >
+            @{process.env.BOT_NAME}
           </a>
         </p>
 
@@ -110,8 +113,8 @@ export default function Home() {
           >
             <h2>Documentation &rarr;</h2>
             <p>
-              Find in-depth information about SuperSimpleStandupBot features and
-              API.
+              Find in-depth information about {process.env.BOT_NAME} features
+              and API.
             </p>
           </a>
         </div>
