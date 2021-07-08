@@ -14,14 +14,12 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   users
     .filter((g) => !!g.groups.length)
     .forEach((user: Member) => {
-      user.groups.forEach((group: StandupGroup) => {
-        reminders.push(
-          sendMsg(
-            'Reminder, please submit an update. Updates are due by 11 AM EST',
-            user.userId
-          )
-        );
-      });
+      reminders.push(
+        sendMsg(
+          'Reminder, please submit an update. Updates are due by 11 AM EST',
+          user.userId
+        )
+      );
     });
 
   await Promise.all(reminders);
