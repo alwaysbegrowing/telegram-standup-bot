@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Page, Text } from '@geist-ui/react';
+import { Page, Text, Avatar } from '@geist-ui/react';
 import Head from 'next/head';
 import Image from 'next/image';
 import useSWR from 'swr';
@@ -53,7 +53,7 @@ export default function Home({ BOT_NAME }) {
       <main className={styles.main}>
         {data && user.photo_url && (
           <div>
-            <Image src={user.photo_url} width={40} height={40} alt='Avatar' />
+            <Avatar src={user.photo_url} alt='Avatar' />
             {user.first_name}
 
             <div>
