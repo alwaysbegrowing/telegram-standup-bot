@@ -3,6 +3,10 @@ import { connectToDatabase } from './_connectToDatabase';
 import { sendMsg, StandupGroup, Member, About } from './_helpers';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
+  if (req.query.key !== process.env.TELEGRAM_API_KEY) {
+    return res.status(401).json({ status: 'invalid api key' });
+  }
+
   const { db } = await connectToDatabase();
 
   const markAllSent = async () => {

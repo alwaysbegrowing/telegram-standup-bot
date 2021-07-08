@@ -49,7 +49,7 @@ You are also to self-host this bot so no data is sent to our servers.
 
 8. Setup a webhook to your vercel standup URL https://core.telegram.org/bots/webhooks (example URL: `https://bla-vercel.com/api/standup`).
 
-```https://api.telegram.org/bot${TELEGRAM_API_KEY}/setWebhook?url=https://.../api/standup```
+```https://api.telegram.org/bot${TELEGRAM_API_KEY}/setWebhook?url=https://.../api/standup?key=${TELEGRAM_API_KEY}```
 
 If your messages aren't going through try clearing pending updates
 

@@ -184,6 +184,10 @@ const addToStandupGroup = async (
 };
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
+  if (req.query.key !== process.env.TELEGRAM_API_KEY) {
+    return res.status(401).json({ status: 'invalid api key' });
+  }
+
   const { body } = req;
   const { message } = body || {};
   const { chat, entities, text, message_id, from } = message || {};
