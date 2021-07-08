@@ -17,6 +17,8 @@ async function fetchWithToken(url, data) {
   return res.json();
 }
 
+function updateList(data) {}
+
 export default function Home({ BOT_NAME }) {
   const [user, setUser] = useState({});
   const { data, error } = useSWR(['/api/view', user], fetchWithToken);
@@ -67,23 +69,30 @@ export default function Home({ BOT_NAME }) {
               <h2>Your Groups</h2>
 
               <ol>
-                {data.user.groups.map((group, i) => {
-                  return <li key={group.chatId}>{group.title}</li>;
+                {data.groups.map((title, i) => {
+                  return <li key={i}>{title}</li>;
                 })}
               </ol>
-              <div key={data.user.about.first_name + data.user.chatId}>
-                <h2>Your Updates</h2>
+              <div>
+                <h2>Group Updates</h2>
 
-                <ul>
-                  {data.user.updateArchive.map((u) => {
-                    if (u.message)
-                      return (
-                        <li key={u.createdAt}>
-                          {u.createdAt} - {u.message}
-                        </li>
-                      );
-                  })}
-                </ul>
+                {data.groupUpdates.map((u, i) => {
+                  return (
+                    <div key={i}>
+                      <h5>{u.about.first_name}</h5>
+                      <ul>
+                        {u.updateArchive.map((b) => {
+                          if (b.message)
+                            return (
+                              <li key={b.createdAt}>
+                                {b.createdAt} - {b.message}
+                              </li>
+                            );
+                        })}
+                      </ul>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
