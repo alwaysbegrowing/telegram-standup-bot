@@ -40,10 +40,10 @@ const leaveStandupGroup = async (
   );
 
   if (removedUserFromGroup.modifiedCount) {
-    return sendMsg('You have left the group.', chatId, messageId);
+    return await sendMsg('You have left the group.', chatId, messageId);
   }
 
-  return sendMsg(
+  return await sendMsg(
     "You aren't currently in a group. Join with /add !",
     chatId,
     messageId
@@ -79,9 +79,9 @@ const sendAboutMessage = async (
 
   const user = await db.collection('users').findOne({ userId });
   if (user) {
-    return sendMsg(JSON.stringify(user), chatId, messageId);
+    return await sendMsg(JSON.stringify(user), chatId, messageId);
   }
-  return sendMsg(
+  return await sendMsg(
     'You dont exist in this channel. Create a group with /add',
     chatId,
     messageId
@@ -120,10 +120,15 @@ const submitStandup = async (
   console.log(body);
 
   if (addUpdate.modifiedCount) {
-    return sendMsg('Your update has been submitted.', chatId, messageId, true);
+    return await sendMsg(
+      'Your update has been submitted.',
+      chatId,
+      messageId,
+      true
+    );
   }
 
-  return sendMsg(
+  return await sendMsg(
     "You aren't currently part of a standup group. Add this bot to your group, then use the /add command to create a standup group",
     chatId,
     messageId
@@ -147,7 +152,7 @@ const addToStandupGroup = async (
   console.log('adding');
 
   if (userExistsInGroup) {
-    return sendMsg('You are already in the group.', chatId, messageId);
+    return await sendMsg('You are already in the group.', chatId, messageId);
   }
 
   const group: StandupGroup = {
@@ -171,7 +176,7 @@ const addToStandupGroup = async (
     db.collection('users').updateOne({ userId }, { $push: { groups: group } });
   }
 
-  return sendMsg(
+  return await sendMsg(
     `You've been added to the standup group! Send me a private message @${process.env.BOT_NAME} to receive reminders.`,
     chatId,
     messageId
@@ -209,27 +214,42 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   if (isPrivateStartCommand) {
     await startBot(from.id);
-    sendMsg(standupTemplate, chat.id, message_id);
-    return res.json({ status: 200 });
+    const r = await sendMsg(standupTemplate, chat.id, message_id);
+    return res.json({ status: r.status });
   } else if (isPrivateCommand) {
-    sendMsg(
+    const r = await sendMsg(
       'This command will not work in a private message. Please add me to a group to use this command.',
       chat.id,
       message_id
     );
-    return res.json({ status: 200 });
+    return res.json({ status: r.status });
   } else if (isPrivateMessage) {
-    submitStandup(chat.id, from.id, from, message_id, text, body);
-    return res.json({ status: 200 });
-  } else if (isAddCommand) {
-    addToStandupGroup(chat.id, from.id, chat.title, from, message_id);
-    return res.json({ status: 200 });
+    const r = await submitStandup(
+      chat.id,
+      from.id,
+      from,
+      message_id,
+      text,
+      body
+    );
+    return res.json({ status: r.status });
+  }
+
+  if (isAddCommand) {
+    const r = await addToStandupGroup(
+      chat.id,
+      from.id,
+      chat.title,
+      from,
+      message_id
+    );
+    return res.json({ status: r.status });
   } else if (isAboutCommand) {
-    sendAboutMessage(chat.id, from.id, from, message_id);
-    return res.json({ status: 200 });
+    const r = await sendAboutMessage(chat.id, from.id, from, message_id);
+    return res.json({ status: r.status });
   } else if (isLeaveCommand) {
-    leaveStandupGroup(chat.id, from.id, from, message_id);
-    return res.json({ status: 200 });
+    const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
+    return res.json({ status: r.status });
   } else {
     return res.status(500).json({ status: 'error' });
   }

@@ -40,7 +40,7 @@ export interface Member {
   groups: Array<StandupGroup>;
 }
 
-export const sendMsg = (
+export const sendMsg = async (
   text: string,
   chat_id: number,
   reply_to_message_id: number = null,
