@@ -20,16 +20,27 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     const isValid = checkSignature(req.body);
     if (isValid) {
       const { db } = await connectToDatabase();
-      const groups = await db
-        .collection('groups')
-        .find({ 'members.about.id': req.body.id })
+      const user = await db
+        .collection('users')
+        .findOne({ userId: req.body.id });
+
+      const groupUpdates = await db
+        .collection('users')
+        .find({ 'groups.chatId': { $in: user.groups.map((g) => g.chatId) } })
         .toArray();
-      res.status(200).json({
-        groups,
+
+      console.log(user.groups.map((g) => g.chatId));
+
+      return res.status(200).json({
+        groups: user.groups.map((g) => g.title),
+        updates: user.updateArchive.map(({ message, createdAt }) => ({
+          message,
+          createdAt,
+        })),
+        groupUpdates,
       });
-      return;
     }
   }
 
-  res.status(401).json({ status: 'Unauthorized' });
+  return res.status(401).json({ status: 'Unauthorized' });
 };

@@ -1,23 +1,18 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-import { sendMsg, StandupGroup, Member, About } from './_helpers';
-
-export const telegramTypes = {
-  text: 'sendMessage',
-  voice: 'sendVoice',
-  audio: 'sendAudio',
-  poll: 'sendPoll',
-  video: 'sendVideo',
-  photo: 'sendPhoto',
-  video_note: 'sendVideoNote',
-  animation: 'sendAnimation',
-};
+import {
+  sendMsg,
+  StandupGroup,
+  Member,
+  About,
+  telegramTypes,
+} from './_helpers';
 
 const standupTemplate = `Welcome!
 
 To get started, add this bot to your group and type /add to create a standup for your chat.
 
-Afterwards, post a message here and it will automatically be sent to your group at 11:00 am. You will recieve a few reminders if you do not submit your standup before 8:00 am the day of.
+Afterwards, post a message here and it will automatically be sent to your group at 11:00 am. You will receive a few reminders if you do not submit your standup before 8:00 am the day of.
 
 Please use the following template for your standups:
 
@@ -37,12 +32,13 @@ const leaveStandupGroup = async (
   messageId: number
 ) => {
   const { db } = await connectToDatabase();
-  const removedUserFromGroup = await db.collection('groups').updateOne(
+  const removedUserFromGroup = await db.collection('users').updateOne(
     {
-      chatId,
+      userId,
     },
-    { $pull: { members: { 'about.id': userId } } }
+    { $pull: { groups: { chatId } } }
   );
+
   if (removedUserFromGroup.modifiedCount) {
     return sendMsg('You have left the group.', chatId, messageId);
   }
@@ -54,20 +50,25 @@ const leaveStandupGroup = async (
   );
 };
 
+/**
+ * The beginning
+ *
+ * @param userId
+ */
 const startBot = async (userId: number) => {
   const { db } = await connectToDatabase();
 
-  await db.collection('groups').updateMany(
-    { 'members.about.id': userId },
+  await db.collection('users').updateOne(
+    { userId },
     {
       $set: {
-        'members.$[elem].botCanMessage': true,
+        botCanMessage: true,
       },
-    },
-    { arrayFilters: [{ 'elem.about.id': userId }] }
+    }
   );
 };
 
+/** Just a random debugger */
 const sendAboutMessage = async (
   chatId: number,
   userId: number,
@@ -76,16 +77,18 @@ const sendAboutMessage = async (
 ) => {
   const { db } = await connectToDatabase();
 
-  const group = await db.collection('groups').findOne({ chatId });
-  if (group) {
-    return sendMsg(JSON.stringify(group), chatId, messageId);
+  const user = await db.collection('users').findOne({ userId });
+  if (user) {
+    return sendMsg(JSON.stringify(user), chatId, messageId);
   }
   return sendMsg(
-    'There is no group for this channel. Create a group with /add',
+    'You dont exist in this channel. Create a group with /add',
     chatId,
     messageId
   );
 };
+
+/** Time to make an update */
 const submitStandup = async (
   chatId: number,
   userId: number,
@@ -96,25 +99,24 @@ const submitStandup = async (
 ) => {
   const type = Object.keys(body?.message).find((a) => telegramTypes[a]);
   const { db } = await connectToDatabase();
-  const addUpdate = await db.collection('groups').updateMany(
-    { 'members.about.id': userId },
+  const addUpdate = await db.collection('users').updateOne(
+    { userId },
     {
       $set: {
-        'members.$[elem].submitted': true,
-        'members.$[elem].botCanMessage': true,
-        'members.$[elem].update': message || '',
-        'members.$[elem].file_id': body.message?.[type]?.file_id,
-        'members.$[elem].type': type,
+        submitted: true,
+        botCanMessage: true,
       },
       $push: {
-        'members.$[elem].updateArchive': {
+        updateArchive: {
+          update: message || '',
+          file_id: body.message?.[type]?.file_id,
+          type: type,
           message: message || '',
           createdAt: Date.now(),
           body,
         },
       },
-    },
-    { arrayFilters: [{ 'elem.about.id': userId }] }
+    }
   );
 
   if (addUpdate.modifiedCount) {
@@ -122,7 +124,7 @@ const submitStandup = async (
   }
 
   return sendMsg(
-    "You aren't currently part of a standup group. Add this bot to your group, then use the /add comand to create a standup group",
+    "You aren't currently part of a standup group. Add this bot to your group, then use the /add command to create a standup group",
     chatId,
     messageId
   );
@@ -135,43 +137,42 @@ const addToStandupGroup = async (
   about: About,
   messageId: number
 ) => {
-  const member: Member = {
-    submitted: false,
-    botCanMessage: false,
-    update: '',
-    updateArchive: [],
-    about,
-    file_id: '',
-    type: 'text',
-  };
   const { db } = await connectToDatabase();
 
-  const userExistsInGroup = await db.collection('groups').findOne({
-    chatId,
-    'members.about.id': userId,
+  const userExistsInGroup = await db.collection('users').findOne({
+    userId,
+    'groups.chatId': chatId,
   });
+
   if (userExistsInGroup) {
     return sendMsg('You are already in the group.', chatId, messageId);
   }
 
-  const groupExists = await db.collection('groups').findOne({ chatId });
-  if (!groupExists) {
-    const group: StandupGroup = {
-      chatId,
-      title,
-      updateTime: '',
-      members: [member],
+  const group: StandupGroup = {
+    chatId,
+    title,
+  };
+
+  const userExists = await db.collection('users').findOne({ userId });
+  if (!userExists) {
+    const member: Member = {
+      userId,
+      submitted: false,
+      botCanMessage: false,
+      updateArchive: [],
+      about,
+      file_id: '',
+      type: 'hehe',
+      groups: [group],
     };
-    db.collection('groups').insertOne(group);
+
+    db.collection('users').insertOne(member);
   } else {
-    db.collection('groups').updateOne(
-      { chatId },
-      { $push: { members: member } }
-    );
+    db.collection('users').updateOne({ userId }, { $push: { groups: group } });
   }
 
   return sendMsg(
-    `You've been added to the standup group! Send me a private message @${process.env.BOT_NAME} to recieve reminders.`,
+    `You've been added to the standup group! Send me a private message @${process.env.BOT_NAME} to receive reminders.`,
     chatId,
     messageId
   );
@@ -187,7 +188,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   // Don't try to parse this message if missing info
   if (!message || !Object.keys(message).some((a) => telegramTypes[a])) {
     console.log('Quitting early', message);
-    res.status(200).json({ status: 'ok' });
+    return res.status(200).json({ status: 'invalid' });
   }
 
   const isGroupCommand =
@@ -220,16 +221,14 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (isPrivateStartCommand) {
     await startBot(from.id);
     const r = await sendMsg(standupTemplate, chat.id, message_id);
-    res.json({ status: r.status });
-    return;
+    return res.json({ status: r.status });
   } else if (isPrivateCommand) {
     const r = await sendMsg(
       'This command will not work in a private message. Please add me to a group to use this command.',
       chat.id,
       message_id
     );
-    res.json({ status: r.status });
-    return;
+    return res.json({ status: r.status });
   } else if (isPrivateMessage) {
     const r = await submitStandup(
       chat.id,
@@ -239,8 +238,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       text,
       body
     );
-    res.json({ status: r.status });
-    return;
+    return res.json({ status: r.status });
   }
 
   if (isAddCommand) {
@@ -251,17 +249,14 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       from,
       message_id
     );
-    res.json({ status: r.status });
-    return;
+    return res.json({ status: r.status });
   } else if (isAboutCommand) {
     const r = await sendAboutMessage(chat.id, from.id, from, message_id);
-    res.json({ status: r.status });
-    return;
+    return res.json({ status: r.status });
   } else if (isLeaveCommand) {
     const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
-    res.json({ status: r.status });
-    return;
+    return res.json({ status: r.status });
   } else {
-    res.status(500).json({ status: 'error' });
+    return res.status(500).json({ status: 'error' });
   }
 };
