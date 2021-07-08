@@ -22,8 +22,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       const { db } = await connectToDatabase();
       const user = await db
         .collection('users')
-        .find({ userId: req.body.id });
-
+        .findOne({ userId: req.body.id });
       return res.status(200).json({ user });
     }
   }
