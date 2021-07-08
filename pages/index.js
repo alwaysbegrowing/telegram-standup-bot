@@ -1,7 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Page, Text, Avatar } from '@geist-ui/react';
+import {
+  Note,
+  Loading,
+  Row,
+  Col,
+  Table,
+  Collapse,
+  Page,
+  Text,
+  User,
+} from '@geist-ui/react';
 import Head from 'next/head';
-import Image from 'next/image';
 import useSWR from 'swr';
 import styles from '../styles/Home.module.css';
 import TelegramLoginButton from 'react-telegram-login';
@@ -47,75 +56,77 @@ export default function Home({ BOT_NAME }) {
       </Head>
 
       <Page.Header>
-        <Text h2>Super Simple Standup Bot</Text>
+        <Row gap={0.8} align='middle' justify='space-around'>
+          <Col span='auto'>
+            <Text h2>Super Simple Standup Bot</Text>
+          </Col>
+          <Col span='auto'>
+            {!user?.photo_url && (
+              <TelegramLoginButton
+                dataOnauth={handleTelegramResponse}
+                botName='stood_bot'
+              />
+            )}
+
+            {user && error && <Note type='error'>Could not load profile</Note>}
+            {user && !data && <Loading>loading...</Loading>}
+
+            {data && user.photo_url && (
+              <User size='medium' src={user.photo_url} name={user.first_name}>
+                {data.groups.join(', ')}
+              </User>
+            )}
+          </Col>
+        </Row>
       </Page.Header>
 
-      <main className={styles.main}>
-        {data && user.photo_url && (
+      <Page.Content>
+        {data && user.photo_url ? (
           <div>
-            <Avatar src={user.photo_url} alt='Avatar' />
-            {user.first_name}
+            <Text h3>Group updates</Text>
 
-            <div>
-              <h2>Your Groups</h2>
-
-              <ol>
-                {data.groups.map((title, i) => {
-                  return <li key={i}>{title}</li>;
-                })}
-              </ol>
-              <div>
-                <h2>Group Updates</h2>
-
-                {data.groupUpdates.map((u, i) => {
-                  return (
-                    <div key={i}>
-                      <h5>{u.name}</h5>
-                      <ul>
-                        {u.updates.map((b) => {
-                          if (b.message)
-                            return (
-                              <li key={b.createdAt}>
-                                {b.createdAt} - {b.message}
-                              </li>
-                            );
-                        })}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {data.groupUpdates.map((u, i) => {
+              return (
+                <div style={{ marginBottom: 20 }}>
+                  <Collapse
+                    key={i}
+                    shadow
+                    title={u.name}
+                    subtitle={
+                      u.updates.slice(-1)[0]?.message || 'No updates yet...'
+                    }
+                  >
+                    <Table data={u.updates}>
+                      <Table.Column prop='createdAt' label='date' />
+                      <Table.Column prop='message' label='message' />
+                    </Table>
+                  </Collapse>
+                </div>
+              );
+            })}
           </div>
+        ) : (
+          <>
+            <p className={styles.description}>
+              Get started by messaging{' '}
+              <a className={styles.code} href={`https://t.me/${BOT_NAME}`}>
+                @{BOT_NAME}
+              </a>
+            </p>
+            <div className={styles.grid}>
+              <a
+                href='https://github.com/RusseII/telegram-standup-bot'
+                className={styles.card}
+              >
+                <h2>Documentation &rarr;</h2>
+                <p>
+                  Find in-depth information about {BOT_NAME} features and API.
+                </p>
+              </a>
+            </div>
+          </>
         )}
-        <p className={styles.description}>
-          Get started by messaging{' '}
-          <a className={styles.code} href={`https://t.me/${BOT_NAME}`}>
-            @{BOT_NAME}
-          </a>
-        </p>
-        <div className={styles.grid}>
-          <a
-            href='https://github.com/RusseII/telegram-standup-bot'
-            className={styles.card}
-          >
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about {BOT_NAME} features and API.</p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        {!user?.photo_url && (
-          <TelegramLoginButton
-            dataOnauth={handleTelegramResponse}
-            botName='stood_bot'
-          />
-        )}
-
-        {user && error && <div>failed to load</div>}
-        {user && !data && <div>loading...</div>}
-      </footer>
+      </Page.Content>
     </Page>
   );
 }
