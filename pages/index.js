@@ -36,9 +36,6 @@ export default function Home({ BOT_NAME }) {
     setUser(response);
   };
 
-  if (error) return <div>failed to load</div>;
-  if (!data) return <div>loading...</div>;
-
   return (
     <div className={styles.container}>
       <Head>
@@ -52,17 +49,19 @@ export default function Home({ BOT_NAME }) {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Super Simple Standup Bot</h1>
-
-        {!user.photo_url && (
+        {!user?.photo_url && (
           <TelegramLoginButton
             dataOnauth={handleTelegramResponse}
             botName='stood_bot'
           />
         )}
 
-        {user.photo_url && (
+        {error && <div>failed to load</div>}
+        {!data && <div>loading...</div>}
+
+        {user?.photo_url && (
           <div>
-            <Image src={user?.photo_url} width={40} height={40} alt='Avatar' />
+            <Image src={user.photo_url} width={40} height={40} alt='Avatar' />
             {user.first_name}
 
             <div>
@@ -97,14 +96,12 @@ export default function Home({ BOT_NAME }) {
             </div>
           </div>
         )}
-
         <p className={styles.description}>
           Get started by messaging{' '}
           <a className={styles.code} href={`https://t.me/${BOT_NAME}`}>
             @{BOT_NAME}
           </a>
         </p>
-
         <div className={styles.grid}>
           <a
             href='https://github.com/RusseII/telegram-standup-bot'
