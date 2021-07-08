@@ -49,15 +49,6 @@ export default function Home({ BOT_NAME }) {
 
       <main className={styles.main}>
         <h1 className={styles.title}>Super Simple Standup Bot</h1>
-        {!user?.photo_url && (
-          <TelegramLoginButton
-            dataOnauth={handleTelegramResponse}
-            botName='stood_bot'
-          />
-        )}
-
-        {user && error && <div>failed to load</div>}
-        {user && !data && <div>loading...</div>}
 
         {data && user.photo_url && (
           <div>
@@ -112,6 +103,18 @@ export default function Home({ BOT_NAME }) {
           </a>
         </div>
       </main>
+
+      <footer className={styles.footer}>
+        {!user?.photo_url && (
+          <TelegramLoginButton
+            dataOnauth={handleTelegramResponse}
+            botName='stood_bot'
+          />
+        )}
+
+        {user && error && <div>failed to load</div>}
+        {user && !data && <div>loading...</div>}
+      </footer>
     </div>
   );
 }
