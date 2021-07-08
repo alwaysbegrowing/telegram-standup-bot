@@ -26,15 +26,10 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
       const groupUpdates = await db
         .collection('users')
-        .find(
-          {},
-          {
-            arrayFilters: [
-              { 'groups.chatId': user.groups.map((g) => g.chatId) },
-            ],
-          }
-        )
+        .find({ 'groups.chatId': { $in: user.groups.map((g) => g.chatId) } })
         .toArray();
+
+      console.log(user.groups.map((g) => g.chatId));
 
       return res.status(200).json({
         groups: user.groups.map((g) => g.title),
