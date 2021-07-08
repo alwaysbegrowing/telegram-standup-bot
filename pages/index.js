@@ -4,7 +4,9 @@ import {
   Loading,
   Row,
   Col,
+  Display,
   Table,
+  Image,
   Collapse,
   Page,
   Text,
@@ -32,12 +34,47 @@ export default function Home({ BOT_NAME }) {
   const { data, error } = useSWR(['/api/view', user], fetchWithToken);
 
   useEffect(() => {
-    const data = localStorage.getItem('telegram-user');
+    const userInfo = localStorage.getItem('telegram-user');
 
-    if (data) {
-      setUser(JSON.parse(data));
+    if (userInfo) {
+      setUser(JSON.parse(userInfo));
     }
   }, []);
+
+  const formattedData =
+    data &&
+    data.groupUpdates.map((d) => {
+      return {
+        ...d,
+        updates: d.updates.map((u) => {
+          return {
+            ...u,
+            file_path: () => {
+              if (!u.file_path) return;
+              if (
+                ['voice', 'video', 'animation', 'audio', 'video_note'].includes(
+                  u.type
+                )
+              ) {
+                return (
+                  <video
+                    controls={u.type !== 'animation'}
+                    autoPlay={u.type === 'animation'}
+                    loop
+                  >
+                    <source src={u.file_path} />
+                  </video>
+                );
+              } else if (u.type === 'photo') {
+                return (
+                  <Image src={u.file_path} alt='Submission' height={200} />
+                );
+              }
+            },
+          };
+        }),
+      };
+    });
 
   const handleTelegramResponse = (response) => {
     localStorage.setItem('telegram-user', JSON.stringify(response));
@@ -85,7 +122,7 @@ export default function Home({ BOT_NAME }) {
           <div>
             <Text h3>Group updates</Text>
 
-            {data.groupUpdates.map((u, i) => {
+            {formattedData.map((u, i) => {
               return (
                 <div key={i} style={{ marginBottom: 20 }}>
                   <Collapse
@@ -99,6 +136,7 @@ export default function Home({ BOT_NAME }) {
                     <Table data={u.updates}>
                       <Table.Column prop='createdAt' label='date' />
                       <Table.Column prop='message' label='message' />
+                      <Table.Column prop='file_path' label='file' />
                     </Table>
                   </Collapse>
                 </div>

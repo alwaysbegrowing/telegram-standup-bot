@@ -19,6 +19,7 @@ export interface StandupGroup {
 export interface UpdateArchive {
   createdAt: string;
   type: string;
+  file_path: string;
   file_id: string;
   body: any;
 }

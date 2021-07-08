@@ -35,17 +35,15 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   return res.status(200).json({
     groups: user.groups.map((g) => g.title),
-    updates: user.updateArchive.map(({ message, createdAt }) => ({
-      message,
-      createdAt,
-    })),
     groupUpdates: groupUpdates.map((g) => {
       return {
         name: g.about.first_name,
         updates: g.updateArchive.map((u) => {
           return {
+            type: u.type,
             createdAt: u.createdAt,
-            message: u?.body?.message?.text || u.type,
+            message: u?.body?.message?.text || u?.body?.message?.caption,
+            file_path: u?.file_path,
           };
         }),
       };

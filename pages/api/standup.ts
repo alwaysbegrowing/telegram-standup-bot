@@ -98,7 +98,26 @@ const submitStandup = async (
   body: any
 ) => {
   const type = Object.keys(body?.message).find((a) => telegramTypes[a]);
+  let file_id = body.message?.[type]?.file_id;
+
+  if (type === 'photo') {
+    file_id = body?.message?.[type].slice(-1)[0].file_id;
+  }
+
   const { db } = await connectToDatabase();
+  let file_path = '';
+
+  if (file_id) {
+    try {
+      const download_url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/getFile?file_id=${file_id}`;
+      const file = await fetch(download_url);
+      const json = await file.json();
+      if (json?.ok) {
+        file_path = `https://api.telegram.org/file/bot${process.env.TELEGRAM_API_KEY}/${json?.result?.file_path}`;
+      }
+    } catch (e) {}
+  }
+
   const addUpdate = await db.collection('users').updateOne(
     { userId },
     {
@@ -108,8 +127,10 @@ const submitStandup = async (
       },
       $push: {
         updateArchive: {
-          file_id: body.message?.[type]?.file_id,
+          file_id,
+          caption: body?.message?.caption,
           type,
+          file_path,
           createdAt: Date.now(),
           body,
         },
@@ -117,7 +138,7 @@ const submitStandup = async (
     }
   );
 
-  console.log(body);
+  // console.log(body);
 
   if (addUpdate.modifiedCount) {
     return await sendMsg(
