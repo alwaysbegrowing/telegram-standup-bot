@@ -46,33 +46,42 @@ export default function Home({ BOT_NAME }) {
     data.groupUpdates.map((d) => {
       return {
         ...d,
-        updates: d.updates.map((u) => {
-          return {
-            ...u,
-            file_path: () => {
-              if (!u.file_path) return;
-              if (
-                ['voice', 'video', 'animation', 'audio', 'video_note'].includes(
-                  u.type
-                )
-              ) {
-                return (
-                  <video
-                    controls={u.type !== 'animation'}
-                    autoPlay={u.type === 'animation'}
-                    loop
-                  >
-                    <source src={u.file_path} />
-                  </video>
-                );
-              } else if (u.type === 'photo') {
-                return (
-                  <Image src={u.file_path} alt='Submission' height={200} />
-                );
-              }
-            },
-          };
-        }),
+        updates: d.updates
+          .filter((u) => {
+            return u.message || u.caption || u.file_path;
+          })
+          .map((u) => {
+            return {
+              ...u,
+              createdAt: new Date(u.createdAt).toDateString(),
+              file_path: () => {
+                if (!u.file_path) return;
+                if (
+                  [
+                    'voice',
+                    'video',
+                    'animation',
+                    'audio',
+                    'video_note',
+                  ].includes(u.type)
+                ) {
+                  return (
+                    <video
+                      controls={u.type !== 'animation'}
+                      autoPlay={u.type === 'animation'}
+                      loop
+                    >
+                      <source src={u.file_path} />
+                    </video>
+                  );
+                } else if (u.type === 'photo') {
+                  return (
+                    <Image src={u.file_path} alt='Submission' height={200} />
+                  );
+                }
+              },
+            };
+          }),
       };
     });
 
