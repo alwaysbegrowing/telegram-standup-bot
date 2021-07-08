@@ -108,16 +108,16 @@ const submitStandup = async (
       },
       $push: {
         updateArchive: {
-          update: message || '',
           file_id: body.message?.[type]?.file_id,
-          type: type,
-          message: message || '',
+          type,
           createdAt: Date.now(),
           body,
         },
       },
     }
   );
+
+  console.log(body);
 
   if (addUpdate.modifiedCount) {
     return sendMsg('Your update has been submitted.', chatId, messageId, true);
@@ -144,6 +144,8 @@ const addToStandupGroup = async (
     'groups.chatId': chatId,
   });
 
+  console.log('adding');
+
   if (userExistsInGroup) {
     return sendMsg('You are already in the group.', chatId, messageId);
   }
@@ -161,8 +163,6 @@ const addToStandupGroup = async (
       botCanMessage: false,
       updateArchive: [],
       about,
-      file_id: '',
-      type: 'text',
       groups: [group],
     };
 
@@ -187,6 +187,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (!message || !Object.keys(message).some((a) => telegramTypes[a])) {
     console.log('Quitting early', message);
     return res.status(200).json({ status: 'invalid' });
+  } else {
+    console.log('Received valid request');
   }
 
   const isGroupCommand =
@@ -207,42 +209,27 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   if (isPrivateStartCommand) {
     await startBot(from.id);
-    const r = await sendMsg(standupTemplate, chat.id, message_id);
-    return res.json({ status: r.status });
+    sendMsg(standupTemplate, chat.id, message_id);
+    return res.json({ status: 200 });
   } else if (isPrivateCommand) {
-    const r = await sendMsg(
+    sendMsg(
       'This command will not work in a private message. Please add me to a group to use this command.',
       chat.id,
       message_id
     );
-    return res.json({ status: r.status });
+    return res.json({ status: 200 });
   } else if (isPrivateMessage) {
-    const r = await submitStandup(
-      chat.id,
-      from.id,
-      from,
-      message_id,
-      text,
-      body
-    );
-    return res.json({ status: r.status });
-  }
-
-  if (isAddCommand) {
-    const r = await addToStandupGroup(
-      chat.id,
-      from.id,
-      chat.title,
-      from,
-      message_id
-    );
-    return res.json({ status: r.status });
+    submitStandup(chat.id, from.id, from, message_id, text, body);
+    return res.json({ status: 200 });
+  } else if (isAddCommand) {
+    addToStandupGroup(chat.id, from.id, chat.title, from, message_id);
+    return res.json({ status: 200 });
   } else if (isAboutCommand) {
-    const r = await sendAboutMessage(chat.id, from.id, from, message_id);
-    return res.json({ status: r.status });
+    sendAboutMessage(chat.id, from.id, from, message_id);
+    return res.json({ status: 200 });
   } else if (isLeaveCommand) {
-    const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
-    return res.json({ status: r.status });
+    leaveStandupGroup(chat.id, from.id, from, message_id);
+    return res.json({ status: 200 });
   } else {
     return res.status(500).json({ status: 'error' });
   }

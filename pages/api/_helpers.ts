@@ -18,6 +18,8 @@ export interface StandupGroup {
 
 export interface UpdateArchive {
   createdAt: string;
+  type: string;
+  file_id: string;
   body: any;
 }
 
@@ -35,31 +37,34 @@ export interface Member {
   botCanMessage: boolean;
   updateArchive: Array<UpdateArchive>;
   about: About;
-  file_id: string;
-  type: string;
   groups: Array<StandupGroup>;
 }
 
-export const sendMsg = async (
+export const sendMsg = (
   text: string,
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
-  file_id: string = '',
-  type: string = 'text',
-  body: any = {}
+  theUpdate: any = {}
 ) => {
+  console.log(theUpdate);
+  const body = theUpdate?.body || {};
+  const type = theUpdate?.type || 'text';
+  const file_id = theUpdate?.file_id || '';
+  const apiUrl = telegramTypes[type] || telegramTypes.text;
+
   console.log({
     text,
     chat_id,
     reply_to_message_id,
     disable_notification,
+    theUpdate,
+    telegramTypes,
+    apiUrl,
     file_id,
     type,
     body,
-    telegramTypes,
   });
-  const apiUrl = telegramTypes[type] || telegramTypes.text;
 
   const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiUrl}`;
   let data = {
@@ -81,13 +86,14 @@ export const sendMsg = async (
       ...data,
       [type]: body?.message?.[type].slice(-1)[0].file_id,
     };
+  } else if (type === 'text' && body?.message?.[type]) {
+    data = {
+      ...data,
+      [type]: `${text}\n${body?.message?.[type]}`,
+    };
   }
 
   console.log(data);
-
-  if (type !== 'text' && text.includes('(@')) {
-    await sendMsg(text, chat_id, reply_to_message_id);
-  }
 
   return fetch(url, {
     method: 'POST',

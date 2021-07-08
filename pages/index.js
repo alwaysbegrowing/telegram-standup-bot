@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Page, Text } from '@geist-ui/react';
 import Head from 'next/head';
 import Image from 'next/image';
 import useSWR from 'swr';
@@ -35,7 +36,7 @@ export default function Home({ BOT_NAME }) {
   };
 
   return (
-    <div className={styles.container}>
+    <Page>
       <Head>
         <title>Super Simple Standup Bot</title>
         <meta
@@ -45,9 +46,11 @@ export default function Home({ BOT_NAME }) {
         <link rel='icon' href='/favicon.ico' />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>Super Simple Standup Bot</h1>
+      <Page.Header>
+        <Text h2>Super Simple Standup Bot</Text>
+      </Page.Header>
 
+      <main className={styles.main}>
         {data && user.photo_url && (
           <div>
             <Image src={user.photo_url} width={40} height={40} alt='Avatar' />
@@ -113,7 +116,7 @@ export default function Home({ BOT_NAME }) {
         {user && error && <div>failed to load</div>}
         {user && !data && <div>loading...</div>}
       </footer>
-    </div>
+    </Page>
   );
 }
 

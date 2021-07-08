@@ -21,21 +21,30 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     .filter((g) => !!g.groups.length)
     .forEach((user: Member) => {
       user.groups.forEach((group: StandupGroup) => {
-        sentStandup.push(
-          sendMsg(
-            user.about.first_name +
-              ' (@' +
-              user.about.username +
-              '): \n' +
-              user.updateArchive?.slice(-1)[0]?.body?.message?.text,
-            group.chatId,
-            null,
-            false,
-            user.file_id,
-            user.type,
-            user.updateArchive.slice(-1)[0].body
-          )
-        );
+        const theUpdate = user.updateArchive.slice(-1)[0];
+        const type = theUpdate?.type;
+
+        if (type === 'text') {
+          sentStandup.push(
+            sendMsg(
+              `${user.about.first_name} (@${user.about.username}):`,
+              group.chatId,
+              null,
+              false,
+              theUpdate
+            )
+          );
+        } else {
+          sentStandup.push(
+            sendMsg(
+              `${user.about.first_name} (@${user.about.username}):`,
+              group.chatId,
+              null,
+              false
+            ),
+            sendMsg(``, group.chatId, null, false, theUpdate)
+          );
+        }
       });
     });
 
