@@ -180,8 +180,6 @@ const addToStandupGroup = async (
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const { body } = req;
-  console.log(body);
-
   const { message } = body || {};
   const { chat, entities, text, message_id, from } = message || {};
 
@@ -201,20 +199,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isLeaveCommand = isGroupCommand && text && text.search('/leave') !== -1;
   const isAboutCommand = isGroupCommand && text && text.search('/about') !== -1;
   const isPrivateMessage = chat && chat.type === 'private';
-  console.log({
-    isGroupCommand,
-    isAddCommand,
-    isLeaveCommand,
-    isAboutCommand,
-    isPrivateMessage,
-  });
 
   const isPrivateCommand =
-    entities &&
-    entities[0] &&
-    entities[0].type === 'bot_command' &&
-    chat &&
-    chat.type === 'private';
+    entities?.[0]?.type === 'bot_command' && chat?.type === 'private';
   const isPrivateStartCommand =
     isPrivateCommand && text && text.search('/start') !== -1;
 

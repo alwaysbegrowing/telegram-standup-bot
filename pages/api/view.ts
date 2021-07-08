@@ -7,6 +7,10 @@ const secret = createHash('sha256')
   .digest();
 
 function checkSignature({ hash, ...data }) {
+  if (!hash) {
+    return false;
+  }
+
   const checkString = Object.keys(data)
     .sort()
     .map((k) => `${k}=${data[k]}`)
@@ -16,31 +20,35 @@ function checkSignature({ hash, ...data }) {
 }
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
-  if (req?.body?.hash) {
-    const isValid = checkSignature(req.body);
-    if (isValid) {
-      const { db } = await connectToDatabase();
-      const user = await db
-        .collection('users')
-        .findOne({ userId: req.body.id });
+  const isValid = checkSignature(req?.body || {});
 
-      const groupUpdates = await db
-        .collection('users')
-        .find({ 'groups.chatId': { $in: user.groups.map((g) => g.chatId) } })
-        .toArray();
-
-      console.log(user.groups.map((g) => g.chatId));
-
-      return res.status(200).json({
-        groups: user.groups.map((g) => g.title),
-        updates: user.updateArchive.map(({ message, createdAt }) => ({
-          message,
-          createdAt,
-        })),
-        groupUpdates,
-      });
-    }
+  if (!isValid) {
+    return res.status(401).json({ status: 'Unauthorized' });
   }
+  const { db } = await connectToDatabase();
+  const user = await db.collection('users').findOne({ userId: req.body.id });
 
-  return res.status(401).json({ status: 'Unauthorized' });
+  const groupUpdates = await db
+    .collection('users')
+    .find({ 'groups.chatId': { $in: user.groups.map((g) => g.chatId) } })
+    .toArray();
+
+  return res.status(200).json({
+    groups: user.groups.map((g) => g.title),
+    updates: user.updateArchive.map(({ message, createdAt }) => ({
+      message,
+      createdAt,
+    })),
+    groupUpdates: groupUpdates.map((g) => {
+      return {
+        name: g.about.first_name,
+        updates: g.updateArchive.map((u) => {
+          return {
+            createdAt: u.createdAt,
+            message: u.message,
+          };
+        }),
+      };
+    }),
+  });
 };

@@ -17,8 +17,6 @@ async function fetchWithToken(url, data) {
   return res.json();
 }
 
-function updateList(data) {}
-
 export default function Home({ BOT_NAME }) {
   const [user, setUser] = useState({});
   const { data, error } = useSWR(['/api/view', user], fetchWithToken);
@@ -69,9 +67,9 @@ export default function Home({ BOT_NAME }) {
                 {data.groupUpdates.map((u, i) => {
                   return (
                     <div key={i}>
-                      <h5>{u.about.first_name}</h5>
+                      <h5>{u.name}</h5>
                       <ul>
-                        {u.updateArchive.map((b) => {
+                        {u.updates.map((b) => {
                           if (b.message)
                             return (
                               <li key={b.createdAt}>
