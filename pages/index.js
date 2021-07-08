@@ -87,7 +87,7 @@ export default function Home({ BOT_NAME }) {
 
             {data.groupUpdates.map((u, i) => {
               return (
-                <div style={{ marginBottom: 20 }}>
+                <div key={i} style={{ marginBottom: 20 }}>
                   <Collapse
                     key={i}
                     shadow
