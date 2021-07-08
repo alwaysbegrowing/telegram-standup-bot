@@ -64,34 +64,27 @@ export default function Home({ BOT_NAME }) {
             {user.first_name}
 
             <div>
-              <h2>Groups you follow</h2>
+              <h2>Your Groups</h2>
 
               <ol>
-                {data.groups.map((group, i) => {
-                  return (
-                    <li key={group.chatId}>
-                      <h4>{group.title}</h4>
-                      {group.members.map((m) => {
-                        return (
-                          <div key={m.about.first_name + m.chatId}>
-                            <h5>{m.about.first_name}</h5>
-                            <ul>
-                              {m.updateArchive.map((u) => {
-                                if (u.message)
-                                  return (
-                                    <li key={u.createdAt}>
-                                      {u.createdAt} - {u.message}
-                                    </li>
-                                  );
-                              })}
-                            </ul>
-                          </div>
-                        );
-                      })}
-                    </li>
-                  );
+                {data.user.groups.map((group, i) => {
+                  return <li key={group.chatId}>{group.title}</li>;
                 })}
               </ol>
+              <div key={data.user.about.first_name + data.user.chatId}>
+                <h2>Your Updates</h2>
+
+                <ul>
+                  {data.user.updateArchive.map((u) => {
+                    if (u.message)
+                      return (
+                        <li key={u.createdAt}>
+                          {u.createdAt} - {u.message}
+                        </li>
+                      );
+                  })}
+                </ul>
+              </div>
             </div>
           </div>
         )}
