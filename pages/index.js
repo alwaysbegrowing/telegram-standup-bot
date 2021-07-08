@@ -42,7 +42,7 @@ export default function Home({ BOT_NAME }) {
   }, []);
 
   const formattedData =
-    data &&
+    data?.groupUpdates &&
     data.groupUpdates.map((d) => {
       return {
         ...d,
