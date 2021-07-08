@@ -114,8 +114,12 @@ export default function Home({ BOT_NAME }) {
               />
             )}
 
-            {user && error && <Note type='error'>Could not load profile</Note>}
-            {user && !data && <Loading>loading...</Loading>}
+            {user && error && (
+              <Note type='error'>
+                Could not load profile. Make sure you message the bot first
+              </Note>
+            )}
+            {user && !error && !data && <Loading>loading...</Loading>}
 
             {data && user.photo_url && (
               <User size='medium' src={user.photo_url} name={user.first_name}>
