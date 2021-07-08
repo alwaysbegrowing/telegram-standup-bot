@@ -56,10 +56,10 @@ export default function Home({ BOT_NAME }) {
           />
         )}
 
-        {error && <div>failed to load</div>}
-        {!data && <div>loading...</div>}
+        {user && error && <div>failed to load</div>}
+        {user && !data && <div>loading...</div>}
 
-        {user?.photo_url && (
+        {data && user.photo_url && (
           <div>
             <Image src={user.photo_url} width={40} height={40} alt='Avatar' />
             {user.first_name}
