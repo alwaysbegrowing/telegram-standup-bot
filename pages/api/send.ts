@@ -5,47 +5,42 @@ import { sendMsg, StandupGroup, Member, About } from './_helpers';
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const { db } = await connectToDatabase();
 
-  const addUpdate = async () => {
-    await db.collection('groups').updateMany(
-      {},
-      {
-        $set: {
-          'members.$[elem].submitted': false,
-          'members.$[elem].update': '',
-        },
-      },
-      { arrayFilters: [{ 'elem.submitted': true }] }
-    );
+  const markAllSent = async () => {
+    await db
+      .collection('users')
+      .updateMany({ submitted: true }, { $set: { submitted: false } });
   };
-  const groups = await db.collection('groups').find({}).toArray();
+
+  const users = await db
+    .collection('users')
+    .find({ submitted: true })
+    .toArray();
 
   const sentStandup = [];
-  groups
-    .filter((g) => !!g.members.length)
-    .forEach((group: StandupGroup) => {
-      group.members
-        .filter((m) => m.submitted)
-        .forEach((member: Member) => {
-          sentStandup.push(
-            sendMsg(
-              member.about.first_name +
-                ' (@' +
-                member.about.username +
-                '): \n' +
-                member.update,
-              group.chatId,
-              null,
-              false,
-              member.file_id,
-              member.type,
-              member.updateArchive.slice(-1)[0].body
-            )
-          );
-        });
+  users
+    .filter((g) => !!g.groups.length)
+    .forEach((user: Member) => {
+      user.groups.forEach((group: StandupGroup) => {
+        sentStandup.push(
+          sendMsg(
+            user.about.first_name +
+              ' (@' +
+              user.about.username +
+              '): \n' +
+              user.updateArchive?.slice(-1)[0]?.body?.message?.text,
+            group.chatId,
+            null,
+            false,
+            user.file_id,
+            user.type,
+            user.updateArchive.slice(-1)[0].body
+          )
+        );
+      });
     });
 
   await Promise.all(sentStandup);
-  await addUpdate();
+  await markAllSent();
 
-  res.status(200).json({ status: 'ok' });
+  return res.status(200).json({ status: 'ok' });
 };

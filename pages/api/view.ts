@@ -20,16 +20,13 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     const isValid = checkSignature(req.body);
     if (isValid) {
       const { db } = await connectToDatabase();
-      const groups = await db
-        .collection('groups')
-        .find({ 'members.about.id': req.body.id })
-        .toArray();
-      res.status(200).json({
-        groups,
-      });
-      return;
+      const user = await db
+        .collection('users')
+        .find({ userId: req.body.id });
+
+      return res.status(200).json({ user });
     }
   }
 
-  res.status(401).json({ status: 'Unauthorized' });
+  return res.status(401).json({ status: 'Unauthorized' });
 };

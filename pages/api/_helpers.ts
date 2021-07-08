@@ -1,15 +1,22 @@
 import fetch from 'node-fetch';
-import { telegramTypes } from './standup';
+
+export const telegramTypes = {
+  text: 'sendMessage',
+  voice: 'sendVoice',
+  audio: 'sendAudio',
+  poll: 'sendPoll',
+  video: 'sendVideo',
+  photo: 'sendPhoto',
+  video_note: 'sendVideoNote',
+  animation: 'sendAnimation',
+};
 
 export interface StandupGroup {
   chatId: number;
   title: string;
-  updateTime: string;
-  members: Member[];
 }
 
 export interface UpdateArchive {
-  update: string;
   createdAt: string;
   body: any;
 }
@@ -23,13 +30,14 @@ export interface About {
 }
 
 export interface Member {
+  userId: number;
   submitted: boolean;
   botCanMessage: boolean;
-  update: string;
   updateArchive: Array<UpdateArchive>;
   about: About;
   file_id: string;
   type: string;
+  groups: Array<StandupGroup>;
 }
 
 export const sendMsg = async (
@@ -41,6 +49,16 @@ export const sendMsg = async (
   type: string = 'text',
   body: any = {}
 ) => {
+  console.log({
+    text,
+    chat_id,
+    reply_to_message_id,
+    disable_notification,
+    file_id,
+    type,
+    body,
+    telegramTypes,
+  });
   const apiUrl = telegramTypes[type] || telegramTypes.text;
 
   const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiUrl}`;
@@ -56,7 +74,7 @@ export const sendMsg = async (
     data = {
       ...data,
       ...body?.message?.[type],
-      options: body.message[type].options.map((o) => o.text),
+      options: body?.message?.[type]?.options?.map((o) => o?.text),
     };
   } else if (type === 'photo') {
     data = {
