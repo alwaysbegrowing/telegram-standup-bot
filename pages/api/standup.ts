@@ -162,7 +162,7 @@ const addToStandupGroup = async (
       updateArchive: [],
       about,
       file_id: '',
-      type: 'hehe',
+      type: 'text',
       groups: [group],
     };
 
