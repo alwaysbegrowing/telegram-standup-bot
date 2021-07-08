@@ -45,7 +45,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         updates: g.updateArchive.map((u) => {
           return {
             createdAt: u.createdAt,
-            message: u.message,
+            message: u?.body?.message?.text || u.type,
           };
         }),
       };
