@@ -14,7 +14,7 @@ To get started, add this bot to your chat and type /subscribe to subscribe them 
 
 Afterwards, post a message here and it will automatically be sent to your chat at 11:00 am. You will receive a few reminders if you do not submit your standup before 8:00 am the day of.
 
-Perfect for letting your friends, family, coworkers know what you're up to today or accomplished yesterday!`;
+You can send me videos / photos with captions, gifs, voice messages, and video messages! Perfect for letting your friends, family, coworkers know what you're up to today or accomplished yesterday!`;
 
 const leaveStandupGroup = async (
   chatId: number,
