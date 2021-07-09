@@ -48,7 +48,7 @@ export default function Home({ BOT_NAME }) {
         ...d,
         updates: d.updates
           .filter((u) => {
-            return u.message || u.caption || u.file_path;
+            return <code>u.message || u.caption || u.file_path</code>;
           })
           .map((u) => {
             return {
@@ -142,9 +142,7 @@ export default function Home({ BOT_NAME }) {
                     key={i}
                     shadow
                     title={u.name}
-                    subtitle={
-                      u.updates.slice(-1)[0]?.message || 'No updates yet...'
-                    }
+                    subtitle={`${u.updates.length} updates posted`}
                   >
                     <Table data={u.updates}>
                       <Table.Column prop='createdAt' label='date' />
