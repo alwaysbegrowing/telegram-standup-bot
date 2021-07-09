@@ -10,20 +10,11 @@ import {
 
 const standupTemplate = `Welcome!
 
-To get started, add this bot to your group and type /add to create a standup for your chat.
+To get started, add this bot to your chat and type /subscribe to subscribe them to your updates.
 
-Afterwards, post a message here and it will automatically be sent to your group at 11:00 am. You will receive a few reminders if you do not submit your standup before 8:00 am the day of.
+Afterwards, post a message here and it will automatically be sent to your chat at 11:00 am. You will receive a few reminders if you do not submit your standup before 8:00 am the day of.
 
-Please use the following template for your standups:
-
-Yesterday:
-...
-
-Today:
-...
-
-Roadblocks
-...`;
+Perfect for letting your friends, family, coworkers know what you're up to today or accomplished yesterday!`;
 
 const leaveStandupGroup = async (
   chatId: number,
@@ -40,11 +31,15 @@ const leaveStandupGroup = async (
   );
 
   if (removedUserFromGroup.modifiedCount) {
-    return await sendMsg('You have left the group.', chatId, messageId);
+    return await sendMsg(
+      'This chat is now unsubscribed from your daily updates.',
+      chatId,
+      messageId
+    );
   }
 
   return await sendMsg(
-    "You aren't currently in a group. Join with /add !",
+    'This chat is not yet subscribed to your daily updates.',
     chatId,
     messageId
   );
@@ -82,7 +77,7 @@ const sendAboutMessage = async (
     return await sendMsg(JSON.stringify(user), chatId, messageId);
   }
   return await sendMsg(
-    'You dont exist in this channel. Create a group with /add',
+    'You dont exist in this chat. Create a subscription with /subscribe',
     chatId,
     messageId
   );
@@ -150,7 +145,7 @@ const submitStandup = async (
   }
 
   return await sendMsg(
-    "You aren't currently part of a standup group. Add this bot to your group, then use the /add command to create a standup group",
+    "You haven't subscribed any chats to your daily updates yet! Add this bot to your chat, then type /subscribe to subscribe them.",
     chatId,
     messageId
   );
@@ -173,7 +168,11 @@ const addToStandupGroup = async (
   console.log('adding');
 
   if (userExistsInGroup) {
-    return await sendMsg('You are already in the group.', chatId, messageId);
+    return await sendMsg(
+      'This chat is already subscribed to your daily updates.',
+      chatId,
+      messageId
+    );
   }
 
   const group: StandupGroup = {
@@ -198,7 +197,7 @@ const addToStandupGroup = async (
   }
 
   return await sendMsg(
-    `You've been added to the standup group! Send me a private message @${process.env.BOT_NAME} to receive reminders.`,
+    `This chat is now subscribed to your daily updates. Send me a message  @${process.env.BOT_NAME} to get started.`,
     chatId,
     messageId
   );
@@ -227,9 +226,10 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       entities[0].type === 'bot_command' &&
       chat.type === 'group') ||
     chat.type === 'supergroup';
-  const isAddCommand = isGroupCommand && text && text.search('/add') !== -1;
-  const isLeaveCommand = isGroupCommand && text && text.search('/leave') !== -1;
-  const isAboutCommand = isGroupCommand && text && text.search('/about') !== -1;
+  const isSubscribeCommand =
+    isGroupCommand && text && text.search('/subscribe') !== -1;
+  const isUnsubscribeCommand =
+    isGroupCommand && text && text.search('/unsubscribe') !== -1;
   const isPrivateMessage = chat && chat.type === 'private';
 
   const isPrivateCommand =
@@ -243,7 +243,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     return res.json({ status: r.status });
   } else if (isPrivateCommand) {
     const r = await sendMsg(
-      'This command will not work in a private message. Please add me to a group to use this command.',
+      'Add me to a chat, then send this command in that chat instead.',
       chat.id,
       message_id
     );
@@ -260,7 +260,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     return res.json({ status: r.status });
   }
 
-  if (isAddCommand) {
+  if (isSubscribeCommand) {
     const r = await addToStandupGroup(
       chat.id,
       from.id,
@@ -269,10 +269,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       message_id
     );
     return res.json({ status: r.status });
-  } else if (isAboutCommand) {
-    const r = await sendAboutMessage(chat.id, from.id, from, message_id);
-    return res.json({ status: r.status });
-  } else if (isLeaveCommand) {
+  } else if (isUnsubscribeCommand) {
     const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
     return res.json({ status: r.status });
   } else {

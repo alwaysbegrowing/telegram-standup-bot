@@ -20,7 +20,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     .forEach((user: Member) => {
       reminders.push(
         sendMsg(
-          'Reminder, please submit an update. Updates are due by 11 AM EST',
+          'Reminder: please submit an update. Your update will send in one hour (11:00am EST).',
           user.userId
         )
       );
