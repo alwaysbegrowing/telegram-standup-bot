@@ -8,23 +8,26 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   }
 
   const { db } = await connectToDatabase();
-  const users = await db
-    .collection('users')
-    .find({ submitted: false })
-    .toArray();
+  const users = await db.collection('users').find({}).toArray();
 
   const reminders = [];
+
+  const notSubmittedMessage = `Reminder: please submit an update.
+
+  You can send me a simple message, or spice it up with a video / photo with a caption, gif, voice message, or video message!
+
+  Your update will send one hour from now (11:00am EST).`;
+
+  const submittedMessage = `Reminder: the update you previously submitted will be posted in one hour from now (11:00am EST).
+
+  If you want to change your update, send me a simple message, or spice it up with a video / photo with a caption, gif, voice message, or video message!`;
 
   users
     .filter((g) => !!g.groups.length)
     .forEach((user: Member) => {
       reminders.push(
         sendMsg(
-          `Reminder: please submit an update.
-
-          You can send me a simple message, or spice it up with a video / photo with a caption, gif, voice message, or video message!
-
-          Your update will send one hour from now (11:00am EST).`,
+          user.submitted ? submittedMessage : notSubmittedMessage,
           user.userId
         )
       );
