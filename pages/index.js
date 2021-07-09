@@ -48,12 +48,13 @@ export default function Home({ BOT_NAME }) {
         ...d,
         updates: d.updates
           .filter((u) => {
-            return <code>{u.message || u.caption || u.file_path}</code>;
+            return u.message || u.file_path;
           })
           .map((u) => {
             return {
               ...u,
               createdAt: new Date(u.createdAt).toDateString(),
+              message: <code>{u.message}</code>,
               file_path: () => {
                 if (!u.file_path) return;
                 if (
