@@ -273,6 +273,6 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
     return res.json({ status: r.status });
   } else {
-    return res.status(500).json({ status: 'error' });
+    return res.status(200).json({ status: 'invalid command' });
   }
 };
