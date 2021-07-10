@@ -35,12 +35,10 @@ function Pager({ initialData: data, user }) {
   const [pageIndex, setPageIndex] = useState({});
   const [activeUser, setActiveUser] = useState();
 
-  console.log(pageIndex);
-
-  const { data: userData, error: userDataError } = useSWR(
-    `/api/updates?page=${pageIndex[activeUser]}&user=${activeUser}`,
-    fetchWithToken
-  );
+  // const { data: userData, error: userDataError } = useSWR(
+  //   `/api/updates?page=${pageIndex[activeUser]}&user=${activeUser}`,
+  //   fetchWithToken
+  // );
 
   const formattedData = (data || []).map((d) => {
     return {
@@ -94,15 +92,6 @@ function Pager({ initialData: data, user }) {
             <Table.Column prop='message' label='message' />
             <Table.Column prop='file_path' label='file' />
           </Table>
-
-          <Pagination
-            count={u.updates.length}
-            initialPage={pageIndex[u.id] || 1}
-            onChange={(i) => {
-              setActiveUser(u.id);
-              setPageIndex((prev) => ({ ...prev, [u.id]: i }));
-            }}
-          />
         </Collapse>
       </div>
     );

@@ -1,4 +1,3 @@
-import MongoPaging from 'mongo-cursor-pagination';
 import { createHash, createHmac } from 'crypto';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
@@ -23,8 +22,6 @@ function checkSignature({ hash, ...data }) {
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isValid = checkSignature(req?.body || {});
 
-  const page = req.query.page || 1;
-
   if (!isValid) {
     return res.status(401).json({ statusText: 'Unauthorized' });
   }
@@ -36,8 +33,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     return res.status(404).json({ statusText: 'User not found' });
   }
 
-  if (page && req.query.user) {
-    const userId = parseInt(req.query.user, 10);
+  if (req.query.page && req.query.user) {
+    const page = req.query.page || 1;
+    const userId = Number(req.query.user);
     const cursor = await db.collection('users').findOne(
       {
         // The user ID to find
