@@ -41,18 +41,27 @@ Send a message to [@mattpew](https://t.me/mattpew) or create a github issue if y
 `vercel env pull`
 
 8. Setup a webhook to your vercel standup URL <https://core.telegram.org/bots/webhooks> (example URL: `https://bla-vercel.com/api/standup`).
+   
+   `https://api.telegram.org/bot${TELEGRAM_API_KEY}/setWebhook?url=https://.../api/standup?key=${TELEGRAM_API_KEY}`
+   
+   This is how your bot will know when events happen inside of telegram
 
-```https://api.telegram.org/bot${TELEGRAM_API_KEY}/setWebhook?url=https://.../api/standup?key=${TELEGRAM_API_KEY}```
+### Sample crontab
 
-If your messages aren't going through try clearing pending updates
+```crontab
+0 10 * * * curl -s https://.../api/reminder?key=TELEGRAM_API_KEY
+0 11 * * * curl -s https://.../api/send?key=TELEGRAM_API_KEY
+```
+
+If your messages or commands aren't going through check if you have any pending updates, read the error is, then clear them
+
+You might have to fix the error or it'll happen again
 
 ```md
 https://api.telegram.org/bot${TELEGRAM_API_KEY}/getWebhookInfo
 
 https://api.telegram.org/bot${TELEGRAM_API_KEY}/deleteWebhook?drop_pending_updates=true
 ```
-
-This is how your bot will know when events happen inside of telegram
 
 ### Run the application
 
@@ -69,12 +78,10 @@ More info on how this works - <https://vercel.com/docs/serverless-functions/intr
 1. View your function logs in vercel
 (Go to vercel.com, login, navigate to your bot, click on your functions, then view the function logs)
 
-2. Ensure your database is named `standup`
+2. Ensure your webhooks are being sent to the correct URL. Make sure not to use the base URL only. The URL needs to be the `/api/standup` url
 
-3. Ensure your webhooks are being sent to the correct URL. Make sure not to use the base URL only. The URL needs to be the `/api/standup` url
+### How can I test this application locally
 
-### How can I test this application locally ???
-
-1. <https://core.telegram.org/bots/webhooks> - You can use these example webhooks to test your bot locally with curl or postman.
-2. If you want to see the exact format of your webhooks - you can set your webhook url to <http://webhook.site/> for testing.
-3. If you wanted to test your bot fully locally, you can run the application with `vercel dev` then setup ngrok on the deployment URL - <https://ngrok.com/docs> then setup your webhooks to go to the ngrok url. (Note, ngrok has rate limiting, so some webhooks may be delayed or not sent)
+* <https://core.telegram.org/bots/webhooks> - You can use these example webhooks to test your bot locally with curl or postman.
+* If you want to see the exact format of your webhooks - you can set your webhook url to <http://webhook.site/> for testing.
+* If you wanted to test your bot fully locally, you can run the application with `vercel dev` then setup ngrok on the deployment URL - <https://ngrok.com/docs> then setup your webhooks to go to the ngrok url. (Note, ngrok has rate limiting, so some webhooks may be delayed or not sent)
