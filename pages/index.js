@@ -16,7 +16,6 @@ import Head from 'next/head';
 import useSWR from 'swr';
 import styles from '../styles/Home.module.css';
 import TelegramLoginButton from 'react-telegram-login';
-import { DEMO_USER } from './consts';
 
 async function fetchWithToken(url) {
   const res = await fetch(url, {
@@ -27,22 +26,21 @@ async function fetchWithToken(url) {
     body: localStorage.getItem('telegram-user'),
   });
 
+  if (res.status !== 200) throw new Error(res.statusText);
+
   return res.json();
 }
 
 function Pager({ initialData: data, user }) {
   const [pageIndex, setPageIndex] = useState({});
+  const [activeUser, setActiveUser] = useState();
 
   console.log(pageIndex);
 
-  let allData = data;
-
-  // useEffect(() => {
-  //   const { data: userData, error: userDataError } = useSWR(
-  //     `/api/updates?page=${pageIndex}&user=`,
-  //     fetchWithToken
-  //   );
-  // }, [user, pageIndex]);
+  const { data: userData, error: userDataError } = useSWR(
+    `/api/updates?page=${pageIndex[activeUser]}&user=${activeUser}`,
+    fetchWithToken
+  );
 
   const formattedData = (data || []).map((d) => {
     return {
@@ -99,8 +97,11 @@ function Pager({ initialData: data, user }) {
 
           <Pagination
             count={u.updates.length}
-            initialPage={pageIndex}
-            onChange={(i) => setPageIndex((prev) => ({ ...prev, [u.id]: i }))}
+            initialPage={pageIndex[u.id] || 1}
+            onChange={(i) => {
+              setActiveUser(u.id);
+              setPageIndex((prev) => ({ ...prev, [u.id]: i }));
+            }}
           />
         </Collapse>
       </div>
@@ -109,7 +110,7 @@ function Pager({ initialData: data, user }) {
 }
 
 export default function Home({ BOT_NAME, ENV }) {
-  const [user, setUser] = useState(ENV === 'production' ? {} : DEMO_USER);
+  const [user, setUser] = useState();
 
   const { data: initialData, error: initialDataError } = useSWR(
     [`/api/updates`],
@@ -155,16 +156,16 @@ export default function Home({ BOT_NAME, ENV }) {
             <Text h2>Super Simple Standup Bot</Text>
           </Col>
           <Col span='auto'>
-            {ENV === 'production' && !user?.photo_url && (
+            {!user?.photo_url && (
               <TelegramLoginButton
                 dataOnauth={handleTelegramResponse}
-                botName='stood_bot'
+                botName={BOT_NAME}
               />
             )}
 
-            {user.photo_url && (
+            {user?.photo_url && (
               <User size='medium' src={user.photo_url} name={user.first_name}>
-                {groups ? groups.join(', ') : null}
+                {Array.isArray(groups) ? groups.join(', ') : null}
               </User>
             )}
           </Col>
@@ -172,13 +173,14 @@ export default function Home({ BOT_NAME, ENV }) {
       </Page.Header>
 
       <Page.Content>
-        {user.photo_url ? (
+        {user?.photo_url ? (
           <div>
             <Text h3>Group updates</Text>
 
             {user && initialDataError && (
-              <Note type='error'>
-                Could not load profile. Make sure you message the bot first
+              <Note type='info'>
+                This bot has not been setup yet! Please wait for some updates to
+                get posted first.
               </Note>
             )}
 

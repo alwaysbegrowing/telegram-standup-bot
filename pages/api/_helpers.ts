@@ -22,6 +22,7 @@ export interface UpdateArchive {
   file_path: string;
   file_id: string;
   body: any;
+  userId: number;
 }
 
 export interface About {

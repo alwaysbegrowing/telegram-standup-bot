@@ -122,6 +122,7 @@ const submitStandup = async (
       },
       $push: {
         updateArchive: {
+          submitted: false,
           file_id,
           caption: body?.message?.caption,
           type,
