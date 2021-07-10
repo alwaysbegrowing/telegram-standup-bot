@@ -34,7 +34,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
               `${user.about.first_name} (@${user.about.username}):`,
               group.chatId,
               null,
-              false,
+              true,
               theUpdate
             )
           );
@@ -44,9 +44,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
               `${user.about.first_name} (@${user.about.username}):`,
               group.chatId,
               null,
-              false
+              true
             ),
-            sendMsg(``, group.chatId, null, false, theUpdate)
+            sendMsg(``, group.chatId, null, true, theUpdate)
           );
         }
       });

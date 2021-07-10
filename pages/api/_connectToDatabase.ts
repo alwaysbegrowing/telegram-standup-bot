@@ -28,7 +28,7 @@ export async function connectToDatabase() {
     ).then((client) => {
       return {
         client,
-        db: client.db(process.env.MONDODB_NAME),
+        db: client.db(process.env.MONGODB_NAME),
       };
     });
   }

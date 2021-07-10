@@ -25,8 +25,13 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (!isValid) {
     return res.status(401).json({ status: 'Unauthorized' });
   }
+
   const { db } = await connectToDatabase();
   const user = await db.collection('users').findOne({ userId: req.body.id });
+
+  if(!user) {
+    return res.status(404).json({ statusText: 'User not found' });
+  }
 
   const groupUpdates = await db
     .collection('users')
