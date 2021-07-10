@@ -20,6 +20,7 @@ export interface UpdateArchive {
   createdAt: string;
   type: string;
   file_path: string;
+  submitted: boolean;
   file_id: string;
   body: any;
   userId: number;
@@ -35,7 +36,6 @@ export interface About {
 
 export interface Member {
   userId: number;
-  submitted: boolean;
   botCanMessage: boolean;
   updateArchive: Array<UpdateArchive>;
   about: About;
