@@ -4,7 +4,7 @@ import {
   Loading,
   Row,
   Col,
-  Display,
+  Pagination,
   Table,
   Image,
   Collapse,
@@ -16,75 +16,122 @@ import Head from 'next/head';
 import useSWR from 'swr';
 import styles from '../styles/Home.module.css';
 import TelegramLoginButton from 'react-telegram-login';
+import { DEMO_USER } from './consts';
 
-async function fetchWithToken(url, data) {
+async function fetchWithToken(url) {
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(data),
+    body: localStorage.getItem('telegram-user'),
   });
 
   return res.json();
 }
 
-export default function Home({ BOT_NAME }) {
-  const [user, setUser] = useState({});
-  const { data, error } = useSWR(['/api/view', user], fetchWithToken);
+function Pager({ initialData: data, user }) {
+  const [pageIndex, setPageIndex] = useState({});
+
+  console.log(pageIndex);
+
+  let allData = data;
+
+  // useEffect(() => {
+  //   const { data: userData, error: userDataError } = useSWR(
+  //     `/api/updates?page=${pageIndex}&user=`,
+  //     fetchWithToken
+  //   );
+  // }, [user, pageIndex]);
+
+  const formattedData = (data || []).map((d) => {
+    return {
+      ...d,
+      updates: d.updates
+        .filter((u) => {
+          return u.message || u.file_path;
+        })
+        .map((u) => {
+          return {
+            ...u,
+            createdAt: new Date(u.createdAt).toDateString(),
+            message: u.message ? <code>{u.message}</code> : '',
+            file_path: () => {
+              if (!u.file_path) return;
+              if (
+                ['voice', 'video', 'animation', 'audio', 'video_note'].includes(
+                  u.type
+                )
+              ) {
+                return (
+                  <video
+                    controls={u.type !== 'animation'}
+                    autoPlay={u.type === 'animation'}
+                    loop
+                  >
+                    <source src={u.file_path} />
+                  </video>
+                );
+              } else if (u.type === 'photo') {
+                return (
+                  <Image src={u.file_path} alt='Submission' height={200} />
+                );
+              }
+            },
+          };
+        }),
+    };
+  });
+
+  return formattedData.map((u) => {
+    return (
+      <div key={u.id} style={{ marginBottom: 20 }}>
+        <Collapse
+          shadow
+          title={u.name}
+          subtitle={`${u.updates.length} updates posted`}
+        >
+          <Table data={u.updates}>
+            <Table.Column prop='createdAt' label='date' />
+            <Table.Column prop='message' label='message' />
+            <Table.Column prop='file_path' label='file' />
+          </Table>
+
+          <Pagination
+            count={u.updates.length}
+            initialPage={pageIndex}
+            onChange={(i) => setPageIndex((prev) => ({ ...prev, [u.id]: i }))}
+          />
+        </Collapse>
+      </div>
+    );
+  });
+}
+
+export default function Home({ BOT_NAME, ENV }) {
+  const [user, setUser] = useState(ENV === 'production' ? {} : DEMO_USER);
+
+  const { data: initialData, error: initialDataError } = useSWR(
+    [`/api/updates`],
+    fetchWithToken
+  );
+
+  const { data: groups, error: groupsError } = useSWR(
+    [`/api/groups`],
+    fetchWithToken
+  );
 
   useEffect(() => {
+    if (user) {
+      return;
+    }
+
     const userInfo = localStorage.getItem('telegram-user');
 
     if (userInfo) {
       setUser(JSON.parse(userInfo));
     }
-  }, []);
-
-  const formattedData =
-    data?.groupUpdates &&
-    data.groupUpdates.map((d) => {
-      return {
-        ...d,
-        updates: d.updates
-          .filter((u) => {
-            return u.message || u.file_path;
-          })
-          .map((u) => {
-            return {
-              ...u,
-              createdAt: new Date(u.createdAt).toDateString(),
-              message: <code>{u.message}</code>,
-              file_path: () => {
-                if (!u.file_path) return;
-                if (
-                  [
-                    'voice',
-                    'video',
-                    'animation',
-                    'audio',
-                    'video_note',
-                  ].includes(u.type)
-                ) {
-                  return (
-                    <video
-                      controls={u.type !== 'animation'}
-                      autoPlay={u.type === 'animation'}
-                      loop
-                    >
-                      <source src={u.file_path} />
-                    </video>
-                  );
-                } else if (u.type === 'photo') {
-                  return (
-                    <Image src={u.file_path} alt='Submission' height={200} />
-                  );
-                }
-              },
-            };
-          }),
-      };
-    });
+  }, [user]);
 
   const handleTelegramResponse = (response) => {
     localStorage.setItem('telegram-user', JSON.stringify(response));
@@ -108,23 +155,16 @@ export default function Home({ BOT_NAME }) {
             <Text h2>Super Simple Standup Bot</Text>
           </Col>
           <Col span='auto'>
-            {!user?.photo_url && (
+            {ENV === 'production' && !user?.photo_url && (
               <TelegramLoginButton
                 dataOnauth={handleTelegramResponse}
                 botName='stood_bot'
               />
             )}
 
-            {user && error && (
-              <Note type='error'>
-                Could not load profile. Make sure you message the bot first
-              </Note>
-            )}
-            {user && !error && !data && <Loading>loading...</Loading>}
-
-            {data && user.photo_url && (
+            {user.photo_url && (
               <User size='medium' src={user.photo_url} name={user.first_name}>
-                {data.groups.join(', ')}
+                {groups ? groups.join(', ') : null}
               </User>
             )}
           </Col>
@@ -132,28 +172,21 @@ export default function Home({ BOT_NAME }) {
       </Page.Header>
 
       <Page.Content>
-        {data && user.photo_url ? (
+        {user.photo_url ? (
           <div>
             <Text h3>Group updates</Text>
 
-            {formattedData.map((u, i) => {
-              return (
-                <div key={i} style={{ marginBottom: 20 }}>
-                  <Collapse
-                    key={i}
-                    shadow
-                    title={u.name}
-                    subtitle={`${u.updates.length} updates posted`}
-                  >
-                    <Table data={u.updates}>
-                      <Table.Column prop='createdAt' label='date' />
-                      <Table.Column prop='message' label='message' />
-                      <Table.Column prop='file_path' label='file' />
-                    </Table>
-                  </Collapse>
-                </div>
-              );
-            })}
+            {user && initialDataError && (
+              <Note type='error'>
+                Could not load profile. Make sure you message the bot first
+              </Note>
+            )}
+
+            {user && !initialDataError && !initialData && (
+              <Loading>loading...</Loading>
+            )}
+
+            <Pager initialData={initialData} user={user} />
           </div>
         ) : (
           <>
@@ -183,6 +216,6 @@ export default function Home({ BOT_NAME }) {
 
 export async function getStaticProps() {
   return {
-    props: { BOT_NAME: process.env.BOT_NAME },
+    props: { BOT_NAME: process.env.BOT_NAME, ENV: process.env.NODE_ENV },
   };
 }

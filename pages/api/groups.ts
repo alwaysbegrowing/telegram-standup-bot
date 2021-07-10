@@ -25,28 +25,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (!isValid) {
     return res.status(401).json({ status: 'Unauthorized' });
   }
+
   const { db } = await connectToDatabase();
   const user = await db.collection('users').findOne({ userId: req.body.id });
 
-  const groupUpdates = await db
-    .collection('users')
-    .find({ 'groups.chatId': { $in: user.groups.map((g) => g.chatId) } })
-    .toArray();
-
-  return res.status(200).json({
-    groups: user.groups.map((g) => g.title),
-    groupUpdates: groupUpdates.map((g) => {
-      return {
-        name: g.about.first_name,
-        updates: g.updateArchive.map((u) => {
-          return {
-            type: u.type,
-            createdAt: u.createdAt,
-            message: u?.body?.message?.text || u?.body?.message?.caption,
-            file_path: u?.file_path,
-          };
-        }),
-      };
-    }),
-  });
+  return res.status(200).json(user.groups.map((g) => g.title));
 };
