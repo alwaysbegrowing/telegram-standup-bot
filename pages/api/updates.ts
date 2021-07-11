@@ -51,8 +51,11 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   const groupUpdates = await db
     .collection('users')
-    .find({ 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } })
-    .project({ updateArchive: { $slice: -5 } })
+    .find(
+      { 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } },
+      { $sort: { updateArchive: 1 } }
+    )
+    .project({ updateArchive: { $slice: -1 } })
     .toArray();
 
   const response = [];
