@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { Tabs, useTheme } from '@geist-ui/react';
+import { usePrefers } from '@/lib/use-prefers';
 
 const Submenu: React.FC = () => {
   const theme = useTheme();
+  const prefers = usePrefers();
   const router = useRouter();
   const [sticky, setSticky] = useState(false);
 
@@ -13,6 +15,8 @@ const Submenu: React.FC = () => {
     document.addEventListener('scroll', scrollHandler);
     return () => document.removeEventListener('scroll', scrollHandler);
   }, [setSticky]);
+
+  if (!prefers.userInfo) return <></>;
 
   return (
     <>

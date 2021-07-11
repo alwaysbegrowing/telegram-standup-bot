@@ -14,6 +14,7 @@ import Heading from '@/components/heading';
 import Project from '@/components/project';
 import EventListItem from '@/components/activity-event';
 import { usePrefers } from '../lib/use-prefers';
+import HomePage from './home';
 
 async function fetchWithToken(url) {
   const res = await fetch(url, {
@@ -76,7 +77,7 @@ function Pager({ initialData: data }) {
   return formattedData.map((user) => <Project key={user.id} {...user} />);
 }
 
-export default function Home() {
+export default function Home({ BOT_NAME }) {
   const prefers = usePrefers();
   const theme = useTheme();
 
@@ -93,6 +94,10 @@ export default function Home() {
   const handleTelegramResponse = (response) => {
     prefers.setUserDetails(response);
   };
+
+  if (!prefers?.userInfo) {
+    return <HomePage BOT_NAME={BOT_NAME} />;
+  }
 
   return (
     <>
@@ -194,4 +199,10 @@ export default function Home() {
       `}</style>
     </>
   );
+}
+
+export async function getStaticProps() {
+  return {
+    props: { BOT_NAME: process.env.BOT_NAME },
+  };
 }

@@ -23,7 +23,7 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
     if (themes.includes(theme)) setThemeType(theme);
 
     const user = window.localStorage.getItem('telegram-user') as string;
-    if (user.includes('hash')) setUserInfo(JSON.parse(user));
+    if (user && user.includes('hash')) setUserInfo(JSON.parse(user));
   }, []);
 
   const switchTheme = useCallback((theme: ThemeType) => {

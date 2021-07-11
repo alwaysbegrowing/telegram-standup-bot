@@ -146,7 +146,7 @@ const Heading: React.FC<HeadingProps> = ({ BOT_NAME, user }) => {
 
 export async function getStaticProps() {
   return {
-    props: { BOT_NAME: process.env.BOT_NAME, ENV: process.env.NODE_ENV },
+    props: { BOT_NAME: process.env.BOT_NAME },
   };
 }
 

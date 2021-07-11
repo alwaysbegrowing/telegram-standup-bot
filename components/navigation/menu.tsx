@@ -29,15 +29,17 @@ const Menu: React.FC = () => {
               <Icons.Moon size={16} />
             )}
           </Button>
-          <Popover
-            content={<UserSettings />}
-            placement="bottomEnd"
-            portalClassName="user-settings__popover"
-          >
-            <button className="user-settings__button">
-              <Avatar src={prefers?.userInfo?.photo_url} text="OA" />
-            </button>
-          </Popover>
+          {prefers?.userInfo && (
+            <Popover
+              content={<UserSettings />}
+              placement="bottomEnd"
+              portalClassName="user-settings__popover"
+            >
+              <button className="user-settings__button">
+                <Avatar src={prefers?.userInfo?.photo_url} text="SB" />
+              </button>
+            </Popover>
+          )}
         </div>
       </nav>
       <Submenu />
