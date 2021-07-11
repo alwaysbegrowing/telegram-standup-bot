@@ -1,6 +1,6 @@
 # About
 
-Super simple standup bot brings standup functionality to Telegram. Group members are able to submit updates, and they are all sent to a shared channel at a set time.
+Stood Bot brings standup functionality to Telegram. Group members are able to submit updates, and they are all sent to a shared channel at a set time.
 
 ## How to use
 
