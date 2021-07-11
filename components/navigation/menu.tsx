@@ -1,4 +1,5 @@
 import React from 'react';
+import TelegramLoginButton from 'react-telegram-login';
 import { Avatar, Button, useTheme, Popover } from '@geist-ui/react';
 import * as Icons from 'react-feather';
 import UserSettings from '@/components/navigation/user-settings';
@@ -8,6 +9,10 @@ import Submenu from '@/components/navigation/submenu';
 const Menu: React.FC = () => {
   const theme = useTheme();
   const prefers = usePrefers();
+  console.log(prefers);
+  const handleTelegramResponse = (response) => {
+    prefers.setUserDetails(response);
+  };
 
   return (
     <>
@@ -39,6 +44,13 @@ const Menu: React.FC = () => {
                 <Avatar src={prefers?.userInfo?.photo_url} text="SB" />
               </button>
             </Popover>
+          )}
+
+          {!prefers?.userInfo && (
+            <TelegramLoginButton
+              dataOnauth={handleTelegramResponse}
+              botName={prefers.BOT_NAME}
+            />
           )}
         </div>
       </nav>

@@ -1,22 +1,16 @@
 import React from 'react';
 import NextLink from 'next/link';
-import TelegramLoginButton from 'react-telegram-login';
 import { Avatar, Button, Tag, Text, Link, useTheme } from '@geist-ui/react';
 import * as Icons from 'react-feather';
 import { UserType } from '@/lib/use-prefers';
 
 interface Props {
   user: UserType;
-  BOT_NAME: string;
 }
 
 export type HeadingProps = Props;
 
-const handleTelegramResponse = (response) => {
-  localStorage.setItem('telegram-user', JSON.stringify(response));
-};
-
-const Heading: React.FC<HeadingProps> = ({ BOT_NAME, user }) => {
+const Heading: React.FC<HeadingProps> = ({ user }) => {
   const theme = useTheme();
 
   return (
@@ -36,12 +30,6 @@ const Heading: React.FC<HeadingProps> = ({ BOT_NAME, user }) => {
               <Tag className="headding__user-role">{user.role}</Tag>
 
               <div className="heading__actions">
-                {!user?.photo_url && (
-                  <TelegramLoginButton
-                    dataOnauth={handleTelegramResponse}
-                    botName={BOT_NAME}
-                  />
-                )}
                 <NextLink href="/projects" passHref>
                   <Button type="secondary" auto>
                     Create Update
@@ -143,11 +131,5 @@ const Heading: React.FC<HeadingProps> = ({ BOT_NAME, user }) => {
     </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { BOT_NAME: process.env.BOT_NAME },
-  };
-}
 
 export default Heading;

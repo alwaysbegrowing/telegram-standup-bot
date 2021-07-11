@@ -12,6 +12,7 @@ export type UserType = {
 interface Prefers {
   themeType: ThemeType;
   userInfo: UserType;
+  BOT_NAME: string;
   setUserDetails: (user: UserType) => void;
   switchTheme: (type: ThemeType) => void;
 }
@@ -19,6 +20,7 @@ interface Prefers {
 export const PrefersContext = createContext<Prefers>({
   themeType: 'dark',
   userInfo: null,
+  BOT_NAME: null,
   setUserDetails: () => {},
   switchTheme: () => {},
 });

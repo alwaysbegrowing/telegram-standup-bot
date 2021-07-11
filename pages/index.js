@@ -77,7 +77,7 @@ function Pager({ initialData: data }) {
   return formattedData.map((user) => <Project key={user.id} {...user} />);
 }
 
-export default function Home({ BOT_NAME }) {
+export default function Home() {
   const prefers = usePrefers();
   const theme = useTheme();
 
@@ -91,12 +91,8 @@ export default function Home({ BOT_NAME }) {
     fetchWithToken
   );
 
-  const handleTelegramResponse = (response) => {
-    prefers.setUserDetails(response);
-  };
-
   if (!prefers?.userInfo) {
-    return <HomePage BOT_NAME={BOT_NAME} />;
+    return <HomePage />;
   }
 
   return (

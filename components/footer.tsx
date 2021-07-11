@@ -8,23 +8,27 @@ const Footer: React.FC = () => {
   return (
     <>
       <footer>
-        <Text>
-          Powered by{' '}
-          <Link
-            href="https://vercel.com?utm_source=stoodbot&utm_campaign=oss"
-            target="_blank"
-            rel="noopener"
-            underline
-          >
-            <Image
-              height={15}
-              width={70}
-              src={`/logos/vercel-logotype-${
-                theme.type === 'dark' ? 'light' : 'dark'
-              }.svg`}
-            />
-          </Link>
-        </Text>
+        <div>
+          <div style={{ display: 'inline-block' }}>
+            <Text>Powered by </Text>
+          </div>
+          <div style={{ display: 'inline-block' }}>
+            <Link
+              href="https://vercel.com?utm_source=stoodbot&utm_campaign=oss"
+              target="_blank"
+              rel="noopener"
+              underline
+            >
+              <Image
+                height={15}
+                width={70}
+                src={`/logos/vercel-logotype-${
+                  theme.type === 'dark' ? 'light' : 'dark'
+                }.svg`}
+              />
+            </Link>
+          </div>
+        </div>
       </footer>
       <style jsx>{`
         footer {

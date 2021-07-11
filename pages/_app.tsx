@@ -66,7 +66,13 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
       <GeistProvider themeType={themeType}>
         <CssBaseline />
         <PrefersContext.Provider
-          value={{ userInfo, setUserDetails, themeType, switchTheme }}
+          value={{
+            BOT_NAME: pageProps.BOT_NAME,
+            userInfo,
+            setUserDetails,
+            themeType,
+            switchTheme,
+          }}
         >
           <Menu />
           <Component {...pageProps} />
@@ -77,4 +83,9 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
   );
 };
 
+export async function getStaticProps() {
+  return {
+    props: { BOT_NAME: process.env.BOT_NAME },
+  };
+}
 export default StoodBotApp;
