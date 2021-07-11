@@ -40,62 +40,47 @@ function Pager({ initialData: data, user }) {
   //   fetchWithToken
   // );
 
-  const formattedData = (data || []).map((d) => {
-    return {
-      ...d,
-      updates: d.updates
-        .filter((u) => {
-          return u.message || u.file_path;
-        })
-        .map((u) => {
-          return {
-            ...u,
-            createdAt: new Date(u.createdAt).toDateString(),
-            message: u.message ? <code>{u.message}</code> : '',
-            file_path: () => {
-              if (!u.file_path) return;
-              if (
-                ['voice', 'video', 'animation', 'audio', 'video_note'].includes(
-                  u.type
-                )
-              ) {
-                return (
-                  <video
-                    controls={u.type !== 'animation'}
-                    autoPlay={u.type === 'animation'}
-                    loop
-                  >
-                    <source src={u.file_path} />
-                  </video>
-                );
-              } else if (u.type === 'photo') {
-                return (
-                  <Image src={u.file_path} alt='Submission' height={200} />
-                );
-              }
-            },
-          };
-        }),
-    };
-  });
+  const formattedData = (data || [])
+    .filter((u) => {
+      return u.message || u.file_path;
+    })
+    .map((u) => {
+      return {
+        ...u,
+        createdAt: new Date(u.createdAt).toDateString(),
+        message: u.message ? <code>{u.message}</code> : '',
+        file_path: () => {
+          if (!u.file_path) return;
+          if (
+            ['voice', 'video', 'animation', 'audio', 'video_note'].includes(
+              u.type
+            )
+          ) {
+            return (
+              <video
+                controls={u.type !== 'animation'}
+                autoPlay={u.type === 'animation'}
+                loop
+              >
+                <source src={u.file_path} />
+              </video>
+            );
+          } else if (u.type === 'photo') {
+            return <Image src={u.file_path} alt="Submission" height={200} />;
+          }
+        },
+      };
+    });
 
-  return formattedData.map((u) => {
-    return (
-      <div key={u.id} style={{ marginBottom: 20 }}>
-        <Collapse
-          shadow
-          title={u.name}
-          subtitle={`${u.updates.length} updates posted`}
-        >
-          <Table data={u.updates}>
-            <Table.Column prop='createdAt' label='date' />
-            <Table.Column prop='message' label='message' />
-            <Table.Column prop='file_path' label='file' />
-          </Table>
-        </Collapse>
-      </div>
-    );
-  });
+  console.log(data, formattedData);
+  return (
+    <Table data={formattedData}>
+      <Table.Column prop="name" label="User" />
+      <Table.Column prop="createdAt" label="date" />
+      <Table.Column prop="message" label="message" />
+      <Table.Column prop="file_path" label="file" />
+    </Table>
+  );
 }
 
 export default function Home({ BOT_NAME, ENV }) {
@@ -131,20 +116,20 @@ export default function Home({ BOT_NAME, ENV }) {
   return (
     <Page>
       <Head>
-        <title>Super Simple Standup Bot</title>
+        <title>Stood Bot</title>
         <meta
-          name='description'
-          content='Super simple standup bot brings standup functionality to Telegram. Group members are able to submit updates, and they are all sent to a shared channel at a set time.'
+          name="description"
+          content="Stood Bot brings standup functionality to Telegram. Group members are able to submit updates, and they are all sent to a shared channel at a set time."
         />
-        <link rel='icon' href='/favicon.ico' />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <Page.Header>
-        <Row gap={0.8} align='middle' justify='space-around'>
-          <Col span='auto'>
-            <Text h2>Super Simple Standup Bot</Text>
+        <Row gap={0.8} align="middle" justify="space-around">
+          <Col span="auto">
+            <Text h2>Stood Bot</Text>
           </Col>
-          <Col span='auto'>
+          <Col span="auto">
             {!user?.photo_url && (
               <TelegramLoginButton
                 dataOnauth={handleTelegramResponse}
@@ -153,7 +138,7 @@ export default function Home({ BOT_NAME, ENV }) {
             )}
 
             {user?.photo_url && (
-              <User size='medium' src={user.photo_url} name={user.first_name}>
+              <User size="medium" src={user.photo_url} name={user.first_name}>
                 {Array.isArray(groups) ? groups.join(', ') : null}
               </User>
             )}
@@ -167,7 +152,7 @@ export default function Home({ BOT_NAME, ENV }) {
             <Text h3>Group updates</Text>
 
             {user && initialDataError && (
-              <Note type='info'>
+              <Note type="info">
                 This bot has not been setup yet! Please wait for some updates to
                 get posted first.
               </Note>
@@ -189,7 +174,7 @@ export default function Home({ BOT_NAME, ENV }) {
             </p>
             <div className={styles.grid}>
               <a
-                href='https://github.com/RusseII/telegram-standup-bot'
+                href="https://github.com/RusseII/telegram-standup-bot"
                 className={styles.card}
               >
                 <h2>Documentation &rarr;</h2>
