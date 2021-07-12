@@ -50,7 +50,11 @@ function Pager({ initialData: data }) {
             locale="en-US"
           />
         ),
-        message: u.message ? <code>{u.message}</code> : '',
+        message: u.message ? (
+          <span style={{ whiteSpace: 'pre-wrap' }}>{u.message}</span>
+        ) : (
+          ''
+        ),
         file_path: () => {
           if (!u.file_path) return;
           if (
