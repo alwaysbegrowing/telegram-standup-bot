@@ -1,10 +1,11 @@
 import React from 'react';
 import { Button, Text, Link, Card, Dot, Tag, useTheme } from '@geist-ui/react';
 import * as Icons from 'react-feather';
+import { UserType } from '@/lib/use-prefers';
 
 interface Props {
   name: string;
-  file_path: string;
+  file_path: () => React.ReactNode;
   message: string;
   createdAt: string;
 }
@@ -30,7 +31,7 @@ const Project: React.FC<ProjectProps> = ({
             </Button>
           </div>
           <div>{message}</div>
-          <div>{file_path}</div>
+          <div>{file_path()}</div>
           <Card.Footer className="project__footer">
             <Icons.Calendar size={14} />
             <Text className="project__repo">{createdAt}</Text>
