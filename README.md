@@ -86,4 +86,6 @@ More info on how this works - <https://vercel.com/docs/serverless-functions/intr
 * If you want to see the exact format of your webhooks - you can set your webhook url to <http://webhook.site/> for testing.
 * If you wanted to test your bot fully locally, you can run the application with `vercel dev` then setup ngrok on the deployment URL - <https://ngrok.com/docs> then setup your webhooks to go to the ngrok url. (Note, ngrok has rate limiting, so some webhooks may be delayed or not sent)
 
-![Powered by Vercel](https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg)
+<center>
+<a href="https://vercel.com?utm_source=alwaysbegrowing&utm_campaign=oss"><img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg"/></a>
+</center>

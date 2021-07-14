@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
           </div>
           <div style={{ display: 'inline-block' }}>
             <Link
-              href="https://vercel.com?utm_source=stoodbot&utm_campaign=oss"
+              href="https://vercel.com?utm_source=alwaysbegrowing&utm_campaign=oss"
               target="_blank"
               rel="noopener"
               underline
