@@ -1,23 +1,20 @@
-# About
+# Stood Bot
 
-Stood Bot brings standup functionality to Telegram. Group members are able to submit updates, and they are all sent to a shared channel at a set time.
+A Telegram bot that automatically posts a personal update in your selected chats. All members of a chat can participate!
 
 ## How to use
 
-1. Send a message to [@stood_bot](https://t.me/stood_bot) on telegram.
-
-2. Add [@stood_bot](https://t.me/stood_bot) to the group you would like to use it in.
-3. Type `/subscribe` in the chat you want the standups to be posted in, and you will be added to the standup group.
-4. Make sure each person private messages the bot, or they will not receive reminders to post their standup.
+1. Add [@stood_bot](https://t.me/stood_bot) to the chats you want your updates to be posted to
+2. Type `/subscribe` in each of those chats
 
 ## Info
 
-Standups are currently posted at 10am est.
-Reminders are sent out at 8am est, 9am est, 9:30 est, and 9:45 est if an update has not been submitted.
+* Reminder to submit an update sent at 10am est
+* Update posts at 11am est
 
 ## Support
 
-Send a message to [@mattpew](https://t.me/mattpew) or create a github issue if you are having problems with the bot.
+[Create a GitHub issue](https://github.com/alwaysbegrowing/telegram-standup-bot/issues/new/choose) if you are having problems with the bot.
 
 ### Self Hosting Setup
 
@@ -53,9 +50,25 @@ Send a message to [@mattpew](https://t.me/mattpew) or create a github issue if y
 0 11 * * * curl -s https://.../api/send?key=TELEGRAM_API_KEY
 ```
 
+### Local development
+
+```bash
+yarn
+vercel dev
+```
+
+* <https://core.telegram.org/bots/webhooks> - You can use these example webhooks to test your bot locally with curl or postman.
+* If you want to see the exact format of your webhooks - you can set your webhook url to <http://webhook.site/> for testing.
+* If you wanted to test your bot fully locally, you can run the application with `vercel dev` then setup ngrok on the deployment URL - <https://ngrok.com/docs> then setup your webhooks to go to the ngrok url. (Note, ngrok has rate limiting, so some webhooks may be delayed or not sent)
+
+This runs the website at localhost:3000 and runs your lambda functions in the /api folder on localhost:3000/api
+More info on how this works - <https://vercel.com/docs/serverless-functions/introduction>
+
+### Troubleshooting
+
 If your messages or commands aren't going through check if you have any pending updates, read the error is, then clear them
 
-You might have to fix the error or it'll happen again
+You might have to fix the error, or it'll happen again
 
 ```md
 https://api.telegram.org/bot${TELEGRAM_API_KEY}/getWebhookInfo
@@ -63,28 +76,9 @@ https://api.telegram.org/bot${TELEGRAM_API_KEY}/getWebhookInfo
 https://api.telegram.org/bot${TELEGRAM_API_KEY}/deleteWebhook?drop_pending_updates=true
 ```
 
-### Run the application
+View your function logs in vercel. Visit vercel.com, login, navigate to your bot, click on your functions, then view the function logs.
 
-```bash
-yarn
-vercel dev
-```
-
-This runs the website at localhost:3000 and runs your lambda functions in the /api folder on localhost:3000/api
-More info on how this works - <https://vercel.com/docs/serverless-functions/introduction>
-
-### Self hosting not working? Debugging steps
-
-1. View your function logs in vercel
-(Go to vercel.com, login, navigate to your bot, click on your functions, then view the function logs)
-
-2. Ensure your webhooks are being sent to the correct URL. Make sure not to use the base URL only. The URL needs to be the `/api/standup` url
-
-### How can I test this application locally
-
-* <https://core.telegram.org/bots/webhooks> - You can use these example webhooks to test your bot locally with curl or postman.
-* If you want to see the exact format of your webhooks - you can set your webhook url to <http://webhook.site/> for testing.
-* If you wanted to test your bot fully locally, you can run the application with `vercel dev` then setup ngrok on the deployment URL - <https://ngrok.com/docs> then setup your webhooks to go to the ngrok url. (Note, ngrok has rate limiting, so some webhooks may be delayed or not sent)
+---
 
 <center>
 <a href="https://vercel.com?utm_source=alwaysbegrowing&utm_campaign=oss"><img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg"/></a>
