@@ -129,23 +129,6 @@ export default function Home() {
               </div>
             )}
           </div>
-          <div className="recent-activity">
-            <Text h2 className="recent-activity__title">
-              Recent Activity
-            </Text>
-            <EventListItem
-              username={prefers?.userInfo?.first_name}
-              avatar="//via.placeholder.com/30"
-              createdAt="4m"
-            >
-              Sample activity item in <b>production</b>
-            </EventListItem>
-            <NextLink href="/activity" passHref>
-              <Link className="view-all" color underline>
-                View All Activity
-              </Link>
-            </NextLink>
-          </div>
         </div>
       </div>
       <style jsx>{`
@@ -164,20 +147,12 @@ export default function Home() {
           box-sizing: border-box;
         }
         .projects {
+          flex: 1;
           width: 540px;
           max-width: 100%;
-          margin-right: calc(4 * ${theme.layout.gap});
         }
         .projects :global(.project__wrapper):not(:last-of-type) {
           margin-bottom: calc(1.5 * ${theme.layout.gap});
-        }
-        .recent-activity {
-          flex: 1;
-        }
-        .recent-activity :global(.recent-activity__title) {
-          font-size: 0.875rem;
-          font-weight: 700;
-          margin: 0 0 calc(3 * ${theme.layout.gapHalf});
         }
         .page__content :global(.view-all) {
           font-size: 0.875rem;
