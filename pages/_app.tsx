@@ -34,8 +34,13 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
 
   const setUserDetails = useCallback((user: UserType) => {
     setUserInfo(user);
-    if (typeof window !== 'undefined' && window.localStorage)
-      window.localStorage.setItem('telegram-user', JSON.stringify(user));
+    if (typeof window !== 'undefined' && window.localStorage) {
+      if (user) {
+        window.localStorage.setItem('telegram-user', JSON.stringify(user));
+      } else {
+        window.localStorage.removeItem('telegram-user');
+      }
+    }
   }, []);
 
   return (

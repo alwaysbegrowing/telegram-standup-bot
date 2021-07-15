@@ -9,7 +9,6 @@ import Submenu from '@/components/navigation/submenu';
 const Menu: React.FC = () => {
   const theme = useTheme();
   const prefers = usePrefers();
-  console.log(prefers);
   const handleTelegramResponse = (response) => {
     prefers.setUserDetails(response);
   };

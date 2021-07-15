@@ -1,6 +1,5 @@
 import React from 'react';
-import NextLink from 'next/link';
-import { Avatar, Button, Tag, Text, Link, useTheme } from '@geist-ui/react';
+import { Tooltip, Avatar, Button, Tag, Text, useTheme } from '@geist-ui/react';
 import * as Icons from 'react-feather';
 import { UserType } from '@/lib/use-prefers';
 
@@ -30,11 +29,11 @@ const Heading: React.FC<HeadingProps> = ({ user }) => {
               <Tag className="headding__user-role">{user.role}</Tag>
 
               <div className="heading__actions">
-                <NextLink href="/projects" passHref>
+                <Tooltip trigger="click" text="Coming soon" type="dark">
                   <Button type="secondary" auto>
                     Create Update
                   </Button>
-                </NextLink>
+                </Tooltip>
               </div>
             </div>
 
