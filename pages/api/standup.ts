@@ -1,4 +1,3 @@
-import * as ftp from 'basic-ftp';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
 import {
