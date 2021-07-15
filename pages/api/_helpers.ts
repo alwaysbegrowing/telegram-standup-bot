@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { createHash, createHmac } from 'crypto';
 
 export const telegramTypes = {
   text: 'sendMessage',
@@ -101,4 +102,21 @@ export const sendMsg = async (
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+};
+
+const secret = createHash('sha256')
+  .update(process.env.TELEGRAM_API_KEY)
+  .digest();
+
+export const checkSignature = ({ hash, ...data }) => {
+  if (!hash) {
+    return false;
+  }
+
+  const checkString = Object.keys(data)
+    .sort()
+    .map((k) => `${k}=${data[k]}`)
+    .join('\n');
+  const hmac = createHmac('sha256', secret).update(checkString).digest('hex');
+  return hmac === hash;
 };
