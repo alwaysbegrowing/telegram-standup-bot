@@ -16,12 +16,17 @@
     "next": "11.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "react-feather": "^2.0.9",
     "react-telegram-login": "^1.1.2",
     "swr": "^0.5.6"
   },
   "devDependencies": {
     "@types/react": "^17.0.13",
-    "eslint": "7.30.0",
-    "eslint-config-next": "11.0.1"
+    "eslint": "^7.30.0",
+    "eslint-config-next": "11.0.1",
+    "eslint-config-prettier": "^8.3.0",
+    "javascript-time-ago": "^2.3.8",
+    "prettier": "2.3.2",
+    "react-time-ago": "^7.0.0"
   }
 }

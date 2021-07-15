@@ -83,6 +83,16 @@ const sendAboutMessage = async (
   );
 };
 
+async function uploadFile(url) {
+  return fetch(
+    `${process.env.UPLOAD_URL}/upload.php?key=${process.env.TELEGRAM_API_KEY}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ url }),
+    }
+  );
+}
+
 /** Time to make an update */
 const submitStandup = async (
   chatId: number,
@@ -104,11 +114,13 @@ const submitStandup = async (
 
   if (file_id) {
     try {
-      const download_url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/getFile?file_id=${file_id}`;
+      var download_url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/getFile?file_id=${file_id}`;
       const file = await fetch(download_url);
       const json = await file.json();
       if (json?.ok) {
-        file_path = `https://api.telegram.org/file/bot${process.env.TELEGRAM_API_KEY}/${json?.result?.file_path}`;
+        download_url = `https://api.telegram.org/file/bot${process.env.TELEGRAM_API_KEY}/${json?.result?.file_path}`;
+        await uploadFile(download_url);
+        file_path = `${process.env.UPLOAD_URL}/${json?.result?.file_path}`;
       }
     } catch (e) {}
   }

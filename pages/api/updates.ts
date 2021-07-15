@@ -22,7 +22,7 @@ function checkSignature({ hash, ...data }) {
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isValid = checkSignature(req?.body || {});
 
-  if (!isValid) {
+  if (!isValid && process.env.NODE_ENV === 'production') {
     return res.status(401).json({ statusText: 'Unauthorized' });
   }
 
@@ -36,40 +36,52 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (req.query.page && req.query.user) {
     const page = req.query.page || 1;
     const userId = Number(req.query.user);
-    const cursor = await db.collection('users').findOne(
-      {
+    const cursor = await db
+      .collection('users')
+      .findOne({
         // The user ID to find
         userId,
         // To make sure they're allowed to query this user ID
         'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) },
-      },
-      { updateArchive: { $slice: ['$favs', 0, 2] } }
-    );
-
-    console.log(cursor);
+      })
+      .project({ updateArchive: { $slice: -5 } });
 
     return res.status(200).json(cursor?.updateArchive);
   }
 
   const groupUpdates = await db
     .collection('users')
-    .find({ 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } })
+    .find(
+      { 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } },
+      { $sort: { updateArchive: 1 } }
+    )
+    .project({ updateArchive: { $slice: -1 } })
     .toArray();
 
-  return res.status(200).json(
-    groupUpdates.map((g) => {
-      return {
+  const response = [];
+
+  groupUpdates.forEach((g) =>
+    g.updateArchive.forEach((u, i) => {
+      const data = {
         id: g.userId,
         name: g.about.first_name,
-        updates: g.updateArchive.map((u) => {
-          return {
-            type: u.type,
-            createdAt: u.createdAt,
-            message: u?.body?.message?.text || u?.body?.message?.caption,
-            file_path: u?.file_path,
-          };
-        }),
+        type: u.type,
+        createdAt: u.createdAt,
+        message: u?.body?.message?.text || u?.body?.message?.caption,
+        file_path: u?.file_path,
       };
+
+      if (i) {
+        response.find((u) => u?.id === g?.userId).archive.push(data);
+        return;
+      }
+
+      response.push({
+        archive: [],
+        ...data,
+      });
     })
   );
+
+  return res.status(200).json(response);
 };
