@@ -115,12 +115,19 @@ const submitStandup = async (
   if (file_id) {
     try {
       var download_url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/getFile?file_id=${file_id}`;
+      console.log(download_url);
       const file = await fetch(download_url);
       const json = await file.json();
+      console.log(json);
       if (json?.ok) {
         download_url = `https://api.telegram.org/file/bot${process.env.TELEGRAM_API_KEY}/${json?.result?.file_path}`;
-        await uploadFile(download_url);
-        file_path = `${process.env.UPLOAD_URL}/${json?.result?.file_path}`;
+        const result = await uploadFile(download_url);
+        const resultJson = await result.json();
+        if (resultJson?.status === 'success') {
+          file_path = `${process.env.UPLOAD_URL}/${json?.result?.file_path}`;
+        } else {
+          file_path = download_url;
+        }
       }
     } catch (e) {}
   }
