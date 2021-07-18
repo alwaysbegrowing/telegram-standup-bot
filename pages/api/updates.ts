@@ -28,29 +28,28 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         // To make sure they're allowed to query this user ID
         'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) },
       })
-      .project({ updateArchive: { $slice: -5 } });
+      .project({ updateArchive: { $slice: -10 } });
 
     return res.status(200).json(cursor?.updateArchive);
   }
 
   const groupUpdates = await db
     .collection('users')
-    .find(
-      { 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } },
-      { $sort: { updateArchive: 1 } }
-    )
-    .project({ updateArchive: { $slice: -1 } })
+    .find({ 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } })
+    .project({ updateArchive: { $slice: -10 } })
     .toArray();
 
   const response = [];
 
-  groupUpdates.forEach((g) =>
-    g.updateArchive.forEach((u, i) => {
+  groupUpdates.forEach((g) => {
+    const latestMessages = g.updateArchive.reverse();
+    return latestMessages.forEach((u, i) => {
       const data = {
         id: g.userId,
         name: g.about.first_name,
         type: u.type,
         createdAt: u.createdAt,
+        groupId: u?.body?.message?.media_group_id,
         message: u?.body?.message?.text || u?.body?.message?.caption,
         file_path: u?.file_path,
         entities: false,
@@ -73,8 +72,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         archive: [],
         ...data,
       });
-    })
-  );
+    });
+  });
 
   return res.status(200).json(response);
 };

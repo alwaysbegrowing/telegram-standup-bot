@@ -54,7 +54,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     });
 
   await Promise.all(sentStandup);
-  await markAllSent();
+  if (process.env.NODE_ENV === 'production') {
+    await markAllSent();
+  }
 
   return res.status(200).json({ status: 'ok' });
 };

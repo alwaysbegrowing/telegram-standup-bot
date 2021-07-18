@@ -102,6 +102,13 @@ const submitStandup = async (
   message: string,
   body: any
 ) => {
+  console.log(body);
+
+  let file_path = '';
+  let successMessage = 'Your update has been submitted.';
+  let sendMessage = true;
+  const { db } = await connectToDatabase();
+
   const type = Object.keys(body?.message).find((a) => telegramTypes[a]);
   let file_id = body.message?.[type]?.file_id;
 
@@ -109,8 +116,41 @@ const submitStandup = async (
     file_id = body?.message?.[type].slice(-1)[0].file_id;
   }
 
-  const { db } = await connectToDatabase();
-  let file_path = '';
+  // Album
+  const groupId = body?.message?.media_group_id;
+  if (groupId) {
+    const mediaGroup = await db
+      .collection('users')
+      .find({
+        userId,
+      })
+      .project({
+        updateArchive: {
+          $filter: {
+            input: '$updateArchive',
+            as: 'update',
+            cond: {
+              $eq: ['$$update.body.message.media_group_id', groupId],
+            },
+          },
+        },
+      })
+      .toArray();
+
+    if (
+      Array.isArray(mediaGroup) &&
+      mediaGroup.length &&
+      mediaGroup?.[0]?.updateArchive.length
+    ) {
+      console.log('Found a group', mediaGroup[0].updateArchive);
+      // Found a group
+      // Since the first message was already sent don't send more
+      sendMessage = false;
+    } else {
+      // Alter message to let them know we see all their media
+      successMessage = 'Your group media has been submitted.';
+    }
+  }
 
   if (file_id) {
     try {
@@ -153,15 +193,14 @@ const submitStandup = async (
     }
   );
 
-  // console.log(body);
+  if (!sendMessage) {
+    // Already sent one
+    console.log('Send message is false');
+    return { status: 200 };
+  }
 
   if (addUpdate.modifiedCount) {
-    return await sendMsg(
-      'Your update has been submitted.',
-      chatId,
-      messageId,
-      true
-    );
+    return await sendMsg(successMessage, chatId, messageId, true);
   }
 
   return await sendMsg(
@@ -277,7 +316,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       text,
       body
     );
-    return res.json({ status: r.status });
+    const status = r?.status || 200;
+    return res.json({ status });
   }
 
   if (isSubscribeCommand) {
