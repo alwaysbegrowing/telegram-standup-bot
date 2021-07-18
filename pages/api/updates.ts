@@ -74,14 +74,10 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
               data.message &&
               data.groupId === b.groupId
             ) {
-              const entities =
-                b?.body?.message?.entities ||
-                b?.body?.message?.caption_entities;
-
-              if (Array.isArray(entities)) {
+              if (data.entities) {
                 return {
                   ...b,
-                  message: fillMarkdownEntitiesMarkup(b.message, entities),
+                  message: data.message,
                   entities: true,
                 };
               }
