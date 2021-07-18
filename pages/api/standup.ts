@@ -171,6 +171,7 @@ const submitStandup = async (
       }
     } catch (e) {}
   }
+  const entities = body?.message?.entities || body?.message?.caption_entities;
 
   const addUpdate = await db.collection('users').updateOne(
     { userId },
@@ -183,6 +184,7 @@ const submitStandup = async (
         updateArchive: {
           submitted: false,
           file_id,
+          entities,
           caption: body?.message?.caption,
           type,
           file_path,

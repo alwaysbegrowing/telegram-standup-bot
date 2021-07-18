@@ -67,23 +67,35 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         // See if any other photos from this group have a caption
         // Really bad, this should be set some how else
         if (!response.find((u) => u?.id === g?.userId)?.message) {
-          response = response.map((u) => {
+          response = response.map((b) => {
             if (
-              u?.id === g?.userId &&
-              !u.message &&
+              b?.id === g?.userId &&
+              !b.message &&
               data.message &&
-              data.groupId === u.groupId
+              data.groupId === b.groupId
             ) {
+              const entities =
+                b?.body?.message?.entities ||
+                b?.body?.message?.caption_entities;
+
+              if (Array.isArray(entities)) {
+                return {
+                  ...b,
+                  message: fillMarkdownEntitiesMarkup(b.message, entities),
+                  entities: true,
+                };
+              }
+
               return {
-                ...u,
+                ...b,
                 message: data.message,
               };
             }
-            return u;
+            return b;
           });
         }
 
-        response.find((u) => u?.id === g?.userId).archive.push(data);
+        response.find((u) => u?.id === g?.userId)?.archive.push(data);
         return;
       }
 
