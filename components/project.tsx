@@ -21,24 +21,22 @@ const Project: React.FC<ProjectProps> = ({
 
   return (
     <>
-      <Grid xs>
-        <div className="project__wrapper">
-          <Card className="project__card" shadow>
-            <div className="project__title">
-              <Text h3>{name}</Text>
-              <Button className="project__visit-button" size="small" auto>
-                More
-              </Button>
-            </div>
-            <div>{message}</div>
-            <div>{file_path}</div>
-            <Card.Footer className="project__footer">
-              <Icons.Calendar size={14} />
-              {createdAt}
-            </Card.Footer>
-          </Card>
-        </div>
-      </Grid>
+      <div className="project__wrapper">
+        <Card className="project__card" shadow>
+          <div className="project__title">
+            <Text h3>{name}</Text>
+            <Button className="project__visit-button" size="small" auto>
+              More
+            </Button>
+          </div>
+          <div>{message}</div>
+          <div>{file_path}</div>
+          <Card.Footer className="project__footer">
+            <Icons.Calendar size={14} />
+            {createdAt}
+          </Card.Footer>
+        </Card>
+      </div>
       <style jsx>{`
         .project__wrapper :global(.project__card) {
           padding: 0 !important;

@@ -148,9 +148,7 @@ export default function Home() {
                   <Loading>loading...</Loading>
                 )}
 
-                <Grid.Container gap={1} justify="flex-start">
-                  <Pager initialData={initialData} />
-                </Grid.Container>
+                <Pager initialData={initialData} />
               </div>
             )}
           </div>
