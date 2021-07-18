@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { createHash, createHmac } from 'crypto';
 import { connectToDatabase } from '@/pages/api/_connectToDatabase';
+import memoize from 'fast-memoize';
 
 export const telegramTypes = {
   text: 'sendMessage',
@@ -172,7 +173,7 @@ const secret = createHash('sha256')
   .update(process.env.TELEGRAM_API_KEY)
   .digest();
 
-export const checkSignature = ({ hash, ...data }) => {
+const signatureMath = ({ hash, ...data }) => {
   if (!hash) {
     return false;
   }
@@ -184,3 +185,5 @@ export const checkSignature = ({ hash, ...data }) => {
   const hmac = createHmac('sha256', secret).update(checkString).digest('hex');
   return hmac === hash;
 };
+
+export const checkSignature = memoize(signatureMath);
