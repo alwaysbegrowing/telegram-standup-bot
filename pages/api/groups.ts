@@ -1,23 +1,6 @@
-const { createHash, createHmac } = require('crypto');
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-
-const secret = createHash('sha256')
-  .update(process.env.TELEGRAM_API_KEY)
-  .digest();
-
-function checkSignature({ hash, ...data }) {
-  if (!hash) {
-    return false;
-  }
-
-  const checkString = Object.keys(data)
-    .sort()
-    .map((k) => `${k}=${data[k]}`)
-    .join('\n');
-  const hmac = createHmac('sha256', secret).update(checkString).digest('hex');
-  return hmac === hash;
-}
+import { checkSignature } from '@/pages/api/_helpers';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isValid = checkSignature(req?.body || {});

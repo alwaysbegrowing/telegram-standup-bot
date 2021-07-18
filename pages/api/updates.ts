@@ -1,23 +1,7 @@
-import { createHash, createHmac } from 'crypto';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-
-const secret = createHash('sha256')
-  .update(process.env.TELEGRAM_API_KEY)
-  .digest();
-
-function checkSignature({ hash, ...data }) {
-  if (!hash) {
-    return false;
-  }
-
-  const checkString = Object.keys(data)
-    .sort()
-    .map((k) => `${k}=${data[k]}`)
-    .join('\n');
-  const hmac = createHmac('sha256', secret).update(checkString).digest('hex');
-  return hmac === hash;
-}
+import { checkSignature } from '@/pages/api/_helpers';
+import { fillMarkdownEntitiesMarkup } from 'telegram-text-entities-filler';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isValid = checkSignature(req?.body || {});
@@ -44,32 +28,40 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         // To make sure they're allowed to query this user ID
         'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) },
       })
-      .project({ updateArchive: { $slice: -5 } });
+      .project({ updateArchive: { $slice: -10 } });
 
     return res.status(200).json(cursor?.updateArchive);
   }
 
   const groupUpdates = await db
     .collection('users')
-    .find(
-      { 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } },
-      { $sort: { updateArchive: 1 } }
-    )
-    .project({ updateArchive: { $slice: -1 } })
+    .find({ 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } })
+    .project({ updateArchive: { $slice: -10 } })
     .toArray();
 
   const response = [];
 
-  groupUpdates.forEach((g) =>
-    g.updateArchive.forEach((u, i) => {
+  groupUpdates.forEach((g) => {
+    const latestMessages = g.updateArchive.reverse();
+    return latestMessages.forEach((u, i) => {
       const data = {
         id: g.userId,
         name: g.about.first_name,
         type: u.type,
         createdAt: u.createdAt,
+        groupId: u?.body?.message?.media_group_id,
         message: u?.body?.message?.text || u?.body?.message?.caption,
         file_path: u?.file_path,
+        entities: false,
       };
+
+      const entities =
+        u?.body?.message?.entities || u?.body?.message?.caption_entities;
+
+      if (Array.isArray(entities)) {
+        data.message = fillMarkdownEntitiesMarkup(data.message, entities);
+        data.entities = true;
+      }
 
       if (i) {
         response.find((u) => u?.id === g?.userId).archive.push(data);
@@ -80,8 +72,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         archive: [],
         ...data,
       });
-    })
-  );
+    });
+  });
 
   return res.status(200).json(response);
 };

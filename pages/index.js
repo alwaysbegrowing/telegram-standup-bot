@@ -1,18 +1,10 @@
 import ReactTimeAgo from 'react-time-ago';
-import NextLink from 'next/link';
-import {
-  Note,
-  Loading,
-  Tooltip,
-  Image,
-  Link,
-  Text,
-  useTheme,
-} from '@geist-ui/react';
+import ReactMarkdown from 'react-markdown';
+import { Note, Loading, Tooltip, Image, useTheme, Grid } from '@geist-ui/react';
 import useSWR from 'swr';
+import gfm from 'remark-gfm';
 import Heading from '@/components/heading';
 import Project from '@/components/project';
-import EventListItem from '@/components/activity-event';
 import { usePrefers } from '../lib/use-prefers';
 import HomePage from './home';
 
@@ -34,6 +26,28 @@ const TooltipContainer = ({ verboseDate, children, ...rest }) => (
   <Tooltip text={verboseDate}>{children}</Tooltip>
 );
 
+const TGVideo = ({ u }) => (
+  <video
+    controls={u.type !== 'animation'}
+    autoPlay={u.type === 'animation'}
+    loop
+  >
+    <source src={u.file_path} />
+  </video>
+);
+
+const TGPhoto = ({ u }) => (
+  <Image src={u.file_path} alt="Submission" height={200} />
+);
+
+const TGFile = ({ u }) => {
+  if (!u.file_path) return null;
+  if (['voice', 'video', 'animation', 'audio', 'video_note'].includes(u.type)) {
+    return <TGVideo u={u} />;
+  } else if (u.type === 'photo') {
+    return <TGPhoto u={u} />;
+  }
+};
 function Pager({ initialData: data }) {
   const formattedData = (data || [])
     .filter((u) => {
@@ -50,31 +64,42 @@ function Pager({ initialData: data }) {
             locale="en-US"
           />
         ),
-        message: u.message ? (
-          <span style={{ whiteSpace: 'pre-wrap' }}>{u.message}</span>
-        ) : (
-          ''
-        ),
-        file_path: () => {
-          if (!u.file_path) return;
-          if (
-            ['voice', 'video', 'animation', 'audio', 'video_note'].includes(
-              u.type
-            )
-          ) {
-            return (
-              <video
-                controls={u.type !== 'animation'}
-                autoPlay={u.type === 'animation'}
-                loop
-              >
-                <source src={u.file_path} />
-              </video>
-            );
-          } else if (u.type === 'photo') {
-            return <Image src={u.file_path} alt="Submission" height={200} />;
+        message: (() => {
+          if (!u.message) return;
+
+          if (!u?.entities) {
+            return <span style={{ whiteSpace: 'pre-wrap' }}>{u.message}</span>;
           }
-        },
+
+          return (
+            <ReactMarkdown remarkPlugins={[gfm]}>{u.message}</ReactMarkdown>
+          );
+        })(),
+        file_path: (() => {
+          if (!u.groupId) {
+            return <TGFile u={u} />;
+          }
+
+          if (u.groupId) {
+            const groupMedia = u.archive.filter((b) => b.groupId === u.groupId);
+            if (groupMedia?.length) {
+              return (
+                <Grid.Container gap={2} justify="space-between">
+                  {groupMedia.map((b) => {
+                    return (
+                      <Grid key={b.createdAt} xs>
+                        <TGFile u={b} />
+                      </Grid>
+                    );
+                  })}
+                  <Grid key={u.createdAt} xs>
+                    <TGFile u={u} />
+                  </Grid>
+                </Grid.Container>
+              );
+            }
+          }
+        })(),
       };
     });
 

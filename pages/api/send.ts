@@ -3,7 +3,10 @@ import { connectToDatabase } from './_connectToDatabase';
 import { sendMsg, StandupGroup, Member, About } from './_helpers';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
-  if (req.query.key !== process.env.TELEGRAM_API_KEY) {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    req.query.key !== process.env.TELEGRAM_API_KEY
+  ) {
     return res.status(401).json({ status: 'invalid api key' });
   }
 
@@ -27,11 +30,14 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       user.groups.forEach((group: StandupGroup) => {
         const theUpdate = user.updateArchive.slice(-1)[0];
         const type = theUpdate?.type;
+        const hasEntities =
+          theUpdate?.body?.message?.entities ||
+          theUpdate?.body?.message?.caption_entities;
 
-        if (type === 'text') {
+        if (!hasEntities && type === 'text') {
           sentStandup.push(
             sendMsg(
-              `${user.about.first_name} (@${user.about.username}):`,
+              `${user.about.first_name}:`,
               group.chatId,
               null,
               true,
@@ -40,12 +46,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
           );
         } else {
           sentStandup.push(
-            sendMsg(
-              `${user.about.first_name} (@${user.about.username}):`,
-              group.chatId,
-              null,
-              true
-            ),
+            sendMsg(`${user.about.first_name}:`, group.chatId, null, true),
             sendMsg(``, group.chatId, null, true, theUpdate)
           );
         }
@@ -53,7 +54,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     });
 
   await Promise.all(sentStandup);
-  await markAllSent();
+  if (process.env.NODE_ENV === 'production') {
+    await markAllSent();
+  }
 
   return res.status(200).json({ status: 'ok' });
 };

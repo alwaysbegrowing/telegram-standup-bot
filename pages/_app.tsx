@@ -93,4 +93,5 @@ export async function getStaticProps() {
     props: { BOT_NAME: process.env.BOT_NAME },
   };
 }
+
 export default StoodBotApp;

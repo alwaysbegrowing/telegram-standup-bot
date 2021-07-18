@@ -1,4 +1,6 @@
 import fetch from 'node-fetch';
+import { createHash, createHmac } from 'crypto';
+import { connectToDatabase } from '@/pages/api/_connectToDatabase';
 
 export const telegramTypes = {
   text: 'sendMessage',
@@ -9,6 +11,7 @@ export const telegramTypes = {
   photo: 'sendPhoto',
   video_note: 'sendVideoNote',
   animation: 'sendAnimation',
+  group: 'sendMediaGroup',
 };
 
 export interface StandupGroup {
@@ -41,39 +44,27 @@ export interface Member {
   groups: Array<StandupGroup>;
 }
 
-export const sendMsg = async (
+const draftBody = (
   text: string,
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
   theUpdate: any = {}
 ) => {
-  console.log(theUpdate);
   const body = theUpdate?.body || {};
   const type = theUpdate?.type || 'text';
   const file_id = theUpdate?.file_id || '';
-  const apiUrl = telegramTypes[type] || telegramTypes.text;
 
-  console.log({
-    text,
-    chat_id,
-    reply_to_message_id,
-    disable_notification,
-    theUpdate,
-    telegramTypes,
-    apiUrl,
-    file_id,
-    type,
-    body,
-  });
-
-  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiUrl}`;
   let data = {
     reply_to_message_id,
     chat_id,
     disable_notification,
     caption: body?.message?.caption,
+    entities: body?.message?.entities,
+    media: file_id,
+    caption_entities: body?.message?.caption_entities,
     [type]: file_id || text,
+    type,
   };
 
   if (type === 'poll') {
@@ -90,15 +81,106 @@ export const sendMsg = async (
   } else if (type === 'text' && body?.message?.[type]) {
     data = {
       ...data,
-      [type]: `${text}\n${body?.message?.[type]}`,
+      [type]: `${body?.message?.[type]}`,
     };
   }
 
-  console.log(data);
+  return data;
+};
+
+export const sendMsg = async (
+  text: string,
+  chat_id: number,
+  reply_to_message_id: number = null,
+  disable_notification: boolean = false,
+  theUpdate: any = {}
+) => {
+  console.log(theUpdate);
+  const body = theUpdate?.body || {};
+  const groupId = body?.message?.media_group_id;
+  const type = groupId ? 'group' : theUpdate?.type || 'text';
+  const apiEndpoint = telegramTypes[type] || telegramTypes.text;
+
+  let data = draftBody(
+    text,
+    chat_id,
+    reply_to_message_id,
+    disable_notification,
+    theUpdate
+  );
+
+  if (type === 'group') {
+    const { db } = await connectToDatabase();
+    const mediaGroup = await db
+      .collection('users')
+      .find({
+        userId: theUpdate?.body?.message?.from?.id,
+      })
+      .project({
+        updateArchive: {
+          $filter: {
+            input: '$updateArchive',
+            as: 'update',
+            cond: {
+              $eq: ['$$update.body.message.media_group_id', groupId],
+            },
+          },
+        },
+      })
+      .toArray();
+
+    if (
+      Array.isArray(mediaGroup) &&
+      mediaGroup.length &&
+      mediaGroup?.[0]?.updateArchive.length
+    ) {
+      console.log('Using full group', mediaGroup[0].updateArchive);
+      data.media = [];
+      mediaGroup[0].updateArchive.forEach((u) => {
+        data.media.push(
+          draftBody(text, chat_id, reply_to_message_id, disable_notification, u)
+        );
+      });
+
+      console.log('data.media', data.media);
+    }
+  }
+
+  console.log({
+    text,
+    chat_id,
+    reply_to_message_id,
+    disable_notification,
+    theUpdate,
+    telegramTypes,
+    apiEndpoint,
+    type,
+    body,
+    data,
+  });
+
+  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiEndpoint}`;
 
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
+};
+
+const secret = createHash('sha256')
+  .update(process.env.TELEGRAM_API_KEY)
+  .digest();
+
+export const checkSignature = ({ hash, ...data }) => {
+  if (!hash) {
+    return false;
+  }
+
+  const checkString = Object.keys(data)
+    .sort()
+    .map((k) => `${k}=${data[k]}`)
+    .join('\n');
+  const hmac = createHmac('sha256', secret).update(checkString).digest('hex');
+  return hmac === hash;
 };
