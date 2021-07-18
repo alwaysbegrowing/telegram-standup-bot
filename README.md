@@ -43,13 +43,6 @@ A Telegram bot that automatically posts a personal update in your selected chats
    
    This is how your bot will know when events happen inside of telegram
 
-### Sample crontab
-
-```crontab
-0 10 * * * curl -s https://.../api/reminder?key=TELEGRAM_API_KEY
-0 11 * * * curl -s https://.../api/send?key=TELEGRAM_API_KEY
-```
-
 ### Local development
 
 ```bash
