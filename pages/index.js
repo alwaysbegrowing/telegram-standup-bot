@@ -88,31 +88,11 @@ function Pager({ initialData: data }) {
                   <Grid key={u.createdAt} md={6} xs={12}>
                     <TGFile u={u} />
                   </Grid>
-                  {groupMedia.map((b) => {
-                    return (
-                      <>
-                        {' '}
-                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
-                          <TGFile u={b} />
-                        </Grid>{' '}
-                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
-                          <TGFile u={b} />
-                        </Grid>{' '}
-                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
-                          <TGFile u={b} />
-                        </Grid>
-                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
-                          <TGFile u={b} />
-                        </Grid>{' '}
-                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
-                          <TGFile u={b} />
-                        </Grid>
-                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
-                          <TGFile u={b} />
-                        </Grid>
-                      </>
-                    );
-                  })}
+                  {groupMedia.map((b) => (
+                    <Grid key={b.createdAt} md={6} xs={24} sm={12}>
+                      <TGFile u={b} />
+                    </Grid>
+                  ))}
                 </Grid.Container>
               );
             }
