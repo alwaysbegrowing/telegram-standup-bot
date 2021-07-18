@@ -39,7 +39,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     .project({ updateArchive: { $slice: -10 } })
     .toArray();
 
-  const response = [];
+  let response = [];
 
   groupUpdates.forEach((g) => {
     const latestMessages = g.updateArchive.reverse();
@@ -64,6 +64,25 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       }
 
       if (i) {
+        // See if any other photos from this group have a caption
+        // Really bad, this should be set some how else
+        if (!response.find((u) => u?.id === g?.userId)?.message) {
+          response = response.map((u) => {
+            if (
+              u?.id === g?.userId &&
+              !u.message &&
+              data.message &&
+              data.groupId === u.groupId
+            ) {
+              return {
+                ...u,
+                message: data.message,
+              };
+            }
+            return u;
+          });
+        }
+
         response.find((u) => u?.id === g?.userId).archive.push(data);
         return;
       }
