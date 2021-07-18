@@ -37,7 +37,7 @@ const TGVideo = ({ u }) => (
 );
 
 const TGPhoto = ({ u }) => (
-  <Image src={u.file_path} alt="Submission" height={200} />
+  <Image src={u.file_path} alt="Submission" width={300} height={200} />
 );
 
 const TGFile = ({ u }) => {
@@ -84,17 +84,35 @@ function Pager({ initialData: data }) {
             const groupMedia = u.archive.filter((b) => b.groupId === u.groupId);
             if (groupMedia?.length) {
               return (
-                <Grid.Container gap={2} justify="space-between">
-                  {groupMedia.map((b) => {
-                    return (
-                      <Grid key={b.createdAt} xs>
-                        <TGFile u={b} />
-                      </Grid>
-                    );
-                  })}
-                  <Grid key={u.createdAt} xs>
+                <Grid.Container gap={1} justify="center">
+                  <Grid key={u.createdAt} md={6} xs={12}>
                     <TGFile u={u} />
                   </Grid>
+                  {groupMedia.map((b) => {
+                    return (
+                      <>
+                        {' '}
+                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
+                          <TGFile u={b} />
+                        </Grid>{' '}
+                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
+                          <TGFile u={b} />
+                        </Grid>{' '}
+                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
+                          <TGFile u={b} />
+                        </Grid>
+                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
+                          <TGFile u={b} />
+                        </Grid>{' '}
+                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
+                          <TGFile u={b} />
+                        </Grid>
+                        <Grid key={b.createdAt} md={6} xs={24} sm={12}>
+                          <TGFile u={b} />
+                        </Grid>
+                      </>
+                    );
+                  })}
                 </Grid.Container>
               );
             }
