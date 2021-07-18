@@ -1,18 +1,10 @@
 import ReactTimeAgo from 'react-time-ago';
-import NextLink from 'next/link';
-import {
-  Note,
-  Loading,
-  Tooltip,
-  Image,
-  Link,
-  Text,
-  useTheme,
-} from '@geist-ui/react';
+import ReactMarkdown from 'react-markdown';
+import { Note, Loading, Tooltip, Image, useTheme } from '@geist-ui/react';
 import useSWR from 'swr';
+import gfm from 'remark-gfm';
 import Heading from '@/components/heading';
 import Project from '@/components/project';
-import EventListItem from '@/components/activity-event';
 import { usePrefers } from '../lib/use-prefers';
 import HomePage from './home';
 
@@ -50,12 +42,18 @@ function Pager({ initialData: data }) {
             locale="en-US"
           />
         ),
-        message: u.message ? (
-          <span style={{ whiteSpace: 'pre-wrap' }}>{u.message}</span>
-        ) : (
-          ''
-        ),
-        file_path: () => {
+        message: (() => {
+          if (!u.message) return;
+
+          if (!u?.entities) {
+            return <span style={{ whiteSpace: 'pre-wrap' }}>{u.message}</span>;
+          }
+
+          return (
+            <ReactMarkdown remarkPlugins={[gfm]}>{u.message}</ReactMarkdown>
+          );
+        })(),
+        file_path: (() => {
           if (!u.file_path) return;
           if (
             ['voice', 'video', 'animation', 'audio', 'video_note'].includes(
@@ -74,7 +72,7 @@ function Pager({ initialData: data }) {
           } else if (u.type === 'photo') {
             return <Image src={u.file_path} alt="Submission" height={200} />;
           }
-        },
+        })(),
       };
     });
 

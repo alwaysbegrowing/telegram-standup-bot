@@ -74,6 +74,8 @@ export const sendMsg = async (
     chat_id,
     disable_notification,
     caption: body?.message?.caption,
+    entities: body?.message?.entities,
+    caption_entities: body?.message?.caption_entities,
     [type]: file_id || text,
   };
 
@@ -91,7 +93,7 @@ export const sendMsg = async (
   } else if (type === 'text' && body?.message?.[type]) {
     data = {
       ...data,
-      [type]: `${text}\n${body?.message?.[type]}`,
+      [type]: `${body?.message?.[type]}`,
     };
   }
 

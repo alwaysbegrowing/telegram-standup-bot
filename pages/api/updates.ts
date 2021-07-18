@@ -1,6 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
 import { checkSignature } from '@/pages/api/_helpers';
+import { fillMarkdownEntitiesMarkup } from 'telegram-text-entities-filler';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isValid = checkSignature(req?.body || {});
@@ -52,7 +53,16 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         createdAt: u.createdAt,
         message: u?.body?.message?.text || u?.body?.message?.caption,
         file_path: u?.file_path,
+        entities: false,
       };
+
+      const entities =
+        u?.body?.message?.entities || u?.body?.message?.caption_entities;
+
+      if (Array.isArray(entities)) {
+        data.message = fillMarkdownEntitiesMarkup(data.message, entities);
+        data.entities = true;
+      }
 
       if (i) {
         response.find((u) => u?.id === g?.userId).archive.push(data);
