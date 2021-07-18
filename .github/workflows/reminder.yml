@@ -1,0 +1,12 @@
+name: Reminder notification
+on:
+  schedule:
+    - cron: '0 15 * * *'
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reminder API
+        run: |
+          curl --request GET \
+          --url 'https://${{ secrets.MAIN_SITE }}/api/reminder?key=${{ secrets.TELEGRAM_API_KEY }}'
