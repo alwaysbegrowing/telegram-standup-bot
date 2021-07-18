@@ -1,0 +1,12 @@
+name: Send the updates to every group
+on:
+  schedule:
+    - cron: '0 16 * * *'
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send API
+        run: |
+          curl --request GET \
+          --url 'https://${{ secrets.MAIN_SITE }}/api/send?key=${{ secrets.TELEGRAM_API_KEY }}'
