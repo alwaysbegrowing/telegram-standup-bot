@@ -44,7 +44,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   groupUpdates.forEach((g) => {
     const latestMessages = g.updateArchive.reverse();
     return latestMessages.forEach((u, i) => {
-      const data = {
+      let data = {
         id: g.userId,
         name: g.about.first_name,
         type: u.type,
@@ -52,12 +52,19 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         groupId: u?.body?.message?.media_group_id,
         message: u?.body?.message?.text || u?.body?.message?.caption,
         file_path: u?.file_path,
+        locked: g.submitted && !i,
         entities: false,
       };
-
-      // Hasn't been sent to the group yet
-      if (!g.submitted) {
-        console.log('lock it');
+      if (
+        latestMessages?.[0]?.body?.message?.media_group_id === data.groupId &&
+        g.submitted
+      ) {
+        data = {
+          ...data,
+          locked: true,
+          message: false,
+          file_path: false,
+        };
       }
 
       const entities =
@@ -106,8 +113,6 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         ...data,
         message: !g.submitted && data.message,
         file_path: !g.submitted && data.file_path,
-        groupId: !g.submitted && data.groupId,
-        locked: g.submitted,
       });
     });
   });
