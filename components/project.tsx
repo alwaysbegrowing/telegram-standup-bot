@@ -1,11 +1,20 @@
 import React from 'react';
-import { Grid, Button, Text, Card, useTheme } from '@geist-ui/react';
-import * as Icons from 'react-feather';
+import {
+  Button,
+  Text,
+  Card,
+  useTheme,
+  Display,
+  Tooltip,
+} from '@geist-ui/react';
+import { Calendar, Lock } from '@geist-ui/react-icons';
+import timeUntil from 'time-until';
 
 interface Props {
   name: string;
   file_path: () => React.ReactNode;
   message: () => React.ReactNode;
+  locked: boolean;
   createdAt: string;
 }
 
@@ -13,11 +22,17 @@ export type ProjectProps = Props;
 
 const Project: React.FC<ProjectProps> = ({
   name,
+  locked,
   createdAt,
   file_path,
   message,
 }) => {
   const theme = useTheme();
+
+  const nextSubmit = new Date();
+  nextSubmit.setUTCHours(16);
+  nextSubmit.setUTCMinutes(0);
+  nextSubmit.setUTCSeconds(0);
 
   return (
     <>
@@ -25,14 +40,31 @@ const Project: React.FC<ProjectProps> = ({
         <Card className="project__card" shadow>
           <div className="project__title">
             <Text h3>{name}</Text>
-            <Button className="project__visit-button" size="small" auto>
-              More
-            </Button>
+            <Tooltip trigger="click" text="Coming soon" type="dark">
+              <Button className="project__visit-button" size="small" auto>
+                More
+              </Button>
+            </Tooltip>
           </div>
-          <div>{message}</div>
-          <div>{file_path}</div>
+          <div className="content">
+            {locked && (
+              <Display
+                caption={`This new update will be unlocked in ${
+                  timeUntil(nextSubmit).string
+                }`}
+              >
+                <Lock color="lightgray" size={150} />
+              </Display>
+            )}
+            {!locked && (
+              <>
+                <div>{message}</div>
+                <div>{file_path}</div>
+              </>
+            )}
+          </div>
           <Card.Footer className="project__footer">
-            <Icons.Calendar size={14} />
+            <Calendar size={14} />
             {createdAt}
           </Card.Footer>
         </Card>

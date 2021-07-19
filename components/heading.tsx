@@ -1,6 +1,5 @@
 import React from 'react';
 import { Tooltip, Avatar, Button, Tag, Text, useTheme } from '@geist-ui/react';
-import * as Icons from 'react-feather';
 import { UserType } from '@/lib/use-prefers';
 
 interface Props {
@@ -42,7 +41,6 @@ const Heading: React.FC<HeadingProps> = ({ user }) => {
                 <Text className="heading__integration-title">Your groups</Text>
 
                 <div className="heading__integration-inner">
-                  <Icons.Users size={16} aria-label="Telegram" />
                   <span>{user.groups}</span>
                 </div>
               </div>

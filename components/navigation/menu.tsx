@@ -1,7 +1,7 @@
 import React from 'react';
 import TelegramLoginButton from 'react-telegram-login';
 import { Avatar, Button, useTheme, Popover } from '@geist-ui/react';
-import * as Icons from 'react-feather';
+import { Sun, Moon } from '@geist-ui/react-icons';
 import UserSettings from '@/components/navigation/user-settings';
 import { usePrefers } from '@/lib/use-prefers';
 import Submenu from '@/components/navigation/submenu';
@@ -27,11 +27,7 @@ const Menu: React.FC = () => {
               prefers.switchTheme(theme.type === 'dark' ? 'light' : 'dark')
             }
           >
-            {theme.type === 'dark' ? (
-              <Icons.Sun size={16} />
-            ) : (
-              <Icons.Moon size={16} />
-            )}
+            {theme.type === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </Button>
           {prefers?.userInfo && (
             <Popover

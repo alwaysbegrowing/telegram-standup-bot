@@ -69,6 +69,11 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
+"@geist-ui/react-icons@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@geist-ui/react-icons/-/react-icons-1.0.1.tgz#5da112bbc98216bf05da3aabbd7d21594440b209"
+  integrity sha512-/phre1NwXT0Mrxcq3yb+KksJ16/ykptgxI7+jh5pmDZfxnIMPlBWFBGDK0yw96oi752Wuo24X6+tkWjVe/g5Bg==
+
 "@geist-ui/react@^2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@geist-ui/react/-/react-2.1.5.tgz#26532eb1869a97c60c36a3860cba184bdab59f55"
@@ -2970,13 +2975,6 @@ react-dom@17.0.2:
     object-assign "^4.1.1"
     scheduler "^0.20.2"
 
-react-feather@^2.0.9:
-  version "2.0.9"
-  resolved "https://registry.yarnpkg.com/react-feather/-/react-feather-2.0.9.tgz#6e42072130d2fa9a09d4476b0e61b0ed17814480"
-  integrity sha512-yMfCGRkZdXwIs23Zw/zIWCJO3m3tlaUvtHiXlW+3FH7cIT6fiK1iJ7RJWugXq7Fso8ZaQyUm92/GOOHXvkiVUw==
-  dependencies:
-    prop-types "^15.7.2"
-
 react-is@17.0.2, react-is@^17.0.0:
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
@@ -3598,6 +3596,11 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
+
+time-until@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/time-until/-/time-until-1.0.0.tgz#388ae608b0f649e8e1f4bced636625df6a5ae1a2"
+  integrity sha512-+jGXLQE11fXH2yaR/WlyUMDs8Gv082OAY7abMbRw9HpE1ZrxX0TKJLujwbA6thYE7E2Y/w4oZGytbVMICWr15g==
 
 timers-browserify@2.0.12, timers-browserify@^2.0.4:
   version "2.0.12"

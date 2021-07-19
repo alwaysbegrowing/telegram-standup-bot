@@ -55,10 +55,16 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         entities: false,
       };
 
+      // Hasn't been sent to the group yet
+      if (!g.submitted) {
+        console.log('lock it');
+      }
+
       const entities =
         u?.body?.message?.entities || u?.body?.message?.caption_entities;
 
-      if (Array.isArray(entities)) {
+      // Don't convert entities if it isn't submitted
+      if (!g.submitted && Array.isArray(entities)) {
         data.message = fillMarkdownEntitiesMarkup(data.message, entities);
         data.entities = true;
       }
@@ -98,6 +104,10 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       response.push({
         archive: [],
         ...data,
+        message: !g.submitted && data.message,
+        file_path: !g.submitted && data.file_path,
+        groupId: !g.submitted && data.groupId,
+        locked: g.submitted,
       });
     });
   });
