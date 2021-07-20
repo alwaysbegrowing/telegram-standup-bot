@@ -1,7 +1,7 @@
 name: Reminder notification
 on:
   schedule:
-    - cron: '0 15 * * *'
+    - cron: '0 14 * * *'
 jobs:
   cron:
     runs-on: ubuntu-latest
