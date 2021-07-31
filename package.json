@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev &",
-    "local": "npm-run-all -n -s dev ngrok webhook whinfo",
+    "open": "open $(curl -s localhost:4040/api/tunnels | jq -r \".tunnels[0].public_url\")",
+    "local": "npm-run-all -n -s dev ngrok webhook whinfo open",
     "ngrok": "ngrok http 3000 &",
     "webhook": "curl -vvv \"https://api.telegram.org/bot$(dotenv -e .env.local -p TELEGRAM_API_KEY)/setWebhook?url=$(curl -s localhost:4040/api/tunnels | jq -r \".tunnels[0].public_url\")/api/standup?key=$(dotenv -e .env.local -p TELEGRAM_API_KEY)\"",
     "whinfo": "curl -s https://api.telegram.org/bot$(dotenv -e .env.local -p TELEGRAM_API_KEY)/getWebhookInfo | jq",
@@ -33,7 +34,6 @@
   "devDependencies": {
     "@types/react": "^17.0.13",
     "dotenv-cli": "^4.0.0",
-    "dotenv-flow": "^3.2.0",
     "eslint": "^7.30.0",
     "eslint-config-next": "11.0.1",
     "eslint-config-prettier": "^8.3.0",
