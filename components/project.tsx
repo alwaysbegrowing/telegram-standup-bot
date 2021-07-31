@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Button,
-  Text,
+  User,
   Card,
   useTheme,
   Display,
@@ -11,7 +11,9 @@ import { Calendar, Lock } from '@geist-ui/react-icons';
 import timeUntil from 'time-until';
 
 interface Props {
+  username: string;
   name: string;
+  photo: string;
   file_path: () => React.ReactNode;
   message: () => React.ReactNode;
   locked: boolean;
@@ -22,6 +24,8 @@ export type ProjectProps = Props;
 
 const Project: React.FC<ProjectProps> = ({
   name,
+    username,
+    photo,
   locked,
   createdAt,
   file_path,
@@ -39,7 +43,9 @@ const Project: React.FC<ProjectProps> = ({
       <div className="project__wrapper">
         <Card className="project__card" shadow>
           <div className="project__title">
-            <Text h3>{name}</Text>
+            <User src={photo} name={name} >
+              <User.Link href={`https://t.me/${username}`}>@{username}</User.Link>
+            </User>
             <Tooltip trigger="click" text="Coming soon" type="dark">
               <Button className="project__visit-button" size="small" auto>
                 More
