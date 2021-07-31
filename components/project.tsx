@@ -24,8 +24,8 @@ export type ProjectProps = Props;
 
 const Project: React.FC<ProjectProps> = ({
   name,
-    username,
-    photo,
+  username,
+  photo,
   locked,
   createdAt,
   file_path,
@@ -38,13 +38,19 @@ const Project: React.FC<ProjectProps> = ({
   nextSubmit.setUTCMinutes(0);
   nextSubmit.setUTCSeconds(0);
 
+  if (nextSubmit.getUTCDay() === new Date().getUTCDay()) {
+    nextSubmit.setUTCDate(nextSubmit.getUTCDate() + 1);
+  }
+
   return (
     <>
       <div className="project__wrapper">
         <Card className="project__card" shadow>
           <div className="project__title">
-            <User src={photo} name={name} >
-              <User.Link href={`https://t.me/${username}`}>@{username}</User.Link>
+            <User src={photo} name={name}>
+              <User.Link href={`https://t.me/${username}`}>
+                @{username}
+              </User.Link>
             </User>
             <Tooltip trigger="click" text="Coming soon" type="dark">
               <Button className="project__visit-button" size="small" auto>
