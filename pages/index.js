@@ -24,7 +24,7 @@ const TGVideo = ({ u }) => (
 );
 
 const TGPhoto = ({ u }) => (
-  <Image src={u.file_path} alt="Submission" width={300} height={200} />
+  <Image src={u.file_path} alt="Submission" width="300px" height="200px" />
 );
 
 const TGFile = ({ u }) => {
