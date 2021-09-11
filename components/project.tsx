@@ -9,6 +9,7 @@ import {
 } from '@geist-ui/react';
 import { Calendar, Lock } from '@geist-ui/react-icons';
 import timeUntil from 'time-until';
+import { useRouter } from 'next/router';
 
 interface Props {
   name: string;
@@ -33,6 +34,7 @@ const Project: React.FC<ProjectProps> = ({
   nextSubmit.setUTCHours(16);
   nextSubmit.setUTCMinutes(0);
   nextSubmit.setUTCSeconds(0);
+  const router = useRouter();
 
   return (
     <>
@@ -41,7 +43,12 @@ const Project: React.FC<ProjectProps> = ({
           <div className="project__title">
             <Text h3>{name}</Text>
             <Tooltip trigger="click" text="Coming soon" type="dark">
-              <Button className="project__visit-button" size="small" auto>
+              <Button
+                onClick={() => router.push(name)}
+                className="project__visit-button"
+                size="small"
+                auto
+              >
                 More
               </Button>
             </Tooltip>

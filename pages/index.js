@@ -7,20 +7,7 @@ import Heading from '@/components/heading';
 import Project from '@/components/project';
 import { usePrefers } from '../lib/use-prefers';
 import HomePage from './home';
-
-async function fetchWithToken(url) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: localStorage.getItem('telegram-user'),
-  });
-
-  if (res.status !== 200) throw new Error(res.statusText);
-
-  return res.json();
-}
+import { fetchWithToken } from '../lib/helpers';
 
 const TooltipContainer = ({ verboseDate, children, ...rest }) => (
   <Tooltip text={verboseDate}>{children}</Tooltip>
