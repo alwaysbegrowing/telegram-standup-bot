@@ -3,12 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev &",
-    "open": "open $(curl -s localhost:4040/api/tunnels | jq -r \".tunnels[0].public_url\")",
+    "dev": "next dev",
     "local": "npm-run-all -n -s dev ngrok webhook whinfo open",
     "ngrok": "ngrok http 3000 &",
-    "webhook": "curl -vvv \"https://api.telegram.org/bot$(dotenv -e .env.local -p TELEGRAM_API_KEY)/setWebhook?url=$(curl -s localhost:4040/api/tunnels | jq -r \".tunnels[0].public_url\")/api/standup?key=$(dotenv -e .env.local -p TELEGRAM_API_KEY)\"",
-    "whinfo": "curl -s https://api.telegram.org/bot$(dotenv -e .env.local -p TELEGRAM_API_KEY)/getWebhookInfo | jq",
+    "webhook": "bash ngrok-webhook.sh",
+    "open": "bash ngrok-dev.sh",
+    "whinfo": "bash ngrok-whinfo.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

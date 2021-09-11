@@ -136,7 +136,9 @@ export default function Home() {
                   <Loading>loading...</Loading>
                 )}
 
-                <Pager initialData={initialData} />
+                {Array.isArray(initialData) && (
+                  <Pager initialData={initialData} />
+                )}
               </div>
             )}
           </div>

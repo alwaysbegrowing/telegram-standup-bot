@@ -1,4 +1,4 @@
-export const etchWithToken = async (url) => {
+export const fetchWithToken = async (url) => {
   const user = localStorage.getItem('telegram-user');
   if (!user) throw new Error('user not found');
 
