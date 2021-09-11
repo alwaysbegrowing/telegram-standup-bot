@@ -41,7 +41,6 @@ function Pager({ initialData: data }) {
       return u.message || u.file_path || u.locked;
     })
     .map((u) => {
-      console.log(u);
       return {
         ...u,
         createdAt: (

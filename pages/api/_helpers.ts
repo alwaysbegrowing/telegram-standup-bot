@@ -30,9 +30,10 @@ export interface UpdateArchive {
 
 export interface About {
   id: number;
-  is_bot: boolean;
   first_name: string;
   last_name: string;
+  photo_url: string;
+  hash: string;
   username: string;
 }
 

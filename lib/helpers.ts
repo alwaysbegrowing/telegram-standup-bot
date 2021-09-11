@@ -1,10 +1,13 @@
-export const fetchWithToken = async (url) => {
+export const etchWithToken = async (url) => {
+  const user = localStorage.getItem('telegram-user');
+  if (!user) throw new Error('user not found');
+
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: localStorage.getItem('telegram-user'),
+    body: user,
   });
 
   if (res.status !== 200) throw new Error(res.statusText);

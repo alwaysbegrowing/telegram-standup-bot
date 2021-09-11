@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Button,
-  Text,
+  User,
   Card,
   useTheme,
   Display,
@@ -12,7 +12,9 @@ import timeUntil from 'time-until';
 import { useRouter } from 'next/router';
 
 interface Props {
+  username: string;
   name: string;
+  photo: string;
   file_path: () => React.ReactNode;
   message: () => React.ReactNode;
   locked: boolean;
@@ -23,6 +25,8 @@ export type ProjectProps = Props;
 
 const Project: React.FC<ProjectProps> = ({
   name,
+  username,
+  photo,
   locked,
   createdAt,
   file_path,
@@ -36,12 +40,20 @@ const Project: React.FC<ProjectProps> = ({
   nextSubmit.setUTCSeconds(0);
   const router = useRouter();
 
+  if (nextSubmit.getUTCDay() === new Date().getUTCDay()) {
+    nextSubmit.setUTCDate(nextSubmit.getUTCDate() + 1);
+  }
+
   return (
     <>
       <div className="project__wrapper">
         <Card className="project__card" shadow>
           <div className="project__title">
-            <Text h3>{name}</Text>
+            <User src={photo} name={name}>
+              <User.Link href={`https://t.me/${username}`}>
+                @{username}
+              </User.Link>
+            </User>
             <Tooltip trigger="click" text="Coming soon" type="dark">
               <Button
                 onClick={() => router.push(name)}

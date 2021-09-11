@@ -11,12 +11,17 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   }
 
   const { db } = await connectToDatabase();
-  const user = await db.collection('users').findOne({ userId: req.body.id });
+  const { value: user } = await db.collection('users').findOneAndUpdate({ userId: req.body.id }, {
+    $set: {
+      about: req?.body,
+    }
+  });
 
   if (!user) {
     return res.status(404).json({ statusText: 'User not found' });
   }
 
+  // Get updates for one user
   if (req.query.page && req.query.user) {
     const page = req.query.page || 1;
     const userId = Number(req.query.user);
@@ -26,7 +31,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         // The user ID to find
         userId,
         // To make sure they're allowed to query this user ID
-        'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) },
+        'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) || [] },
       })
       .project({ updateArchive: { $slice: -10 } });
 
@@ -35,7 +40,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   const groupUpdates = await db
     .collection('users')
-    .find({ 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) } })
+    .find({ 'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) || [] } })
     .project({ updateArchive: { $slice: -10 } })
     .toArray();
 
@@ -47,6 +52,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       let data = {
         id: g.userId,
         name: g.about.first_name,
+        username: g.about.username,
+        photo: g.about.photo_url,
         type: u.type,
         createdAt: u.createdAt,
         groupId: u?.body?.message?.media_group_id,

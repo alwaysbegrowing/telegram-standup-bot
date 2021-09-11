@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev &",
+    "open": "open $(curl -s localhost:4040/api/tunnels | jq -r \".tunnels[0].public_url\")",
+    "local": "npm-run-all -n -s dev ngrok webhook whinfo open",
+    "ngrok": "ngrok http 3000 &",
+    "webhook": "curl -vvv \"https://api.telegram.org/bot$(dotenv -e .env.local -p TELEGRAM_API_KEY)/setWebhook?url=$(curl -s localhost:4040/api/tunnels | jq -r \".tunnels[0].public_url\")/api/standup?key=$(dotenv -e .env.local -p TELEGRAM_API_KEY)\"",
+    "whinfo": "curl -s https://api.telegram.org/bot$(dotenv -e .env.local -p TELEGRAM_API_KEY)/getWebhookInfo | jq",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -28,10 +33,13 @@
   },
   "devDependencies": {
     "@types/react": "^17.0.13",
+    "dotenv-cli": "^4.0.0",
     "eslint": "^7.30.0",
     "eslint-config-next": "11.0.1",
     "eslint-config-prettier": "^8.3.0",
     "javascript-time-ago": "^2.3.8",
+    "ngrok": "^4.1.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "2.3.2",
     "react-time-ago": "^7.0.0"
   }
