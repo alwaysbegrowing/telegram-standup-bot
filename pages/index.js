@@ -36,6 +36,7 @@ const TGFile = ({ u }) => {
   }
 };
 function Pager({ initialData: data }) {
+  console.log(data);
   const formattedData = (data || [])
     .filter((u) => {
       return u.message || u.file_path || u.locked;
