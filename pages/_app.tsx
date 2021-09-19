@@ -24,6 +24,10 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
 
     const user = window.localStorage.getItem('telegram-user') as string;
     if (user && user.includes('hash')) setUserInfo(JSON.parse(user));
+
+    if (pageProps.TELEGRAM_USER && !user) {
+      setUserDetails(JSON.parse(pageProps.TELEGRAM_USER));
+    }
   }, []);
 
   const switchTheme = useCallback((theme: ThemeType) => {
@@ -87,11 +91,5 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
     </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { BOT_NAME: process.env.BOT_NAME },
-  };
-}
 
 export default StoodBotApp;

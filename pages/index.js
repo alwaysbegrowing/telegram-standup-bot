@@ -191,6 +191,9 @@ export default function Home() {
 
 export async function getStaticProps() {
   return {
-    props: { BOT_NAME: process.env.BOT_NAME },
+    props: {
+      BOT_NAME: process.env.BOT_NAME,
+      TELEGRAM_USER: process.env.TELEGRAM_USER,
+    },
   };
 }
