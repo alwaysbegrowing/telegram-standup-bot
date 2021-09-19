@@ -8,33 +8,12 @@ import Project from '@/components/project';
 import { usePrefers } from '../lib/use-prefers';
 import HomePage from './home';
 import { fetchWithToken } from '../lib/helpers';
+import TGFile from './../components/views/File';
 
-const TooltipContainer = ({ verboseDate, children, ...rest }) => (
+const TooltipContainer = ({ verboseDate, children }) => (
   <Tooltip text={verboseDate}>{children}</Tooltip>
 );
 
-const TGVideo = ({ u }) => (
-  <video
-    controls={u.type !== 'animation'}
-    autoPlay={u.type === 'animation'}
-    loop
-  >
-    <source src={u.file_path} />
-  </video>
-);
-
-const TGPhoto = ({ u }) => (
-  <Image src={u.file_path} alt="Submission" width="300px" height="200px" />
-);
-
-const TGFile = ({ u }) => {
-  if (!u.file_path) return null;
-  if (['voice', 'video', 'animation', 'audio', 'video_note'].includes(u.type)) {
-    return <TGVideo u={u} />;
-  } else if (u.type === 'photo') {
-    return <TGPhoto u={u} />;
-  }
-};
 function Pager({ initialData: data }) {
   console.log(data);
   const formattedData = (data || [])
