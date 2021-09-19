@@ -11,7 +11,7 @@ const SettingsPage = () => {
         <Grid.Container gap={1} alignItems="stretch" alignContent="stretch">
           <Grid md={4} xs={12} alignContent="flex-start" direction="column">
             <span>General</span>
-            <Spacer y={1} />
+            <Spacer />
             <span>Groups</span>
           </Grid>
 
