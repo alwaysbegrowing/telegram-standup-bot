@@ -43,7 +43,10 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
     if (user && user.includes('hash')) setUserInfo(JSON.parse(user));
 
     if (pageProps.TELEGRAM_USER && !user) {
-      setUserDetails(JSON.parse(pageProps.TELEGRAM_USER));
+      try {
+        const deets = JSON.parse(pageProps.TELEGRAM_USER);
+        setUserDetails(deets);
+      } catch (e) {}
     }
   }, [pageProps.TELEGRAM_USER, setUserDetails]);
 
