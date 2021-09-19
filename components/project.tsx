@@ -57,16 +57,13 @@ const Project: React.FC<ProjectProps> = ({
                 @{username}
               </User.Link>
             </User>
-            <Tooltip trigger="click" text="Coming soon" type="dark">
-              <Button
-                onClick={() => router.push(name)}
-                className="project__visit-button"
-                size="small"
-                auto
-              >
-                More
-              </Button>
-            </Tooltip>
+            <Button
+              onClick={() => router.push(username)}
+              className="project__visit-button"
+              auto
+            >
+              More
+            </Button>
           </div>
           <div className="content">
             {locked && (
