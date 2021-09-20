@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tooltip, Avatar, Button, Tag, Text, useTheme } from '@geist-ui/react';
+import { Avatar, Button, Tag, Text, useTheme, Link } from '@geist-ui/react';
 import { UserType } from '@/lib/use-prefers';
 
 interface Props {
@@ -28,11 +28,11 @@ const Heading: React.FC<HeadingProps> = ({ user }) => {
               <Tag className="headding__user-role">{user.role}</Tag>
 
               <div className="heading__actions">
-                <Tooltip trigger="click" text="Coming soon" type="dark">
+                <Link href="https://t.me/stood_bot">
                   <Button type="secondary" auto>
                     Create Update
                   </Button>
-                </Tooltip>
+                </Link>
               </div>
             </div>
 
