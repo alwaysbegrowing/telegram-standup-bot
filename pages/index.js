@@ -9,13 +9,13 @@ import { usePrefers } from '../lib/use-prefers';
 import HomePage from './home';
 import { fetchWithToken } from '../lib/helpers';
 import TGFile from './../components/views/File';
+import Update from './../components/views/Update';
 
 const TooltipContainer = ({ verboseDate, children }) => (
   <Tooltip text={verboseDate}>{children}</Tooltip>
 );
 
-function Pager({ initialData: data }) {
-  console.log(data);
+export const Pager = ({ initialData: data }) => {
   const formattedData = (data || [])
     .filter((u) => {
       return u.message || u.file_path || u.locked;
@@ -69,7 +69,7 @@ function Pager({ initialData: data }) {
     });
 
   return formattedData.map((user) => <Project key={user.id} {...user} />);
-}
+};
 
 export default function Home() {
   const prefers = usePrefers();
@@ -99,80 +99,7 @@ export default function Home() {
         }}
       />
 
-      <div className="page__wrapper">
-        <div className="page__content">
-          <div className="projects">
-            {prefers?.userInfo?.photo_url && (
-              <div>
-                {prefers?.userInfo && initialDataError && (
-                  <Note type="info">
-                    This bot has not been setup yet! Please wait for some
-                    updates to get posted first.
-                  </Note>
-                )}
-
-                {prefers?.userInfo && !initialDataError && !initialData && (
-                  <Loading>loading...</Loading>
-                )}
-
-                {Array.isArray(initialData) && (
-                  <Pager initialData={initialData} />
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <style jsx>{`
-        .page__wrapper {
-          background-color: ${theme.palette.accents_1};
-        }
-        .page__content {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: wrap;
-          width: ${theme.layout.pageWidthWithMargin};
-          max-width: 100%;
-          margin: 0 auto;
-          padding: 0 ${theme.layout.pageMargin};
-          transform: translateY(-35px);
-          box-sizing: border-box;
-        }
-        .projects {
-          flex: 1;
-          width: 540px;
-          max-width: 100%;
-        }
-        .projects :global(.project__wrapper):not(:last-of-type) {
-          margin-bottom: calc(1.5 * ${theme.layout.gap});
-        }
-        .page__content :global(.view-all) {
-          font-size: 0.875rem;
-          font-weight: 700;
-          margin: calc(1.5 * ${theme.layout.gap}) 0;
-          text-align: center;
-        }
-        @media (max-width: ${theme.breakpoints.sm.max}) {
-          .page__content {
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch;
-          }
-          .projects {
-            width: 100%;
-            margin-right: unset;
-          }
-        }
-      `}</style>
+      <Update initialDataError={initialDataError} initialData={initialData} />
     </>
   );
-}
-
-export async function getStaticProps() {
-  return {
-    props: {
-      BOT_NAME: process.env.BOT_NAME,
-      TELEGRAM_USER: process.env.TELEGRAM_USER,
-    },
-  };
 }
