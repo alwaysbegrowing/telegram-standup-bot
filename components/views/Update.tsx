@@ -82,7 +82,7 @@ const Update = ({ initialData, initialDataError }) => {
             {prefers?.userInfo?.photo_url && (
               <div>
                 {prefers?.userInfo && initialDataError && (
-                  <Note type="info">
+                  <Note>
                     This bot has not been setup yet! Please wait for some
                     updates to get posted first.
                   </Note>
