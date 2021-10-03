@@ -7,51 +7,15 @@ import Heading from '@/components/heading';
 import Project from '@/components/project';
 import { usePrefers } from '../lib/use-prefers';
 import HomePage from './home';
+import { fetchWithToken } from '../lib/helpers';
+import TGFile from './../components/views/File';
+import Update from './../components/views/Update';
 
-async function fetchWithToken(url) {
-  const user = localStorage.getItem('telegram-user');
-  if (!user) throw new Error('user not found');
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: user,
-  });
-
-  if (res.status !== 200) throw new Error(res.statusText);
-
-  return res.json();
-}
-
-const TooltipContainer = ({ verboseDate, children, ...rest }) => (
+const TooltipContainer = ({ verboseDate, children }) => (
   <Tooltip text={verboseDate}>{children}</Tooltip>
 );
 
-const TGVideo = ({ u }) => (
-  <video
-    controls={u.type !== 'animation'}
-    autoPlay={u.type === 'animation'}
-    loop
-  >
-    <source src={u.file_path} />
-  </video>
-);
-
-const TGPhoto = ({ u }) => (
-  <Image src={u.file_path} alt="Submission" width={300} height={200} />
-);
-
-const TGFile = ({ u }) => {
-  if (!u.file_path) return null;
-  if (['voice', 'video', 'animation', 'audio', 'video_note'].includes(u.type)) {
-    return <TGVideo u={u} />;
-  } else if (u.type === 'photo') {
-    return <TGPhoto u={u} />;
-  }
-};
-function Pager({ initialData: data }) {
+export const Pager = ({ initialData: data }) => {
   const formattedData = (data || [])
     .filter((u) => {
       return u.message || u.file_path || u.locked;
@@ -105,7 +69,7 @@ function Pager({ initialData: data }) {
     });
 
   return formattedData.map((user) => <Project key={user.id} {...user} />);
-}
+};
 
 export default function Home() {
   const prefers = usePrefers();
@@ -135,75 +99,7 @@ export default function Home() {
         }}
       />
 
-      <div className="page__wrapper">
-        <div className="page__content">
-          <div className="projects">
-            {prefers?.userInfo?.photo_url && (
-              <div>
-                {prefers?.userInfo && initialDataError && (
-                  <Note type="info">
-                    This bot has not been setup yet! Please wait for some
-                    updates to get posted first.
-                  </Note>
-                )}
-
-                {prefers?.userInfo && !initialDataError && !initialData && (
-                  <Loading>loading...</Loading>
-                )}
-
-                <Pager initialData={initialData} />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      <style jsx>{`
-        .page__wrapper {
-          background-color: ${theme.palette.accents_1};
-        }
-        .page__content {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: wrap;
-          width: ${theme.layout.pageWidthWithMargin};
-          max-width: 100%;
-          margin: 0 auto;
-          padding: 0 ${theme.layout.pageMargin};
-          transform: translateY(-35px);
-          box-sizing: border-box;
-        }
-        .projects {
-          flex: 1;
-          width: 540px;
-          max-width: 100%;
-        }
-        .projects :global(.project__wrapper):not(:last-of-type) {
-          margin-bottom: calc(1.5 * ${theme.layout.gap});
-        }
-        .page__content :global(.view-all) {
-          font-size: 0.875rem;
-          font-weight: 700;
-          margin: calc(1.5 * ${theme.layout.gap}) 0;
-          text-align: center;
-        }
-        @media (max-width: ${theme.breakpoints.sm.max}) {
-          .page__content {
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch;
-          }
-          .projects {
-            width: 100%;
-            margin-right: unset;
-          }
-        }
-      `}</style>
+      <Update initialDataError={initialDataError} initialData={initialData} />
     </>
   );
-}
-
-export async function getStaticProps() {
-  return {
-    props: { BOT_NAME: process.env.BOT_NAME },
-  };
 }

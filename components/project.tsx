@@ -9,6 +9,7 @@ import {
 } from '@geist-ui/react';
 import { Calendar, Lock } from '@geist-ui/react-icons';
 import timeUntil from 'time-until';
+import { useRouter } from 'next/router';
 
 interface Props {
   username: string;
@@ -33,12 +34,16 @@ const Project: React.FC<ProjectProps> = ({
 }) => {
   const theme = useTheme();
 
+  // Releases are at 4pm UTC every day
   const nextSubmit = new Date();
-  nextSubmit.setUTCHours(16);
-  nextSubmit.setUTCMinutes(0);
+  nextSubmit.setUTCHours(15);
+  nextSubmit.setUTCMinutes(8);
   nextSubmit.setUTCSeconds(0);
+  const router = useRouter();
 
-  if (nextSubmit.getUTCDay() === new Date().getUTCDay()) {
+  var currentDate = new Date();
+  // Set release date to tomorrow because release has passed
+  if (currentDate.getTime() >= nextSubmit.getTime()) {
     nextSubmit.setUTCDate(nextSubmit.getUTCDate() + 1);
   }
 
@@ -52,11 +57,13 @@ const Project: React.FC<ProjectProps> = ({
                 @{username}
               </User.Link>
             </User>
-            <Tooltip trigger="click" text="Coming soon" type="dark">
-              <Button className="project__visit-button" size="small" auto>
-                More
-              </Button>
-            </Tooltip>
+            <Button
+              onClick={() => router.push(username)}
+              className="project__visit-button"
+              auto
+            >
+              More
+            </Button>
           </div>
           <div className="content">
             {locked && (

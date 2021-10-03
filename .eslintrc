@@ -3,7 +3,12 @@
     "browser": true,
     "es2021": true
   },
-  "extends": ["next", "next/core-web-vitals","plugin:react/recommended", "prettier"],
+  "extends": [
+    "next",
+    "next/core-web-vitals",
+    "plugin:react/recommended",
+    "prettier"
+  ],
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -13,10 +18,11 @@
   },
   "plugins": ["react"],
   "rules": {
-      "react/prop-types": 0,
-    // suppress errors for missing 'import React' in files
+    "react/prop-types": 0,
     "react/react-in-jsx-scope": "off",
-    // allow jsx syntax in js files (for next.js project)
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx", ".ts"] }]
+    "react/jsx-filename-extension": [
+      1,
+      { "extensions": [".js", ".jsx", ".ts", ".tsx"] }
+    ]
   }
 }

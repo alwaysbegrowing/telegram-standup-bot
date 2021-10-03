@@ -20,6 +20,7 @@ const Footer: React.FC = () => {
               underline
             >
               <Image
+                alt="Vercel Logo"
                 height={15}
                 width={70}
                 src={`/logos/vercel-logotype-${

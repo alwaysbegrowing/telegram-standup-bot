@@ -15,17 +15,6 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
   const [themeType, setThemeType] = useState<ThemeType>('light');
   const [userInfo, setUserInfo] = useState<UserType>();
 
-  useEffect(() => {
-    document.documentElement.removeAttribute('style');
-    document.body.removeAttribute('style');
-
-    const theme = window.localStorage.getItem('theme') as ThemeType;
-    if (themes.includes(theme)) setThemeType(theme);
-
-    const user = window.localStorage.getItem('telegram-user') as string;
-    if (user && user.includes('hash')) setUserInfo(JSON.parse(user));
-  }, []);
-
   const switchTheme = useCallback((theme: ThemeType) => {
     setThemeType(theme);
     if (typeof window !== 'undefined' && window.localStorage)
@@ -42,6 +31,24 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.removeAttribute('style');
+    document.body.removeAttribute('style');
+
+    const theme = window.localStorage.getItem('theme') as ThemeType;
+    if (themes.includes(theme)) setThemeType(theme);
+
+    const user = window.localStorage.getItem('telegram-user') as string;
+    if (user && user.includes('hash')) setUserInfo(JSON.parse(user));
+
+    if (pageProps.TELEGRAM_USER && !user) {
+      try {
+        const deets = JSON.parse(pageProps.TELEGRAM_USER);
+        setUserDetails(deets);
+      } catch (e) {}
+    }
+  }, [pageProps.TELEGRAM_USER, setUserDetails]);
 
   return (
     <>
@@ -61,10 +68,6 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
         <meta
           name="description"
           content="Stood Bot brings standup functionality to Telegram. Group members are able to submit updates, and they are all sent to a shared channel at a set time."
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-          rel="stylesheet"
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -87,11 +90,5 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
     </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: { BOT_NAME: process.env.BOT_NAME },
-  };
-}
 
 export default StoodBotApp;
