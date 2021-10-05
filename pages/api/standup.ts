@@ -258,7 +258,7 @@ const addToStandupGroup = async (
   }
 
   return await sendMsg(
-    `This chat is now subscribed to your daily updates. Send me a message  @${process.env.BOT_NAME} to get started.`,
+    `This chat is now subscribed to your daily updates. Send me a message  @${process.env.NEXT_PUBLIC_BOT_NAME} to get started.`,
     chatId,
     messageId
   );

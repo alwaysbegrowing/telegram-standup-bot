@@ -28,7 +28,7 @@ const Submenu: React.FC = () => {
               onChange={(route) => router.push(route)}
             >
               <Tabs.Item label="Overview" value="/" />
-              <Tabs.Item label="Your updates" value="/profile" />
+              <Tabs.Item label="Your updates" value={`/${prefers.username}`} />
               <Tabs.Item label="Settings" value="/settings" />
             </Tabs>
           </div>

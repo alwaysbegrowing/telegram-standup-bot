@@ -11,7 +11,7 @@ import Footer from '@/components/footer';
 
 TimeAgo.addDefaultLocale(en);
 
-const StoodBotApp = ({ Component, pageProps }: AppProps) => {
+const StoodBotApp = ({ Component }: AppProps) => {
   const [themeType, setThemeType] = useState<ThemeType>('light');
   const [userInfo, setUserInfo] = useState<UserType>();
 
@@ -42,13 +42,13 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
     const user = window.localStorage.getItem('telegram-user') as string;
     if (user && user.includes('hash')) setUserInfo(JSON.parse(user));
 
-    if (pageProps.TELEGRAM_USER && !user) {
+    if (process.env.NEXT_PUBLIC_TELEGRAM_USER && !user) {
       try {
-        const deets = JSON.parse(pageProps.TELEGRAM_USER);
+        const deets = JSON.parse(process.env.NEXT_PUBLIC_TELEGRAM_USER);
         setUserDetails(deets);
       } catch (e) {}
     }
-  }, [pageProps.TELEGRAM_USER, setUserDetails]);
+  }, [setUserDetails]);
 
   return (
     <>
@@ -75,7 +75,6 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
         <CssBaseline />
         <PrefersContext.Provider
           value={{
-            BOT_NAME: pageProps.BOT_NAME,
             userInfo,
             setUserDetails,
             themeType,
@@ -83,21 +82,12 @@ const StoodBotApp = ({ Component, pageProps }: AppProps) => {
           }}
         >
           <Menu />
-          <Component {...pageProps} />
+          <Component />
           <Footer />
         </PrefersContext.Provider>
       </GeistProvider>
     </>
   );
 };
-
-export async function getStaticProps() {
-  return {
-    props: {
-      BOT_NAME: process.env.BOT_NAME,
-      TELEGRAM_USER: process.env.TELEGRAM_USER,
-    },
-  };
-}
 
 export default StoodBotApp;

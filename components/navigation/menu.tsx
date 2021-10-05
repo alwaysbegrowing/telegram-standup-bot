@@ -44,7 +44,7 @@ const Menu: React.FC = () => {
           {!prefers?.userInfo && (
             <TelegramLoginButton
               dataOnauth={handleTelegramResponse}
-              botName={prefers.BOT_NAME}
+              botName={process.env.NEXT_PUBLIC_BOT_NAME}
             />
           )}
         </div>
