@@ -72,8 +72,6 @@ const Update = ({ initialData, initialDataError }) => {
   const prefers = usePrefers();
   const theme = useTheme();
 
-  console.log(initialData);
-
   return (
     <>
       <div className="page__wrapper">
