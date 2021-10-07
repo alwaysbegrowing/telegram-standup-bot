@@ -47,7 +47,7 @@ export interface Member {
 }
 
 const draftBody = (
-  text: string,
+  prefix: string,
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
@@ -65,7 +65,7 @@ const draftBody = (
     entities: body?.message?.entities,
     media: file_id,
     caption_entities: body?.message?.caption_entities,
-    [type]: file_id || text,
+    [type]: file_id || prefix,
     type,
   };
 
@@ -83,7 +83,7 @@ const draftBody = (
   } else if (type === 'text' && body?.message?.[type]) {
     data = {
       ...data,
-      [type]: `${body?.message?.[type]}`,
+      [type]: `${prefix}\n\n${body.message[type]}`,
     };
   }
 
@@ -91,20 +91,19 @@ const draftBody = (
 };
 
 export const sendMsg = async (
-  text: string,
+  prefix: string,
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
   theUpdate: any = {}
 ) => {
-  console.log(theUpdate);
   const body = theUpdate?.body || {};
   const groupId = body?.message?.media_group_id;
   const type = groupId ? 'group' : theUpdate?.type || 'text';
   const apiEndpoint = telegramTypes[type] || telegramTypes.text;
 
   let data = draftBody(
-    text,
+    prefix,
     chat_id,
     reply_to_message_id,
     disable_notification,
@@ -136,30 +135,20 @@ export const sendMsg = async (
       mediaGroup.length &&
       mediaGroup?.[0]?.updateArchive.length
     ) {
-      console.log('Using full group', mediaGroup[0].updateArchive);
       data.media = [];
       mediaGroup[0].updateArchive.forEach((u) => {
         data.media.push(
-          draftBody(text, chat_id, reply_to_message_id, disable_notification, u)
+          draftBody(
+            prefix,
+            chat_id,
+            reply_to_message_id,
+            disable_notification,
+            u
+          )
         );
       });
-
-      console.log('data.media', data.media);
     }
   }
-
-  console.log({
-    text,
-    chat_id,
-    reply_to_message_id,
-    disable_notification,
-    theUpdate,
-    telegramTypes,
-    apiEndpoint,
-    type,
-    body,
-    data,
-  });
 
   const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiEndpoint}`;
 

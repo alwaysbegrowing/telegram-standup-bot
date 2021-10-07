@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-import { sendMsg, StandupGroup, Member, About } from './_helpers';
+import { sendMsg, StandupGroup, Member } from './_helpers';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (
@@ -23,37 +23,18 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     .find({ submitted: true })
     .toArray();
 
-  const sentStandup = [];
+  const sendPromises = [];
   users
     .filter((g) => !!g.groups.length)
     .forEach((user: Member) => {
-      user.groups.forEach((group: StandupGroup) => {
+      user.groups.forEach(async (group: StandupGroup) => {
         const theUpdate = user.updateArchive.slice(-1)[0];
-        const type = theUpdate?.type;
-        const hasEntities =
-          theUpdate?.body?.message?.entities ||
-          theUpdate?.body?.message?.caption_entities;
 
-        if (!hasEntities && type === 'text') {
-          sentStandup.push(
-            sendMsg(
-              `${user.about.first_name}:`,
-              group.chatId,
-              null,
-              true,
-              theUpdate
-            )
-          );
-        } else {
-          sentStandup.push(
-            sendMsg(`${user.about.first_name}:`, group.chatId, null, true),
-            sendMsg(``, group.chatId, null, true, theUpdate)
-          );
-        }
+        await sendMsg(`${user.about.first_name}:`, group.chatId, null, true);
+        await sendMsg(``, group.chatId, null, true, theUpdate);
       });
     });
 
-  await Promise.all(sentStandup);
   if (process.env.NODE_ENV === 'production') {
     await markAllSent();
   }
