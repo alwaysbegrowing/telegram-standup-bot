@@ -93,7 +93,7 @@ const draftBody = (
     disable_notification,
     caption: appendAuthor(body?.message?.caption, postfix, theUpdate.createdAt),
     entities: body?.message?.entities,
-    media: file_id,
+    media: [],
     caption_entities: body?.message?.caption_entities,
     [type]: file_id || postfix,
     type,
@@ -165,7 +165,6 @@ export const sendMsg = async (
       mediaGroup.length &&
       mediaGroup?.[0]?.updateArchive.length
     ) {
-      data.media = [];
       mediaGroup[0].updateArchive.forEach((u, i) => {
         data.media.push(
           draftBody(
