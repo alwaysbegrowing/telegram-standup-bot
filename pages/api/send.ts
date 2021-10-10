@@ -23,17 +23,20 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     .find({ submitted: true })
     .toArray();
 
-  const sendPromises = [];
+  const sentStandup = [];
   users
-    .filter((g) => !!g.groups.length)
+    .filter((g: Member) => !!g.groups.length)
     .forEach((user: Member) => {
-      user.groups.forEach(async (group: StandupGroup) => {
+      user.groups.forEach((group: StandupGroup) => {
         const theUpdate = user.updateArchive.slice(-1)[0];
-
-        await sendMsg(`${user.about.first_name}:`, group.chatId, null, true);
-        await sendMsg(``, group.chatId, null, true, theUpdate);
+        sentStandup.push(
+          sendMsg(`${user.about.first_name}:`, group.chatId, null, true),
+          sendMsg(``, group.chatId, null, true, theUpdate)
+        );
       });
     });
+
+  await Promise.all(sentStandup);
 
   if (process.env.NODE_ENV === 'production') {
     await markAllSent();
