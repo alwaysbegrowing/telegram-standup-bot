@@ -351,12 +351,6 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isRestartCommand =
     isPrivateCommand && text && text.search('/restart') !== -1;
   if (isPreviewCommand) {
-    const r = await sendMsg(
-      "Here's a preview of your next update:",
-      chat.id,
-      message_id
-    );
-
     const { previousSubmitTimestamp, nextSubmitTimestamp } =
       getSubmissionDates();
 
@@ -390,16 +384,36 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       ])
       .toArray();
 
-    const sendUpdatePromises = [];
-    groupUpdates
-      .filter((g: Member) => !!g.groups.length && !!g.latestUpdate)
-      .forEach((user: Member) => {
-        sendUpdatePromises.push(
-          sendMsg(user.about.first_name, chat.id, null, true, user.latestUpdate)
-        );
-      });
+    if (groupUpdates.length !== 0) {
+      await sendMsg(
+        "Here's a preview of your next update:",
+        chat.id,
+        message_id
+      );
 
-    await Promise.allSettled(sendUpdatePromises);
+      const sendUpdatePromises = [];
+      groupUpdates
+        .filter((g: Member) => !!g.groups.length && !!g.latestUpdate)
+        .forEach((user: Member) => {
+          sendUpdatePromises.push(
+            sendMsg(
+              user.about.first_name,
+              chat.id,
+              null,
+              true,
+              user.latestUpdate
+            )
+          );
+        });
+
+      await Promise.allSettled(sendUpdatePromises);
+    } else {
+      await sendMsg(
+        'You have no update to send yet! Send me your update to get started.',
+        chat.id,
+        message_id
+      );
+    }
 
     return res.json({ status: r.status });
   }
