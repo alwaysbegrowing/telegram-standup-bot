@@ -91,7 +91,11 @@ const draftBody = (
     reply_to_message_id,
     chat_id,
     disable_notification,
-    caption: appendAuthor(body?.message?.caption, postfix, theUpdate.createdAt),
+    caption: appendAuthor(
+      body?.message?.caption,
+      postfix,
+      theUpdate?.createdAt
+    ),
     entities: body?.message?.entities,
     media: [],
     caption_entities: body?.message?.caption_entities,
@@ -113,7 +117,7 @@ const draftBody = (
   } else if (type === 'text' && body?.message?.[type]) {
     data = {
       ...data,
-      [type]: appendAuthor(body.message[type], postfix, theUpdate.createdAt),
+      [type]: appendAuthor(body.message[type], postfix, theUpdate?.createdAt),
     };
   }
 
