@@ -43,16 +43,34 @@ export interface Member {
   botCanMessage: boolean;
   updateArchive: Array<UpdateArchive>;
   about: About;
+  latestUpdate?: UpdateArchive;
   groups: Array<StandupGroup>;
 }
 
-const getCaption = (caption = '', postfix = '') => {
+const appendAuthor = (caption = '', postfix = '', createdAt = '') => {
   let response = '';
 
   if (postfix) {
     response = caption ? `${caption}\n\n- ${postfix}` : `- ${postfix}`;
   } else {
     response = caption || '';
+  }
+
+  // TODO: think about timezone submissions
+  if (createdAt) {
+    // response = `${response}\n\n${createdAt}`;
+  }
+
+  // captions & texts
+  const maxLengths = [1024, 4096];
+  const captionLength = caption.length;
+
+  if (maxLengths.includes(captionLength) && !caption.includes(postfix)) {
+    response = appendAuthor(
+      caption.slice(0, captionLength - (response.length - captionLength)),
+      postfix,
+      createdAt
+    );
   }
 
   return response;
@@ -63,7 +81,7 @@ const draftBody = (
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
-  theUpdate: any = {}
+  theUpdate?: UpdateArchive
 ) => {
   const body = theUpdate?.body || {};
   const type = theUpdate?.type || 'text';
@@ -73,7 +91,7 @@ const draftBody = (
     reply_to_message_id,
     chat_id,
     disable_notification,
-    caption: getCaption(body?.message?.caption, postfix),
+    caption: appendAuthor(body?.message?.caption, postfix, theUpdate.createdAt),
     entities: body?.message?.entities,
     media: file_id,
     caption_entities: body?.message?.caption_entities,
@@ -95,7 +113,7 @@ const draftBody = (
   } else if (type === 'text' && body?.message?.[type]) {
     data = {
       ...data,
-      [type]: `${body.message[type]}\n\n- ${postfix}`,
+      [type]: appendAuthor(body.message[type], postfix, theUpdate.createdAt),
     };
   }
 
@@ -107,7 +125,7 @@ export const sendMsg = async (
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
-  theUpdate: any = {}
+  theUpdate?: UpdateArchive
 ) => {
   const body = theUpdate?.body || {};
   const groupId = body?.message?.media_group_id;
@@ -164,7 +182,6 @@ export const sendMsg = async (
 
   const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiEndpoint}`;
 
-  console.log(url);
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

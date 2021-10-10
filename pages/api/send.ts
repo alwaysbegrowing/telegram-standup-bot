@@ -15,6 +15,10 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   nextSubmit.setUTCHours(15);
   nextSubmit.setUTCMinutes(8);
   nextSubmit.setUTCSeconds(0);
+
+  // Can manually send a day by setting it here (3 less than today for example)
+  // nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 3);
+
   const nextSubmitTimestamp = nextSubmit.getTime();
   nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 1);
   const previousSubmitTimestamp = nextSubmit.getTime();
@@ -22,10 +26,12 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const { db } = await connectToDatabase();
 
   const markAllSent = async () => {
+    console.log('Marking as sent');
+
     const response = await db.collection('users').updateMany(
       {
         'updateArchive.createdAt': {
-          $gte: previousSubmitTimestamp,
+          $gt: previousSubmitTimestamp,
           $lt: nextSubmitTimestamp,
         },
       },
@@ -34,7 +40,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         arrayFilters: [
           {
             'elem.createdAt': {
-              $gte: previousSubmitTimestamp,
+              $gt: previousSubmitTimestamp,
               $lt: nextSubmitTimestamp,
             },
           },
@@ -48,32 +54,51 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   const groupUpdates = await db
     .collection('users')
-    .find({
-      submitted: true,
-      'updateArchive.createdAt': {
-        $gte: previousSubmitTimestamp,
-        $lt: nextSubmitTimestamp,
+    .aggregate([
+      {
+        $project: { updateArchive: 1, groups: 1, about: 1 },
       },
-    })
-    .project({ updateArchive: { $slice: -1 } })
+      {
+        $unwind: '$updateArchive',
+      },
+      {
+        $match: {
+          'updateArchive.createdAt': {
+            $gt: previousSubmitTimestamp,
+            $lt: nextSubmitTimestamp,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: '$about.id',
+          about: { $first: '$about' },
+          groups: { $first: '$groups' },
+          latestUpdate: { $last: '$updateArchive' },
+        },
+      },
+    ])
     .toArray();
 
   const sendUpdatePromises = [];
   groupUpdates
-    .filter((g: Member) => !!g.groups.length)
+    .filter((g: Member) => !!g.groups.length && !!g.latestUpdate)
     .forEach((user: Member) => {
       user.groups.forEach((group: StandupGroup) => {
-        console.log(user.about.first_name, 'sending', group.title);
-        const theUpdate = user.updateArchive.slice(-1)[0];
         sendUpdatePromises.push(
-          sendMsg(user.about.first_name, group.chatId, null, true, theUpdate)
+          sendMsg(
+            user.about.first_name,
+            group.chatId,
+            null,
+            true,
+            user.latestUpdate
+          )
         );
       });
     });
 
   await Promise.allSettled(sendUpdatePromises);
   if (sendUpdatePromises.length) {
-    console.log('Marking as sent');
     await markAllSent();
   }
 
