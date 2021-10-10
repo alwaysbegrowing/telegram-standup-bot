@@ -6,6 +6,7 @@ import {
   Member,
   About,
   telegramTypes,
+  getSubmissionDates,
 } from './_helpers';
 
 const standupTemplate = `Welcome!
@@ -345,6 +346,67 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     entities?.[0]?.type === 'bot_command' && chat?.type === 'private';
   const isPrivateStartCommand =
     isPrivateCommand && text && text.search('/start') !== -1;
+  const isPreviewCommand =
+    isPrivateCommand && text && text.search('/preview') !== -1;
+  const isRestartCommand =
+    isPrivateCommand && text && text.search('/restart') !== -1;
+  if (isPreviewCommand) {
+    const r = await sendMsg(
+      "Here's a preview of your next update:",
+      chat.id,
+      message_id
+    );
+
+    const { previousSubmitTimestamp, nextSubmitTimestamp } =
+      getSubmissionDates();
+
+    const { db } = await connectToDatabase();
+    const groupUpdates = await db
+      .collection('users')
+      .aggregate([
+        {
+          $project: { updateArchive: 1, groups: 1, about: 1 },
+        },
+        {
+          $unwind: '$updateArchive',
+        },
+        {
+          $match: {
+            'about.id': from.id,
+            'updateArchive.createdAt': {
+              $gt: previousSubmitTimestamp,
+              $lt: nextSubmitTimestamp,
+            },
+          },
+        },
+        {
+          $group: {
+            _id: '$about.id',
+            about: { $first: '$about' },
+            groups: { $first: '$groups' },
+            latestUpdate: { $last: '$updateArchive' },
+          },
+        },
+      ])
+      .toArray();
+
+    const sendUpdatePromises = [];
+    groupUpdates
+      .filter((g: Member) => !!g.groups.length && !!g.latestUpdate)
+      .forEach((user: Member) => {
+        sendUpdatePromises.push(
+          sendMsg(user.about.first_name, chat.id, null, true, user.latestUpdate)
+        );
+      });
+
+    await Promise.allSettled(sendUpdatePromises);
+
+    return res.json({ status: r.status });
+  }
+
+  if (isRestartCommand) {
+    // not yet implemented, maybe never will
+  }
 
   if (isPrivateStartCommand) {
     await startBot(from.id);

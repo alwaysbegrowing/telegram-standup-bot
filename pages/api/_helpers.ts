@@ -210,3 +210,23 @@ const signatureMath = ({ hash, ...data }) => {
 };
 
 export const checkSignature = memoize(signatureMath);
+
+export const getSubmissionDates = () => {
+  // Releases are at 4pm UTC every day
+  const nextSubmit = new Date();
+  nextSubmit.setUTCHours(15);
+  nextSubmit.setUTCMinutes(8);
+  nextSubmit.setUTCSeconds(0);
+
+  // Can manually send a day by setting it here (3 less than today for example)
+  // nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 3);
+
+  // Manually send tomorrow's update by doing + 1
+  nextSubmit.setUTCDate(nextSubmit.getUTCDate() + 1);
+
+  const nextSubmitTimestamp = nextSubmit.getTime();
+  nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 1);
+  const previousSubmitTimestamp = nextSubmit.getTime();
+
+  return { previousSubmitTimestamp, nextSubmitTimestamp };
+};

@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-import { sendMsg, StandupGroup, Member } from './_helpers';
+import { sendMsg, StandupGroup, Member, getSubmissionDates } from './_helpers';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (
@@ -10,21 +10,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     return res.status(401).json({ status: 'invalid api key' });
   }
 
-  // Releases are at 4pm UTC every day
-  const nextSubmit = new Date();
-  nextSubmit.setUTCHours(15);
-  nextSubmit.setUTCMinutes(8);
-  nextSubmit.setUTCSeconds(0);
-
-  // Can manually send a day by setting it here (3 less than today for example)
-  // nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 3);
-
-  // Manually send tomorrow's update by doing + 1
-  // nextSubmit.setUTCDate(nextSubmit.getUTCDate() + 1);
-
-  const nextSubmitTimestamp = nextSubmit.getTime();
-  nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 1);
-  const previousSubmitTimestamp = nextSubmit.getTime();
+  const { previousSubmitTimestamp, nextSubmitTimestamp } = getSubmissionDates();
 
   const { db } = await connectToDatabase();
 
