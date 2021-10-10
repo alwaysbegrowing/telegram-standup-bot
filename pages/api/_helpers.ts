@@ -222,7 +222,7 @@ export const getSubmissionDates = () => {
   // nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 3);
 
   // Manually send tomorrow's update by doing + 1
-  nextSubmit.setUTCDate(nextSubmit.getUTCDate() + 1);
+  // nextSubmit.setUTCDate(nextSubmit.getUTCDate() + 1);
 
   const nextSubmitTimestamp = nextSubmit.getTime();
   nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 1);
