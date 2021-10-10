@@ -33,13 +33,13 @@ const Project: React.FC<ProjectProps> = ({
   message,
 }) => {
   const theme = useTheme();
+  const router = useRouter();
 
   // Releases are at 4pm UTC every day
   const nextSubmit = new Date();
   nextSubmit.setUTCHours(15);
   nextSubmit.setUTCMinutes(8);
   nextSubmit.setUTCSeconds(0);
-  const router = useRouter();
 
   var currentDate = new Date();
   // Set release date to tomorrow because release has passed

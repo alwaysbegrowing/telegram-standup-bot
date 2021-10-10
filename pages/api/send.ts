@@ -10,35 +10,70 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     return res.status(401).json({ status: 'invalid api key' });
   }
 
+  // Releases are at 4pm UTC every day
+  const nextSubmit = new Date();
+  nextSubmit.setUTCHours(15);
+  nextSubmit.setUTCMinutes(8);
+  nextSubmit.setUTCSeconds(0);
+  const nextSubmitTimestamp = nextSubmit.getTime();
+  nextSubmit.setUTCDate(nextSubmit.getUTCDate() - 1);
+  const previousSubmitTimestamp = nextSubmit.getTime();
+
   const { db } = await connectToDatabase();
 
   const markAllSent = async () => {
-    await db
-      .collection('users')
-      .updateMany({ submitted: true }, { $set: { submitted: false } });
+    const response = await db.collection('users').updateMany(
+      {
+        'updateArchive.createdAt': {
+          $gte: previousSubmitTimestamp,
+          $lt: nextSubmitTimestamp,
+        },
+      },
+      { $set: { 'updateArchive.$[elem].sent': true, submitted: false } },
+      {
+        arrayFilters: [
+          {
+            'elem.createdAt': {
+              $gte: previousSubmitTimestamp,
+              $lt: nextSubmitTimestamp,
+            },
+          },
+        ],
+        multi: true,
+      }
+    );
+
+    console.log(response);
   };
 
-  const users = await db
+  const groupUpdates = await db
     .collection('users')
-    .find({ submitted: true })
+    .find({
+      submitted: true,
+      'updateArchive.createdAt': {
+        $gte: previousSubmitTimestamp,
+        $lt: nextSubmitTimestamp,
+      },
+    })
+    .project({ updateArchive: { $slice: -1 } })
     .toArray();
 
-  const sentStandup = [];
-  users
+  const sendUpdatePromises = [];
+  groupUpdates
     .filter((g: Member) => !!g.groups.length)
     .forEach((user: Member) => {
       user.groups.forEach((group: StandupGroup) => {
+        console.log(user.about.first_name, 'sending', group.title);
         const theUpdate = user.updateArchive.slice(-1)[0];
-        sentStandup.push(
-          sendMsg(`${user.about.first_name}:`, group.chatId, null, true),
-          sendMsg(``, group.chatId, null, true, theUpdate)
+        sendUpdatePromises.push(
+          sendMsg(user.about.first_name, group.chatId, null, true, theUpdate)
         );
       });
     });
 
-  await Promise.all(sentStandup);
-
-  if (process.env.NODE_ENV === 'production') {
+  await Promise.allSettled(sendUpdatePromises);
+  if (sendUpdatePromises.length) {
+    console.log('Marking as sent');
     await markAllSent();
   }
 

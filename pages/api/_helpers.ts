@@ -46,8 +46,20 @@ export interface Member {
   groups: Array<StandupGroup>;
 }
 
+const getCaption = (caption = '', postfix = '') => {
+  let response = '';
+
+  if (postfix) {
+    response = caption ? `${caption}\n\n- ${postfix}` : `- ${postfix}`;
+  } else {
+    response = caption || '';
+  }
+
+  return response;
+};
+
 const draftBody = (
-  prefix: string,
+  postfix: string,
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
@@ -61,11 +73,11 @@ const draftBody = (
     reply_to_message_id,
     chat_id,
     disable_notification,
-    caption: body?.message?.caption,
+    caption: getCaption(body?.message?.caption, postfix),
     entities: body?.message?.entities,
     media: file_id,
     caption_entities: body?.message?.caption_entities,
-    [type]: file_id || prefix,
+    [type]: file_id || postfix,
     type,
   };
 
@@ -83,7 +95,7 @@ const draftBody = (
   } else if (type === 'text' && body?.message?.[type]) {
     data = {
       ...data,
-      [type]: `${prefix}\n\n${body.message[type]}`,
+      [type]: `${body.message[type]}\n\n- ${postfix}`,
     };
   }
 
@@ -91,7 +103,7 @@ const draftBody = (
 };
 
 export const sendMsg = async (
-  prefix: string,
+  postfix: string,
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
@@ -103,7 +115,7 @@ export const sendMsg = async (
   const apiEndpoint = telegramTypes[type] || telegramTypes.text;
 
   let data = draftBody(
-    prefix,
+    postfix,
     chat_id,
     reply_to_message_id,
     disable_notification,
@@ -136,10 +148,10 @@ export const sendMsg = async (
       mediaGroup?.[0]?.updateArchive.length
     ) {
       data.media = [];
-      mediaGroup[0].updateArchive.forEach((u) => {
+      mediaGroup[0].updateArchive.forEach((u, i) => {
         data.media.push(
           draftBody(
-            prefix,
+            !i && postfix,
             chat_id,
             reply_to_message_id,
             disable_notification,
@@ -152,6 +164,7 @@ export const sendMsg = async (
 
   const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiEndpoint}`;
 
+  console.log(url);
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
