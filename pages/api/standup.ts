@@ -97,27 +97,30 @@ async function uploadFile(url) {
 const submitStandup = async (
   chatId: number,
   userId: number,
-  about: About,
   messageId: number,
-  message: string,
   body: any
 ) => {
   console.log(body);
 
+  const isEdit = !!body?.edited_message;
+  let message = body?.message || body?.edited_message;
+  const type = Object.keys(message).find((a) => telegramTypes[a]);
+  let file_id = message[type]?.file_id;
+
+  if (type === 'photo') {
+    file_id = message?.[type].slice(-1)[0].file_id;
+  }
+
   let file_path = '';
-  let successMessage = 'Your update has been submitted.';
+  let successMessage = isEdit
+    ? 'Your update has been edited.'
+    : 'Your update has been submitted.';
+
   let sendMessage = true;
   const { db } = await connectToDatabase();
 
-  const type = Object.keys(body?.message).find((a) => telegramTypes[a]);
-  let file_id = body.message?.[type]?.file_id;
-
-  if (type === 'photo') {
-    file_id = body?.message?.[type].slice(-1)[0].file_id;
-  }
-
   // Album
-  const groupId = body?.message?.media_group_id;
+  const groupId = message?.media_group_id;
   if (groupId) {
     const mediaGroup = await db
       .collection('users')
@@ -171,29 +174,65 @@ const submitStandup = async (
       }
     } catch (e) {}
   }
-  const entities = body?.message?.entities || body?.message?.caption_entities;
+  const entities = message?.entities || message?.caption_entities;
 
-  const addUpdate = await db.collection('users').updateOne(
-    { userId },
-    {
-      $set: {
-        submitted: true,
-        botCanMessage: true,
+  let dbResponse;
+  if (isEdit) {
+    dbResponse = await db.collection('users').updateOne(
+      {
+        'updateArchive.body.message.message_id': message.message_id,
       },
-      $push: {
-        updateArchive: {
-          sent: false,
-          file_id,
-          entities,
-          caption: body?.message?.caption,
-          type,
-          file_path,
-          createdAt: Date.now(),
-          body,
+      {
+        $set: {
+          'updateArchive.$[elem]': {
+            sent: false,
+            file_id,
+            entities,
+            caption: message?.caption,
+            type,
+            file_path,
+            createdAt: Date.now(),
+            body: {
+              ...body,
+              edited_message: true,
+              message: body.edited_message,
+            },
+          },
         },
       },
-    }
-  );
+      {
+        arrayFilters: [
+          {
+            'elem.body.message.message_id': message.message_id,
+            'elem.sent': false,
+          },
+        ],
+        multi: true,
+      }
+    );
+  } else {
+    dbResponse = await db.collection('users').updateOne(
+      { userId },
+      {
+        $set: {
+          submitted: true,
+          botCanMessage: true,
+        },
+        $push: {
+          updateArchive: {
+            sent: false,
+            file_id,
+            entities,
+            caption: message?.caption,
+            type,
+            file_path,
+            createdAt: Date.now(),
+            body,
+          },
+        },
+      }
+    );
+  }
 
   if (!sendMessage) {
     // Already sent one
@@ -201,8 +240,16 @@ const submitStandup = async (
     return { status: 200 };
   }
 
-  if (addUpdate.modifiedCount) {
+  if (dbResponse.modifiedCount || dbResponse.modifiedCount) {
     return await sendMsg(successMessage, chatId, messageId, true);
+  }
+
+  if (isEdit && dbResponse.modifiedCount === 0) {
+    return await sendMsg(
+      "You can only edit a message that hasn't been sent yet!",
+      chatId,
+      messageId
+    );
   }
 
   return await sendMsg(
@@ -270,12 +317,13 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   }
 
   const { body } = req;
-  const { message } = body || {};
+
+  let message = body?.message || body?.edited_message;
   const { chat, entities, text, message_id, from } = message || {};
 
   // Don't try to parse this message if missing info
   if (!message || !Object.keys(message).some((a) => telegramTypes[a])) {
-    console.log('Quitting early', message);
+    console.log('Quitting early', message, body);
     return res.status(200).json({ status: 'invalid' });
   } else {
     console.log('Received valid request');
@@ -310,14 +358,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     );
     return res.json({ status: r.status });
   } else if (isPrivateMessage) {
-    const r = await submitStandup(
-      chat.id,
-      from.id,
-      from,
-      message_id,
-      text,
-      body
-    );
+    // Valid request to save a new update to db
+    const r = await submitStandup(chat.id, from.id, message_id, body);
     const status = r?.status || 200;
     return res.json({ status });
   }
