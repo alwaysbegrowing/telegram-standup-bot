@@ -43,6 +43,7 @@ export const Pager = ({ initialData: data }) => {
           );
         })(),
         file_path: (() => {
+          if (!u.file_path) return;
           if (!u.groupId) {
             return <TGFile u={u} />;
           }

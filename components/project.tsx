@@ -32,6 +32,8 @@ const Project: React.FC<ProjectProps> = ({
   file_path,
   message,
 }) => {
+  if (!file_path && !message) return null;
+
   const theme = useTheme();
   const router = useRouter();
 

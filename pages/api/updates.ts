@@ -82,8 +82,6 @@ const transformUpdate = (g, response) => {
       file_path: !g.submitted && data.file_path,
     });
   });
-
-  return response;
 };
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
@@ -123,7 +121,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
     if (updates && Array.isArray(updates)) {
       let response = [];
-      const json = updates.map((r) => transformUpdate(r, response));
+      updates.forEach((r) => transformUpdate(r, response));
 
       return res.status(200).json(response);
     }
