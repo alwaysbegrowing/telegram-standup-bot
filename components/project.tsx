@@ -32,10 +32,10 @@ const Project: React.FC<ProjectProps> = ({
   file_path,
   message,
 }) => {
-  if (!file_path && !message) return null;
-
   const theme = useTheme();
   const router = useRouter();
+
+  if (!file_path && !message) return null;
 
   // Releases are at 4pm UTC every day
   const nextSubmit = new Date();
