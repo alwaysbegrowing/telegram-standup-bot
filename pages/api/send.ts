@@ -1,6 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-import { sendMsg, StandupGroup, Member, getSubmissionDates } from './_helpers';
+import { sendMsg, getSubmissionDates } from './_helpers';
+import { Member, StandupGroup, UpdateArchive } from './../lib/types';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (
@@ -23,6 +24,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
           $gt: previousSubmitTimestamp,
           $lt: nextSubmitTimestamp,
         },
+        'updateArchive.sent': false,
       },
       { $set: { 'updateArchive.$[elem].sent': true, submitted: false } },
       {
@@ -32,6 +34,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
               $gt: previousSubmitTimestamp,
               $lt: nextSubmitTimestamp,
             },
+            'elem.sent': false,
           },
         ],
         multi: true,
@@ -56,6 +59,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
             $gt: previousSubmitTimestamp,
             $lt: nextSubmitTimestamp,
           },
+          'updateArchive.sent': false,
         },
       },
       {
@@ -63,26 +67,81 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
           _id: '$about.id',
           about: { $first: '$about' },
           groups: { $first: '$groups' },
-          latestUpdate: { $last: '$updateArchive' },
+          updateArchive: { $push: '$updateArchive' },
         },
       },
     ])
     .toArray();
 
+  const sent = {};
   const sendUpdatePromises = [];
+
+  const totalMedia = {};
+
   groupUpdates
-    .filter((g: Member) => !!g.groups.length && !!g.latestUpdate)
+    .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
+    .forEach((user: Member) => {
+      user.updateArchive.forEach((update: UpdateArchive) => {
+        const id =
+          update.body?.message?.media_group_id ||
+          update.body?.message?.message_id;
+
+        if (
+          Array.isArray(totalMedia[user.about.id]) &&
+          totalMedia[user.about.id].includes(id)
+        )
+          return;
+
+        totalMedia[user.about.id] = Array.isArray(totalMedia[user.about.id])
+          ? [...totalMedia[user.about.id], id]
+          : [id];
+      });
+    });
+
+  groupUpdates
+    .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
     .forEach((user: Member) => {
       user.groups.forEach((group: StandupGroup) => {
-        sendUpdatePromises.push(
-          sendMsg(
-            user.about.first_name,
-            group.chatId,
-            null,
-            true,
-            user.latestUpdate
-          )
-        );
+        const chat_id = group.chatId;
+        let total = user.updateArchive.length;
+        let prefixTotal = 1;
+
+        user.updateArchive.forEach((update: UpdateArchive) => {
+          total = totalMedia[user.about.id].length;
+
+          const body = update?.body || {};
+          const groupId = body?.message?.media_group_id;
+          const type = groupId ? 'group' : update?.type || 'text';
+
+          if (Array.isArray(sent[chat_id]) && sent[chat_id].includes(groupId)) {
+            console.log(groupId, 'already sent');
+            return true;
+          }
+
+          if (type === 'group') {
+            sent[chat_id] = Array.isArray(sent[chat_id])
+              ? [...sent[chat_id], groupId]
+              : [groupId];
+          }
+
+          const prefix =
+            total > 1
+              ? `${prefixTotal}/${total}: ${user.about.first_name}`
+              : `- ${user.about.first_name}`;
+
+          sendUpdatePromises.push(
+            sendMsg(
+              prefix,
+              group.chatId,
+              null,
+              true,
+              update,
+              user.updateArchive
+            )
+          );
+
+          prefixTotal += 1;
+        });
       });
     });
 

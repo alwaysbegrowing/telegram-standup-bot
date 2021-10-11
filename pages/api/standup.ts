@@ -1,13 +1,13 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
+import { sendMsg, getSubmissionDates } from './_helpers';
 import {
-  sendMsg,
   StandupGroup,
   Member,
   About,
   telegramTypes,
-  getSubmissionDates,
-} from './_helpers';
+  UpdateArchive,
+} from '../lib/types';
 
 const standupTemplate = `Welcome!
 
@@ -20,7 +20,6 @@ You can send me videos / photos with captions, gifs, voice messages, and video m
 const leaveStandupGroup = async (
   chatId: number,
   userId: number,
-  about: About,
   messageId: number
 ) => {
   const { db } = await connectToDatabase();
@@ -351,6 +350,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isRestartCommand =
     isPrivateCommand && text && text.search('/restart') !== -1;
   if (isPreviewCommand) {
+    await sendMsg('Not yet', chat.id, message_id);
+    return res.json({ status: 200 });
     const { previousSubmitTimestamp, nextSubmitTimestamp } =
       getSubmissionDates();
 
@@ -371,6 +372,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
               $gt: previousSubmitTimestamp,
               $lt: nextSubmitTimestamp,
             },
+            'updateArchive.sent': false,
           },
         },
         {
@@ -378,37 +380,88 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
             _id: '$about.id',
             about: { $first: '$about' },
             groups: { $first: '$groups' },
-            latestUpdate: { $last: '$updateArchive' },
+            updateArchive: { $push: '$updateArchive' },
           },
         },
       ])
       .toArray();
 
+    let r;
     if (groupUpdates.length !== 0) {
-      await sendMsg(
+      r = await sendMsg(
         "Here's a preview of your next update:",
         chat.id,
         message_id
       );
 
+      const sent = {};
       const sendUpdatePromises = [];
+
+      const totalMedia = {};
+
       groupUpdates
-        .filter((g: Member) => !!g.groups.length && !!g.latestUpdate)
+        .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
         .forEach((user: Member) => {
-          sendUpdatePromises.push(
-            sendMsg(
-              user.about.first_name,
-              chat.id,
-              null,
-              true,
-              user.latestUpdate
+          user.updateArchive.forEach((update: UpdateArchive) => {
+            const id =
+              update.body?.message?.media_group_id ||
+              update.body?.message?.message_id;
+
+            if (
+              Array.isArray(totalMedia[user.about.id]) &&
+              totalMedia[user.about.id].includes(id)
             )
-          );
+              return;
+
+            totalMedia[user.about.id] = Array.isArray(totalMedia[user.about.id])
+              ? [...totalMedia[user.about.id], id]
+              : [id];
+          });
+        });
+
+      groupUpdates
+        .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
+        .forEach((user: Member) => {
+          const chat_id = chat.id;
+          let total = user.updateArchive.length;
+          let prefixTotal = 1;
+
+          user.updateArchive.forEach((update: UpdateArchive) => {
+            total = totalMedia[user.about.id].length;
+
+            const body = update?.body || {};
+            const groupId = body?.message?.media_group_id;
+            const type = groupId ? 'group' : update?.type || 'text';
+
+            if (
+              Array.isArray(sent[chat_id]) &&
+              sent[chat_id].includes(groupId)
+            ) {
+              console.log(groupId, 'already sent');
+              return true;
+            }
+
+            if (type === 'group') {
+              sent[chat_id] = Array.isArray(sent[chat_id])
+                ? [...sent[chat_id], groupId]
+                : [groupId];
+            }
+
+            const prefix =
+              total > 1
+                ? `${prefixTotal}/${total}: ${user.about.first_name}`
+                : `- ${user.about.first_name}`;
+
+            sendUpdatePromises.push(
+              sendMsg(prefix, chat.id, null, true, update, user.updateArchive)
+            );
+            prefixTotal += 1;
+          });
         });
 
       await Promise.allSettled(sendUpdatePromises);
     } else {
-      await sendMsg(
+      r = await sendMsg(
         'You have no update to send yet! Send me your update to get started.',
         chat.id,
         message_id
@@ -450,7 +503,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     );
     return res.json({ status: r.status });
   } else if (isUnsubscribeCommand) {
-    const r = await leaveStandupGroup(chat.id, from.id, from, message_id);
+    const r = await leaveStandupGroup(chat.id, from.id, message_id);
     return res.json({ status: r.status });
   } else {
     return res.status(200).json({ status: 'invalid command' });

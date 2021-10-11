@@ -2,56 +2,13 @@ import fetch from 'node-fetch';
 import { createHash, createHmac } from 'crypto';
 import { connectToDatabase } from '@/pages/api/_connectToDatabase';
 import memoize from 'fast-memoize';
-
-export const telegramTypes = {
-  text: 'sendMessage',
-  voice: 'sendVoice',
-  audio: 'sendAudio',
-  poll: 'sendPoll',
-  video: 'sendVideo',
-  photo: 'sendPhoto',
-  video_note: 'sendVideoNote',
-  animation: 'sendAnimation',
-  group: 'sendMediaGroup',
-};
-
-export interface StandupGroup {
-  chatId: number;
-  title: string;
-}
-
-export interface UpdateArchive {
-  createdAt: string;
-  type: string;
-  file_path: string;
-  file_id: string;
-  body: any;
-}
-
-export interface About {
-  id: number;
-  first_name: string;
-  last_name: string;
-  photo_url: string;
-  hash: string;
-  username: string;
-}
-
-export interface Member {
-  userId: number;
-  submitted: boolean;
-  botCanMessage: boolean;
-  updateArchive: Array<UpdateArchive>;
-  about: About;
-  latestUpdate?: UpdateArchive;
-  groups: Array<StandupGroup>;
-}
+import { telegramTypes, UpdateArchive } from '../lib/types';
 
 const appendAuthor = (caption = '', postfix = '', createdAt = '') => {
   let response = '';
 
   if (postfix) {
-    response = caption ? `${caption}\n\n- ${postfix}` : `- ${postfix}`;
+    response = caption ? `${caption}\n\n${postfix}` : postfix;
   } else {
     response = caption || '';
   }
@@ -97,7 +54,7 @@ const draftBody = (
       theUpdate?.createdAt
     ),
     entities: body?.message?.entities,
-    media: [],
+    media: file_id,
     caption_entities: body?.message?.caption_entities,
     [type]: file_id || postfix,
     type,
@@ -124,12 +81,14 @@ const draftBody = (
   return data;
 };
 
+const sent = {};
 export const sendMsg = async (
   postfix: string,
   chat_id: number,
   reply_to_message_id: number = null,
   disable_notification: boolean = false,
-  theUpdate?: UpdateArchive
+  theUpdate?: UpdateArchive,
+  allUpdates?: UpdateArchive[]
 ) => {
   const body = theUpdate?.body || {};
   const groupId = body?.message?.media_group_id;
@@ -144,32 +103,22 @@ export const sendMsg = async (
     theUpdate
   );
 
-  if (type === 'group') {
-    const { db } = await connectToDatabase();
-    const mediaGroup = await db
-      .collection('users')
-      .find({
-        userId: theUpdate?.body?.message?.from?.id,
-      })
-      .project({
-        updateArchive: {
-          $filter: {
-            input: '$updateArchive',
-            as: 'update',
-            cond: {
-              $eq: ['$$update.body.message.media_group_id', groupId],
-            },
-          },
-        },
-      })
-      .toArray();
+  if (Array.isArray(sent[chat_id]) && sent[chat_id].includes(groupId)) {
+    console.log(groupId, 'already sent');
+    return false;
+  }
 
-    if (
-      Array.isArray(mediaGroup) &&
-      mediaGroup.length &&
-      mediaGroup?.[0]?.updateArchive.length
-    ) {
-      mediaGroup[0].updateArchive.forEach((u, i) => {
+  if (type === 'group') {
+    sent[chat_id] = Array.isArray(sent[chat_id])
+      ? [...sent[chat_id], groupId]
+      : [groupId];
+    const mediaGroup = allUpdates.filter((update: UpdateArchive) => {
+      return update.body?.message?.media_group_id === groupId;
+    });
+
+    if (Array.isArray(mediaGroup) && mediaGroup.length) {
+      data.media = [];
+      mediaGroup.forEach((u, i) => {
         data.media.push(
           draftBody(
             !i && postfix,
@@ -189,7 +138,9 @@ export const sendMsg = async (
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-  });
+  })
+    .then((res) => res.json())
+    .then((r) => console.log(r));
 };
 
 const secret = createHash('sha256')
