@@ -1,6 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './_connectToDatabase';
-import { sendMsg, StandupGroup, Member, About } from './_helpers';
+import { sendMsg } from './_helpers';
+import { Member } from '../lib/types';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (
