@@ -7,7 +7,7 @@ import {
   About,
   telegramTypes,
   UpdateArchive,
-} from '../lib/types';
+} from './lib/_types';
 
 const standupTemplate = `Welcome!
 
