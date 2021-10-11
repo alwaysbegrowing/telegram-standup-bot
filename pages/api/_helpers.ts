@@ -54,7 +54,7 @@ const draftBody = (
       theUpdate?.createdAt
     ),
     entities: body?.message?.entities,
-    media: file_id,
+    media: file_id || [],
     caption_entities: body?.message?.caption_entities,
     [type]: file_id || postfix,
     type,
@@ -119,15 +119,17 @@ export const sendMsg = async (
     if (Array.isArray(mediaGroup) && mediaGroup.length) {
       data.media = [];
       mediaGroup.forEach((u, i) => {
-        data.media.push(
-          draftBody(
-            !i && postfix,
-            chat_id,
-            reply_to_message_id,
-            disable_notification,
-            u
-          )
-        );
+        if (Array.isArray(data.media)) {
+          data.media.push(
+            draftBody(
+              !i && postfix,
+              chat_id,
+              reply_to_message_id,
+              disable_notification,
+              u
+            )
+          );
+        }
       });
     }
   }
