@@ -14,15 +14,13 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const { db } = await connectToDatabase();
   const users = await db.collection('users').find({}).toArray();
 
-  const notSubmittedMessage = `Reminder: please submit an update.
+  const notSubmittedMessage = `(1 hour reminder) Tick tock. Ready to submit an update?
 
-  You can send me a simple message, or spice it up with a video / photo with a caption, gif, voice message, or video message!
+Send me a message, or spice it up with some photos! Afterall, pictures tell a thousand words. Can you guess how many a video could tell? `;
 
-  Your update will send one hour from now.`;
+  const submittedMessage = `(1 hour reminder) The update you previously submitted will be posted soon!
 
-  const submittedMessage = `Reminder: the update you previously submitted will be posted in one hour from now.
-
-  If you want to change your update, send me a simple message, or spice it up with a video / photo with a caption, gif, voice message, or video message!`;
+If you want to change your update, edit your last message.`;
 
   const reminders = [];
   users
