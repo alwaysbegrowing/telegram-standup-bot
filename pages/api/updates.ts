@@ -17,7 +17,7 @@ const transformUpdate = (g, response) => {
       createdAt: u.createdAt,
       groupId: u?.body?.message?.media_group_id,
       message: u?.body?.message?.text || u?.body?.message?.caption,
-      file_path: u?.file_path,
+      file_id: u?.file_id,
       locked: g.submitted && !i,
       entities: false,
     };
@@ -30,7 +30,7 @@ const transformUpdate = (g, response) => {
         ...data,
         locked: true,
         message: false,
-        file_path: false,
+        file_id: false,
       };
     }
 
@@ -79,7 +79,7 @@ const transformUpdate = (g, response) => {
       archive: [],
       ...data,
       message: !g.submitted && data.message,
-      file_path: !g.submitted && data.file_path,
+      file_id: !g.submitted && data.file_id,
     });
   });
 };

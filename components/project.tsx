@@ -15,7 +15,7 @@ interface Props {
   username: string;
   name: string;
   photo: string;
-  file_path: () => React.ReactNode;
+  file_id: () => React.ReactNode;
   message: () => React.ReactNode;
   locked: boolean;
   createdAt: string;
@@ -29,13 +29,13 @@ const Project: React.FC<ProjectProps> = ({
   photo,
   locked,
   createdAt,
-  file_path,
+  file_id,
   message,
 }) => {
   const theme = useTheme();
   const router = useRouter();
 
-  if (!file_path && !message) return null;
+  if (!file_id && !message) return null;
 
   // Releases are at 4pm UTC every day
   const nextSubmit = new Date();
@@ -80,7 +80,7 @@ const Project: React.FC<ProjectProps> = ({
             {!locked && (
               <>
                 <div>{message}</div>
-                <div>{file_path}</div>
+                <div>{file_id}</div>
               </>
             )}
           </div>

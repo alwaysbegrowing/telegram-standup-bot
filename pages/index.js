@@ -18,7 +18,7 @@ const TooltipContainer = ({ verboseDate, children }) => (
 export const Pager = ({ initialData: data }) => {
   const formattedData = (data || [])
     .filter((u) => {
-      return u.message || u.file_path || u.locked;
+      return u.message || u.file_id || u.locked;
     })
     .map((u) => {
       return {
@@ -42,8 +42,8 @@ export const Pager = ({ initialData: data }) => {
             <ReactMarkdown remarkPlugins={[gfm]}>{u.message}</ReactMarkdown>
           );
         })(),
-        file_path: (() => {
-          if (!u.file_path) return;
+        file_id: (() => {
+          if (!u.file_id) return;
           if (!u.groupId) {
             return <TGFile u={u} />;
           }
