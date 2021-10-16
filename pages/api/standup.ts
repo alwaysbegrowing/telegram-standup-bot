@@ -14,7 +14,7 @@ import {
   UNSUBSCRIBED_MESSAGE,
   UPDATE_EDITED_MESSAGE,
   UPDATE_SUBMITTED_MESSAGE,
-} from './lib/_locale';
+} from './lib/_locale.en';
 
 /**
  * The beginning

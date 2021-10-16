@@ -2,7 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './lib/_connectToDatabase';
 import { sendMsg } from './lib/_helpers';
 import { Member } from './lib/_types';
-import { NOT_SUBMITTED_MESSAGE, SUBMITTED_MESSAGE } from './lib/_locale';
+import { NOT_SUBMITTED_MESSAGE, SUBMITTED_MESSAGE } from './lib/_locale.en';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (
