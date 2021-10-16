@@ -16,6 +16,24 @@ import {
   UPDATE_SUBMITTED_MESSAGE,
 } from './lib/_locale';
 
+/**
+ * The beginning
+ *
+ * @param userId
+ */
+const startBot = async (userId: number) => {
+  const { db } = await connectToDatabase();
+
+  await db.collection('users').updateOne(
+    { userId },
+    {
+      $set: {
+        botCanMessage: true,
+      },
+    }
+  );
+};
+
 const leaveStandupGroup = async (
   chatId: number,
   userId: number,
@@ -36,25 +54,7 @@ const leaveStandupGroup = async (
   return await sendMsg(INVALID_UNSUBSCRIBE_MESSAGE, chatId, messageId);
 };
 
-/**
- * The beginning
- *
- * @param userId
- */
-const startBot = async (userId: number) => {
-  const { db } = await connectToDatabase();
-
-  await db.collection('users').updateOne(
-    { userId },
-    {
-      $set: {
-        botCanMessage: true,
-      },
-    }
-  );
-};
-
-/** Time to make an update */
+// A message is sent to the bot
 const submitStandup = async (
   chatId: number,
   userId: number,
@@ -266,16 +266,22 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     await startBot(from.id);
     const r = await sendMsg(START_MESSAGE, chat.id, message_id);
     return res.json({ status: r.status });
-  } else if (isPrivateCommand) {
+  }
+
+  // We only accept start command as a private command
+  if (isPrivateCommand) {
     const r = await sendMsg(INVALID_PRIVATE_MESSAGE, chat.id, message_id);
     return res.json({ status: r.status });
-  } else if (isPrivateMessage) {
-    // Valid request to save a new update to db
+  }
+
+  // Private to the bot, must be a standup update so lets save it
+  if (isPrivateMessage) {
     const r = await submitStandup(chat.id, from.id, message_id, body);
     const status = r?.status || 200;
     return res.json({ status });
   }
 
+  // In a group
   if (isSubscribeCommand) {
     const r = await addToStandupGroup(
       chat.id,
@@ -285,10 +291,13 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       message_id
     );
     return res.json({ status: r.status });
-  } else if (isUnsubscribeCommand) {
+  }
+
+  // In a group
+  if (isUnsubscribeCommand) {
     const r = await leaveStandupGroup(chat.id, from.id, message_id);
     return res.json({ status: r.status });
-  } else {
-    return res.status(200).json({ status: 'invalid command' });
   }
+
+  return res.status(200).json({ status: 'invalid command' });
 };
