@@ -29,5 +29,6 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   res.setHeader('content-disposition', `attachment; filename=${tmp.pop()}`);
 
-  await pipeline(response.body, res);
+  // @ts-ignore - pipeline weird issue
+  await pipeline(response.text(), res);
 };
