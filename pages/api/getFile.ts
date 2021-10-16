@@ -6,12 +6,6 @@ import { promisify } from 'util';
 const pipeline = promisify(stream.pipeline);
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
-  const isValid = checkSignature(req?.body || {});
-
-  if (!isValid && process.env.NODE_ENV === 'production') {
-    return res.status(401).json({ statusText: 'Unauthorized' });
-  }
-
   let file_path = '';
   if (!req.query.file_id) {
     return res.status(400).json({ statusText: 'Bad Request' });
