@@ -1,8 +1,8 @@
 import fetch from 'node-fetch';
 import { createHash, createHmac } from 'crypto';
-import { connectToDatabase } from '@/pages/api/_connectToDatabase';
+import { connectToDatabase } from '@/pages/api/lib/_connectToDatabase';
 import memoize from 'fast-memoize';
-import { telegramTypes, UpdateArchive } from './lib/_types';
+import { telegramTypes, UpdateArchive } from './_types';
 
 const appendAuthor = (caption = '', postfix = '', createdAt = '') => {
   let response = '';

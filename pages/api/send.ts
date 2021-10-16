@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from './_connectToDatabase';
-import { sendMsg, getSubmissionDates } from './_helpers';
+import { connectToDatabase } from './lib/_connectToDatabase';
+import { sendMsg, getSubmissionDates } from './lib/_helpers';
 import { Member, StandupGroup, UpdateArchive } from './lib/_types';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {

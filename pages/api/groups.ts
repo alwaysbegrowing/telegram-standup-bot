@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from './_connectToDatabase';
-import { checkSignature } from '@/pages/api/_helpers';
+import { connectToDatabase } from './lib/_connectToDatabase';
+import { checkSignature } from '@/pages/api/lib/_helpers';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isValid = checkSignature(req?.body || {});

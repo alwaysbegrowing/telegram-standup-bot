@@ -1,21 +1,20 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from './_connectToDatabase';
-import { sendMsg, getSubmissionDates } from './_helpers';
+import { connectToDatabase } from './lib/_connectToDatabase';
+import { sendMsg } from './lib/_helpers';
+import { StandupGroup, Member, About, telegramTypes } from './lib/_types';
 import {
-  StandupGroup,
-  Member,
-  About,
-  telegramTypes,
-  UpdateArchive,
-} from './lib/_types';
-
-const standupTemplate = `Welcome!
-
-To get started, add this bot to your chat and type /subscribe to subscribe them to your updates.
-
-Afterwards, post a message here and it will automatically be sent to your chat at 11:00 am. You will receive a few reminders if you do not submit your standup before 8:00 am the day of.
-
-You can send me videos / photos with captions, gifs, voice messages, and video messages! Perfect for letting your friends, family, coworkers know what you're up to today or accomplished yesterday!`;
+  ALREADY_SUBSCRIBED_MESSAGE,
+  GROUP_MEDIA_SUBMITTED_MESSAGE,
+  INVALID_EDIT_MESSAGE,
+  INVALID_PRIVATE_MESSAGE,
+  INVALID_UNSUBSCRIBE_MESSAGE,
+  NO_SUBSCRIBED_GROUPS_MESSAGE,
+  START_MESSAGE,
+  SUBSCRIBED_MESSAGE,
+  UNSUBSCRIBED_MESSAGE,
+  UPDATE_EDITED_MESSAGE,
+  UPDATE_SUBMITTED_MESSAGE,
+} from './lib/_locale';
 
 const leaveStandupGroup = async (
   chatId: number,
@@ -31,18 +30,10 @@ const leaveStandupGroup = async (
   );
 
   if (removedUserFromGroup.modifiedCount) {
-    return await sendMsg(
-      'This chat is now unsubscribed from your daily updates.',
-      chatId,
-      messageId
-    );
+    return await sendMsg(UNSUBSCRIBED_MESSAGE, chatId, messageId);
   }
 
-  return await sendMsg(
-    'This chat is not yet subscribed to your daily updates.',
-    chatId,
-    messageId
-  );
+  return await sendMsg(INVALID_UNSUBSCRIBE_MESSAGE, chatId, messageId);
 };
 
 /**
@@ -60,26 +51,6 @@ const startBot = async (userId: number) => {
         botCanMessage: true,
       },
     }
-  );
-};
-
-/** Just a random debugger */
-const sendAboutMessage = async (
-  chatId: number,
-  userId: number,
-  about: About,
-  messageId: number
-) => {
-  const { db } = await connectToDatabase();
-
-  const user = await db.collection('users').findOne({ userId });
-  if (user) {
-    return await sendMsg(JSON.stringify(user), chatId, messageId);
-  }
-  return await sendMsg(
-    'You dont exist in this chat. Create a subscription with /subscribe',
-    chatId,
-    messageId
   );
 };
 
@@ -101,9 +72,9 @@ const submitStandup = async (
     file_id = message?.[type].slice(-1)[0].file_id;
   }
 
-  let successMessage = isEdit
-    ? 'Your update has been edited.'
-    : 'Your update has been submitted.';
+  let SUCCESS_MESSAGE = isEdit
+    ? UPDATE_EDITED_MESSAGE
+    : UPDATE_SUBMITTED_MESSAGE;
 
   let sendMessage = true;
   const { db } = await connectToDatabase();
@@ -140,7 +111,7 @@ const submitStandup = async (
       sendMessage = false;
     } else {
       // Alter message to let them know we see all their media
-      successMessage = 'Your group media has been submitted.';
+      SUCCESS_MESSAGE = GROUP_MEDIA_SUBMITTED_MESSAGE;
     }
   }
 
@@ -202,29 +173,20 @@ const submitStandup = async (
     );
   }
 
+  // Already told the user they submitted
   if (!sendMessage) {
-    // Already sent one
-    console.log('Send message is false');
     return { status: 200 };
   }
 
   if (dbResponse.modifiedCount || dbResponse.modifiedCount) {
-    return await sendMsg(successMessage, chatId, messageId, true);
+    return await sendMsg(SUCCESS_MESSAGE, chatId, messageId, true);
   }
 
   if (isEdit && dbResponse.modifiedCount === 0) {
-    return await sendMsg(
-      "You can only edit a message that hasn't been sent yet!",
-      chatId,
-      messageId
-    );
+    return await sendMsg(INVALID_EDIT_MESSAGE, chatId, messageId);
   }
 
-  return await sendMsg(
-    "You haven't subscribed any chats to your daily updates yet! Add this bot to your chat, then type /subscribe to subscribe them.",
-    chatId,
-    messageId
-  );
+  return await sendMsg(NO_SUBSCRIBED_GROUPS_MESSAGE, chatId, messageId);
 };
 
 const addToStandupGroup = async (
@@ -244,11 +206,7 @@ const addToStandupGroup = async (
   console.log('adding');
 
   if (userExistsInGroup) {
-    return await sendMsg(
-      'This chat is already subscribed to your daily updates.',
-      chatId,
-      messageId
-    );
+    return await sendMsg(ALREADY_SUBSCRIBED_MESSAGE, chatId, messageId);
   }
 
   const group: StandupGroup = {
@@ -272,11 +230,7 @@ const addToStandupGroup = async (
     db.collection('users').updateOne({ userId }, { $push: { groups: group } });
   }
 
-  return await sendMsg(
-    `This chat is now subscribed to your daily updates. Send me a message  @${process.env.NEXT_PUBLIC_BOT_NAME} to get started.`,
-    chatId,
-    messageId
-  );
+  return await sendMsg(SUBSCRIBED_MESSAGE, chatId, messageId);
 };
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
@@ -292,167 +246,28 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   // Don't try to parse this message if missing info
   if (!message || !Object.keys(message).some((a) => telegramTypes[a])) {
     console.log('Quitting early', message, body);
+    // This has to be a 200 or else Telegram will try to resend it
     return res.status(200).json({ status: 'invalid' });
-  } else {
-    console.log('Received valid request');
   }
 
-  const isGroupCommand =
-    (entities &&
-      entities[0] &&
-      entities[0].type === 'bot_command' &&
-      chat.type === 'group') ||
-    chat.type === 'supergroup';
-  const isSubscribeCommand =
-    isGroupCommand && text && text.search('/subscribe') !== -1;
-  const isUnsubscribeCommand =
-    isGroupCommand && text && text.search('/unsubscribe') !== -1;
-  const isPrivateMessage = chat && chat.type === 'private';
+  // Between you and the bot in a public group
+  const inGroup = chat?.type === 'group' || chat?.type === 'supergroup';
+  const isBotCommand = entities?.[0]?.type === 'bot_command';
+  const isGroupCommand = inGroup && isBotCommand;
+  const isSubscribeCommand = isGroupCommand && text?.includes('/subscribe');
+  const isUnsubscribeCommand = isGroupCommand && text?.includes('/unsubscribe');
 
-  const isPrivateCommand =
-    entities?.[0]?.type === 'bot_command' && chat?.type === 'private';
-  const isPrivateStartCommand =
-    isPrivateCommand && text && text.search('/start') !== -1;
-  const isPreviewCommand =
-    isPrivateCommand && text && text.search('/preview') !== -1;
-  const isRestartCommand =
-    isPrivateCommand && text && text.search('/restart') !== -1;
-  if (isPreviewCommand) {
-    await sendMsg('Not yet', chat.id, message_id);
-    return res.json({ status: 200 });
-    const { previousSubmitTimestamp, nextSubmitTimestamp } =
-      getSubmissionDates();
+  // Between you and the bot in a private chat
+  const isPrivateMessage = chat?.type === 'private';
+  const isPrivateCommand = isBotCommand && isPrivateMessage;
+  const isStartCommand = isPrivateCommand && text?.includes('/start');
 
-    const { db } = await connectToDatabase();
-    const groupUpdates = await db
-      .collection('users')
-      .aggregate([
-        {
-          $project: { updateArchive: 1, groups: 1, about: 1 },
-        },
-        {
-          $unwind: '$updateArchive',
-        },
-        {
-          $match: {
-            'about.id': from.id,
-            'updateArchive.createdAt': {
-              $gt: previousSubmitTimestamp,
-              $lt: nextSubmitTimestamp,
-            },
-            'updateArchive.sent': false,
-          },
-        },
-        {
-          $group: {
-            _id: '$about.id',
-            about: { $first: '$about' },
-            groups: { $first: '$groups' },
-            updateArchive: { $push: '$updateArchive' },
-          },
-        },
-      ])
-      .toArray();
-
-    let r;
-    if (groupUpdates.length !== 0) {
-      r = await sendMsg(
-        "Here's a preview of your next update:",
-        chat.id,
-        message_id
-      );
-
-      const sent = {};
-      const sendUpdatePromises = [];
-
-      const totalMedia = {};
-
-      groupUpdates
-        .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
-        .forEach((user: Member) => {
-          user.updateArchive.forEach((update: UpdateArchive) => {
-            const id =
-              update.body?.message?.media_group_id ||
-              update.body?.message?.message_id;
-
-            if (
-              Array.isArray(totalMedia[user.about.id]) &&
-              totalMedia[user.about.id].includes(id)
-            )
-              return;
-
-            totalMedia[user.about.id] = Array.isArray(totalMedia[user.about.id])
-              ? [...totalMedia[user.about.id], id]
-              : [id];
-          });
-        });
-
-      groupUpdates
-        .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
-        .forEach((user: Member) => {
-          const chat_id = chat.id;
-          let total = user.updateArchive.length;
-          let prefixTotal = 1;
-
-          user.updateArchive.forEach((update: UpdateArchive) => {
-            total = totalMedia[user.about.id].length;
-
-            const body = update?.body || {};
-            const groupId = body?.message?.media_group_id;
-            const type = groupId ? 'group' : update?.type || 'text';
-
-            if (
-              Array.isArray(sent[chat_id]) &&
-              sent[chat_id].includes(groupId)
-            ) {
-              console.log(groupId, 'already sent');
-              return true;
-            }
-
-            if (type === 'group') {
-              sent[chat_id] = Array.isArray(sent[chat_id])
-                ? [...sent[chat_id], groupId]
-                : [groupId];
-            }
-
-            const prefix =
-              total > 1
-                ? `${prefixTotal}/${total}: ${user.about.first_name}`
-                : `- ${user.about.first_name}`;
-
-            sendUpdatePromises.push(
-              sendMsg(prefix, chat.id, null, true, update, user.updateArchive)
-            );
-            prefixTotal += 1;
-          });
-        });
-
-      await Promise.allSettled(sendUpdatePromises);
-    } else {
-      r = await sendMsg(
-        'You have no update to send yet! Send me your update to get started.',
-        chat.id,
-        message_id
-      );
-    }
-
-    return res.json({ status: r.status });
-  }
-
-  if (isRestartCommand) {
-    // not yet implemented, maybe never will
-  }
-
-  if (isPrivateStartCommand) {
+  if (isStartCommand) {
     await startBot(from.id);
-    const r = await sendMsg(standupTemplate, chat.id, message_id);
+    const r = await sendMsg(START_MESSAGE, chat.id, message_id);
     return res.json({ status: r.status });
   } else if (isPrivateCommand) {
-    const r = await sendMsg(
-      'Add me to a chat, then send this command in that chat instead.',
-      chat.id,
-      message_id
-    );
+    const r = await sendMsg(INVALID_PRIVATE_MESSAGE, chat.id, message_id);
     return res.json({ status: r.status });
   } else if (isPrivateMessage) {
     // Valid request to save a new update to db

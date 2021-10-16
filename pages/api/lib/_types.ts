@@ -1,3 +1,9 @@
+export enum Commands {
+  subscribe,
+  unsubscribe,
+  start,
+}
+
 export const telegramTypes = {
   text: 'sendMessage',
   voice: 'sendVoice',

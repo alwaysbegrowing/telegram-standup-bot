@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from './_connectToDatabase';
-import { checkSignature } from '@/pages/api/_helpers';
+import { connectToDatabase } from './lib/_connectToDatabase';
+import { checkSignature } from '@/pages/api/lib/_helpers';
 import { fillMarkdownEntitiesMarkup } from 'telegram-text-entities-filler';
 
 const transformUpdate = (g, response) => {
