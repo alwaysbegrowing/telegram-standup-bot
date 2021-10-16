@@ -30,3 +30,11 @@ export const UPDATE_SUBMITTED_MESSAGE = 'Your update has been submitted.';
 
 export const GROUP_MEDIA_SUBMITTED_MESSAGE =
   'Your group media has been submitted.';
+
+export const NOT_SUBMITTED_MESSAGE = `(1 hour reminder) Tick tock. Ready to submit an update?
+
+Send me a message, or spice it up with some photos! Afterall, pictures tell a thousand words. Can you guess how many a video could tell? `;
+
+export const SUBMITTED_MESSAGE = `(1 hour reminder) The update you previously submitted will be posted soon!
+
+If you want to change your update, edit your last message.`;
