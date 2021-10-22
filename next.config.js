@@ -1,6 +1,6 @@
 module.exports = {
   reactStrictMode: true,
   images: {
-    domains: ['t.me'],
+    domains: ['t.me', 'images.typeform.com'],
   },
 };
