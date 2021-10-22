@@ -13,6 +13,7 @@ const Footer: React.FC = () => {
             <Text>Powered by </Text>
           </div>
           <div style={{ display: 'inline-block' }}>
+            
             <Link
               href="https://vercel.com?utm_source=alwaysbegrowing&utm_campaign=oss"
               target="_blank"
@@ -26,6 +27,19 @@ const Footer: React.FC = () => {
                 src={`/logos/vercel-logotype-${
                   theme.type === 'dark' ? 'light' : 'dark'
                 }.svg`}
+              />
+            </Link>
+             <Link
+              href="http://www.bugsnag.com/"
+              target="_blank"
+              rel="noopener"
+              underline
+            >
+              <Image
+                alt="Bugsnag Logo"
+                height={15}
+                width={70}
+                src="https://images.typeform.com/images/QKuaAssrFCq7/image/default-firstframe.png"
               />
             </Link>
           </div>
