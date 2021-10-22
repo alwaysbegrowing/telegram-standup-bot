@@ -29,6 +29,11 @@ const Footer: React.FC = () => {
                 }.svg`}
               />
             </Link>
+          </div>
+          <div style={{ display: 'inline-block' }}>
+            <Text> and </Text>
+          </div>
+          <div style={{ display: 'inline-block' }}>          
              <Link
               href="http://www.bugsnag.com/"
               target="_blank"
@@ -42,7 +47,7 @@ const Footer: React.FC = () => {
                 src="https://images.typeform.com/images/QKuaAssrFCq7/image/default-firstframe.png"
               />
             </Link>
-          </div>
+          </div>          
         </div>
       </footer>
       <style jsx>{`
