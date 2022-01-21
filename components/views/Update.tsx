@@ -27,7 +27,7 @@ export const Pager = ({ initialData: data }) => {
           />
         ),
         message: (() => {
-          if (!u.message) return;
+          if (!u.locked && !u.message) return;
 
           if (!u?.entities) {
             return <span style={{ whiteSpace: 'pre-wrap' }}>{u.message}</span>;

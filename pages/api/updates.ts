@@ -138,7 +138,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     .toArray();
 
   let response = [];
-  const json = groupUpdates.map((r) => transformUpdate(r, response));
+  groupUpdates.map((r) => transformUpdate(r, response));
 
   return res.status(200).json(response);
 };

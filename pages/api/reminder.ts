@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './lib/_connectToDatabase';
 import { sendMsg } from './lib/_helpers';
-import { Member } from './lib/_types';
+import { Member, StandupGroup } from './lib/_types';
 import { NOT_SUBMITTED_MESSAGE, SUBMITTED_MESSAGE } from './lib/_locale.en';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
@@ -17,13 +17,19 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   const reminders = [];
   users
-    .filter((g) => !!g.groups.length)
+    .filter((u) => !!u.groups.length)
     .forEach((user: Member) => {
-      const message = user.submitted
-        ? SUBMITTED_MESSAGE
-        : NOT_SUBMITTED_MESSAGE;
+      const winners = user.groups.filter((g: StandupGroup) => g.winner);
 
-      reminders.push(sendMsg(message, user.userId));
+      if (winners.length) {
+        const winnerTitles = winners.map((g) => g.title);
+
+        const message = user.submitted
+          ? SUBMITTED_MESSAGE(winnerTitles)
+          : NOT_SUBMITTED_MESSAGE(winnerTitles);
+
+        reminders.push(sendMsg(message, user.userId));
+      }
     });
 
   await Promise.all(reminders);

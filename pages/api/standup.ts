@@ -9,12 +9,14 @@ import {
   INVALID_PRIVATE_MESSAGE,
   INVALID_UNSUBSCRIBE_MESSAGE,
   NO_SUBSCRIBED_GROUPS_MESSAGE,
+  NO_WINNING_GROUPS_MESSAGE,
   START_MESSAGE,
   SUBSCRIBED_MESSAGE,
   UNSUBSCRIBED_MESSAGE,
   UPDATE_EDITED_MESSAGE,
   UPDATE_SUBMITTED_MESSAGE,
 } from './lib/_locale.en';
+import { getWinningGroupsForUser } from './lib/_lottery';
 
 /**
  * The beginning
@@ -62,6 +64,12 @@ const submitStandup = async (
   body: any
 ) => {
   console.log(body);
+
+  // only winners get to submit an update
+  const groups = await getWinningGroupsForUser(userId);
+  if (!groups.length) {
+    return await sendMsg(NO_WINNING_GROUPS_MESSAGE, chatId, messageId);
+  }
 
   const isEdit = !!body?.edited_message;
   let message = body?.message || body?.edited_message;
@@ -212,6 +220,7 @@ const addToStandupGroup = async (
   const group: StandupGroup = {
     chatId,
     title,
+    winner: false,
   };
 
   const userExists = await db.collection('users').findOne({ userId });

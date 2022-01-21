@@ -26,15 +26,45 @@ export const UPDATE_EDITED_MESSAGE = 'Your update has been edited.';
 export const NO_SUBSCRIBED_GROUPS_MESSAGE =
   "You haven't subscribed any chats to your daily updates yet! Add this bot to your chat, then type /subscribe to subscribe them.";
 
-export const UPDATE_SUBMITTED_MESSAGE = 'Your update has been submitted.';
+export const UPDATE_SUBMITTED_MESSAGE =
+  'Your update has been submitted. Congrats on winning the lottery!';
 
 export const GROUP_MEDIA_SUBMITTED_MESSAGE =
-  'Your group media has been submitted.';
+  'Your group media has been submitted. Congrats on winning the lottery!';
 
-export const NOT_SUBMITTED_MESSAGE = `(1 hour reminder) Tick tock. Ready to submit an update?
+const getGroupsMessage = (
+  groups: Array<string>
+) => `Your update will be sent to the following group${
+  groups.length > 1 ? 's' : ''
+}:
+${groups.map((g) => `• ${g}`).join('\n')}`;
 
-Send me a message, or spice it up with some photos! Afterall, pictures tell a thousand words. Can you guess how many a video could tell? `;
+export const NOT_SUBMITTED_MESSAGE = (
+  groups: Array<string>
+) => `(1 hour reminder) Tick tock. Ready to submit an update?
 
-export const SUBMITTED_MESSAGE = `(1 hour reminder) The update you previously submitted will be posted soon!
+Send me a message, or spice it up with some photos! Afterall, pictures tell a thousand words. Can you guess how many a video could tell?
 
-If you want to change your update, edit your last message.`;
+${getGroupsMessage(groups)}
+`;
+
+export const SUBMITTED_MESSAGE = (
+  groups: Array<string>
+) => `(1 hour reminder) The update you previously submitted will be posted soon!
+
+If you want to change your update, edit your last message.
+
+${getGroupsMessage(groups)}`;
+
+export const WINNER_GROUP_MESSAGE = (username: string) =>
+  `🎲 ${username} has won! They've been chosen to send an update to this group.
+Updates from others will be ignored.`;
+
+export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
+  `🎲 We rolled the dice for you, and by golly, you won! 🎲
+
+${getGroupsMessage(groups)}`;
+
+export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in any groups yet! Check back tomorrow 🤞🏻
+
+Your update was not saved.`;

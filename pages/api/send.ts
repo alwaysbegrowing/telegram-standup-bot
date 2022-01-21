@@ -1,6 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './lib/_connectToDatabase';
 import { sendMsg, getSubmissionDates } from './lib/_helpers';
+import { setWinners } from './lib/_lottery';
 import { Member, StandupGroup, UpdateArchive } from './lib/_types';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
@@ -44,34 +45,65 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     console.log(response);
   };
 
-  const groupUpdates = await db
-    .collection('users')
-    .aggregate([
-      {
-        $project: { updateArchive: 1, groups: 1, about: 1 },
-      },
-      {
-        $unwind: '$updateArchive',
-      },
-      {
-        $match: {
-          'updateArchive.createdAt': {
-            $gt: previousSubmitTimestamp,
-            $lt: nextSubmitTimestamp,
+  let groupUpdates = [];
+  if (
+    process.env.NODE_ENV === 'production' &&
+    req.query.key !== process.env.TELEGRAM_API_KEY
+  ) {
+    groupUpdates = await db
+      .collection('users')
+      .aggregate([
+        {
+          $project: { updateArchive: 1, groups: 1, about: 1 },
+        },
+        {
+          $unwind: '$updateArchive',
+        },
+        {
+          $match: {
+            'updateArchive.createdAt': {
+              $gt: previousSubmitTimestamp,
+              $lt: nextSubmitTimestamp,
+            },
+            'updateArchive.sent': false,
           },
-          'updateArchive.sent': false,
         },
-      },
-      {
-        $group: {
-          _id: '$about.id',
-          about: { $first: '$about' },
-          groups: { $first: '$groups' },
-          updateArchive: { $push: '$updateArchive' },
+        {
+          $group: {
+            _id: '$about.id',
+            about: { $first: '$about' },
+            groups: { $first: '$groups' },
+            updateArchive: { $push: '$updateArchive' },
+          },
         },
-      },
-    ])
-    .toArray();
+      ])
+      .toArray();
+  } else {
+    groupUpdates = await db
+      .collection('users')
+      .aggregate([
+        {
+          $project: { updateArchive: 1, groups: 1, about: 1 },
+        },
+        {
+          $unwind: '$updateArchive',
+        },
+        {
+          $match: {
+            'updateArchive.sent': false,
+          },
+        },
+        {
+          $group: {
+            _id: '$about.id',
+            about: { $first: '$about' },
+            groups: { $first: '$groups' },
+            updateArchive: { $push: '$updateArchive' },
+          },
+        },
+      ])
+      .toArray();
+  }
 
   const sent = {};
   const sendUpdatePromises = [];
@@ -102,6 +134,11 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
     .forEach((user: Member) => {
       user.groups.forEach((group: StandupGroup) => {
+        // only send update to this group if the user won for this group!
+        if (!group.winner) {
+          return;
+        }
+
         const chat_id = group.chatId;
         let total = user.updateArchive.length;
         let prefixTotal = 1;
@@ -145,10 +182,15 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       });
     });
 
-  await Promise.allSettled(sendUpdatePromises);
+  await Promise.all(sendUpdatePromises);
   if (sendUpdatePromises.length) {
     await markAllSent();
+  } else {
+    console.log('nothing to send');
   }
+
+  // Next round of users getting chosen!
+  await setWinners();
 
   return res.status(200).json({ status: 'ok' });
 };

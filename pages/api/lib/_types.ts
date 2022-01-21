@@ -19,6 +19,7 @@ export const telegramTypes = {
 export interface StandupGroup {
   chatId: number;
   title: string;
+  winner: boolean;
 }
 
 export interface UpdateArchive {
