@@ -73,4 +73,6 @@ export const SUBSCRIBERS_MESSAGE = (
   usernames: Array<string>
 ) => `Stoodbot member${usernames.length > 1 ? 's' : ''} in this chat:
 
-${usernames.map((g) => `• ${g}`).join('\n')}`;
+${usernames.map((g) => `• ${g}`).join('\n')}
+
+Type /subscribe to join!`;

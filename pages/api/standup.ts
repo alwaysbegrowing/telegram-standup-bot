@@ -286,7 +286,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const isBotCommand = entities?.[0]?.type === 'bot_command';
   const isGroupCommand = inGroup && isBotCommand;
   const isMembersCommand = isGroupCommand && text?.includes('/members');
-  const isSubscribeCommand = isGroupCommand && text?.includes('/subscribe');
+  const isSubscribeCommand =
+    (isGroupCommand && text?.includes('/subscribe')) || text?.includes('/join');
   const isUnsubscribeCommand = isGroupCommand && text?.includes('/unsubscribe');
 
   // Between you and the bot in a private chat
