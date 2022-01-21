@@ -12,6 +12,7 @@ import {
   NO_WINNING_GROUPS_MESSAGE,
   START_MESSAGE,
   SUBSCRIBED_MESSAGE,
+  SUBSCRIBERS_MESSAGE,
   UNSUBSCRIBED_MESSAGE,
   UPDATE_EDITED_MESSAGE,
   UPDATE_SUBMITTED_MESSAGE,
@@ -197,6 +198,27 @@ const submitStandup = async (
   return await sendMsg(NO_SUBSCRIBED_GROUPS_MESSAGE, chatId, messageId);
 };
 
+const getMembers = async (
+  chatId: number,
+  userId: number,
+  title: string,
+  about: About,
+  messageId: number
+) => {
+  const { db } = await connectToDatabase();
+  const users: Array<Member> = await db.collection('users').find({}).toArray();
+
+  const usernames = [];
+
+  users.forEach((u) =>
+    u.groups.forEach(
+      (g) => g.chatId === chatId && usernames.push(u.about.username)
+    )
+  );
+
+  return await sendMsg(SUBSCRIBERS_MESSAGE(usernames), chatId, messageId);
+};
+
 const addToStandupGroup = async (
   chatId: number,
   userId: number,
@@ -263,6 +285,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const inGroup = chat?.type === 'group' || chat?.type === 'supergroup';
   const isBotCommand = entities?.[0]?.type === 'bot_command';
   const isGroupCommand = inGroup && isBotCommand;
+  const isMembersCommand = isGroupCommand && text?.includes('/members');
   const isSubscribeCommand = isGroupCommand && text?.includes('/subscribe');
   const isUnsubscribeCommand = isGroupCommand && text?.includes('/unsubscribe');
 
@@ -299,6 +322,12 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       from,
       message_id
     );
+    return res.json({ status: r.status });
+  }
+
+  // In a group
+  if (isMembersCommand) {
+    const r = await getMembers(chat.id, from.id, chat.title, from, message_id);
     return res.json({ status: r.status });
   }
 

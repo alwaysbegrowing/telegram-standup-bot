@@ -68,3 +68,9 @@ ${getGroupsMessage(groups)}`;
 export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in any groups yet! Check back tomorrow 🤞🏻
 
 Your update was not saved.`;
+
+export const SUBSCRIBERS_MESSAGE = (
+  usernames: Array<string>
+) => `Stoodbot member${usernames.length > 1 ? 's' : ''} in this chat:
+
+${usernames.map((g) => `• ${g}`).join('\n')}`;
