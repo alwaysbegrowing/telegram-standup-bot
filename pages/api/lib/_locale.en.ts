@@ -1,5 +1,16 @@
-import { getDisplayName } from "./_helpers";
 import { Member } from "./_types";
+
+export const getDisplayName = (user: Member) => {
+  const { first_name, last_name, username } = user.about;
+  if (username) {
+    return username;
+  }
+  const userFullName = `${first_name || ''} ${last_name || ''}`.trim();
+  if (userFullName !== '') {
+    return userFullName;
+  }
+  return 'Anonymous';
+}
 
 export const START_MESSAGE = `To get started, add this bot to your chat and type /subscribe to subscribe them to your updates.
 
