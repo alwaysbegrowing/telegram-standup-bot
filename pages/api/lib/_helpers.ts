@@ -3,6 +3,7 @@ import { createHash, createHmac } from 'crypto';
 import { connectToDatabase } from '@/pages/api/lib/_connectToDatabase';
 import memoize from 'fast-memoize';
 import { Member, telegramTypes, UpdateArchive } from './_types';
+import { ANONYMOUS } from './_locale.en';
 
 const appendAuthor = (caption = '', postfix = '', createdAt = '') => {
   let response = '';
@@ -181,3 +182,15 @@ export const getSubmissionDates = () => {
 
   return { previousSubmitTimestamp, nextSubmitTimestamp };
 };
+
+export const getDisplayName = (user: Member) => {
+  const { first_name, last_name, username } = user.about;
+  if (username) {
+    return username;
+  }
+  const userFullName = `${first_name || ''} ${last_name || ''}`.trim();
+  if (userFullName !== '') {
+    return userFullName;
+  }
+  return ANONYMOUS;
+}

@@ -1,16 +1,7 @@
-import { Member } from "./_types";
+import { getDisplayName } from './_helpers';
+import { Member } from './_types';
 
-export const getDisplayName = (user: Member) => {
-  const { first_name, last_name, username } = user.about;
-  if (username) {
-    return username;
-  }
-  const userFullName = `${first_name || ''} ${last_name || ''}`.trim();
-  if (userFullName !== '') {
-    return userFullName;
-  }
-  return 'Anonymous';
-}
+export const ANONYMOUS = 'Anonymous';
 
 export const START_MESSAGE = `To get started, add this bot to your chat and type /subscribe to subscribe them to your updates.
 
@@ -75,18 +66,33 @@ export const WINNER_GROUP_MESSAGE = (user: Member) =>
 Updates from others will be ignored.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
-  `🎲 We rolled the dice for you, and by golly, you won! 🎲
+  `🎲 We rolled the dice for you and by golly - you won! 🎲
 
 ${getGroupsMessage(groups)}`;
 
-export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in any groups yet! Check back tomorrow 🤞🏻
+export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in any groups yet! Check back tomorrow 🤞
 
 Your update was not saved.`;
 
-export const SUBSCRIBERS_MESSAGE = (
-  users: Array<Member>
-) => `A member, at random, will be awarded the opportunity to submit an update for this group. The member${users.length > 1 ? 's' : ''} currently subscribed in this chat:
+export const SUBSCRIBERS_MESSAGE = (users: Array<Member>) => {
+  const noUsersMessage = `There are no subscribers yet.
+
+Click /subscribe to join!`;
+
+  const singleUserMessage = `Currently ${getDisplayName(
+    users[0]
+  )} is the only member subscribed to this group.
+
+  
+Click /subscribe to join them!`;
+
+  const multipleUsersMessage = `At update time, one of the following members will randomly be awarded the opportunity to submit the next update:
 
 ${users.map((u) => `• ${getDisplayName(u)}`).join('\n')}
 
-To have a chance of being chosen, type /subscribe to join!`;
+To participate, click /subscribe and you might be chosen next!`;
+
+  if (users.length === 0) return noUsersMessage;
+  if (users.length === 1) return singleUserMessage;
+  return multipleUsersMessage;
+};
