@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import { createHash, createHmac } from 'crypto';
-import { connectToDatabase } from '@/pages/api/lib/_connectToDatabase';
 import memoize from 'fast-memoize';
 import { telegramTypes, UpdateArchive } from './_types';
 
