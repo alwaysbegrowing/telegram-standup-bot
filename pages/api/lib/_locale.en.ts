@@ -83,7 +83,6 @@ Click /subscribe to join!`;
     users[0]
   )} is the only member subscribed to this group.
 
-  
 Click /subscribe to join them!`;
 
   const multipleUsersMessage = `At update time, one of the following members will randomly be awarded the opportunity to submit the next update:
