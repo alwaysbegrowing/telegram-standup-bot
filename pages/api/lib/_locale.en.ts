@@ -75,23 +75,21 @@ export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in 
 Your update was not saved.`;
 
 export const SUBSCRIBERS_MESSAGE = (users: Array<Member>) => {
-  const noUsersMessage = `There are no subscribers yet.
+  if (users.length === 0)
+    return `There are no subscribers yet.
 
 Click /subscribe to join!`;
 
-  const singleUserMessage = `Currently ${getDisplayName(
-    users[0]
-  )} is the only member subscribed to this group.
+  if (users.length === 1)
+    return `Currently ${getDisplayName(
+      users[0]
+    )} is the only member subscribed to this group.
 
 Click /subscribe to join them!`;
 
-  const multipleUsersMessage = `At update time, one of the following members will randomly be awarded the opportunity to submit the next update:
+  return `At update time, one of the following members will randomly be awarded the opportunity to submit the next update:
 
 ${users.map((u) => `• ${getDisplayName(u)}`).join('\n')}
 
 To participate, click /subscribe and you might be chosen next!`;
-
-  if (users.length === 0) return noUsersMessage;
-  if (users.length === 1) return singleUserMessage;
-  return multipleUsersMessage;
 };
