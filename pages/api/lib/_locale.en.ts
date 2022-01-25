@@ -1,3 +1,8 @@
+import { getDisplayName } from './_helpers';
+import { Member } from './_types';
+
+export const ANONYMOUS = 'Anonymous';
+
 export const START_MESSAGE = `To get started, add this bot to your chat and type /subscribe to subscribe them to your updates.
 
 Afterwards, post a message here and it will automatically be sent to your chat at 11:00 am. You will receive a few reminders if you do not submit your standup before 8:00 am the day of.
@@ -56,23 +61,35 @@ If you want to change your update, edit your last message.
 
 ${getGroupsMessage(groups)}`;
 
-export const WINNER_GROUP_MESSAGE = (username: string) =>
-  `🎲 ${username} has won! They've been chosen to send an update to this group.
+export const WINNER_GROUP_MESSAGE = (user: Member) =>
+  `🎲 ${getDisplayName(user)} has won! They've been chosen to send an update to this group.
 Updates from others will be ignored.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
-  `🎲 We rolled the dice for you, and by golly, you won! 🎲
+  `🎲 We rolled the dice for you and by golly - you won! 🎲
 
 ${getGroupsMessage(groups)}`;
 
-export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in any groups yet! Check back tomorrow 🤞🏻
+export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in any groups yet! Check back tomorrow 🤞
 
 Your update was not saved.`;
 
-export const SUBSCRIBERS_MESSAGE = (
-  usernames: Array<string>
-) => `Stoodbot member${usernames.length > 1 ? 's' : ''} in this chat:
+export const SUBSCRIBERS_MESSAGE = (users: Array<Member>) => {
+  if (users.length === 0)
+    return `There are no subscribers yet.
 
-${usernames.map((g) => `• ${g}`).join('\n')}
+Click /subscribe to join!`;
 
-Type /subscribe to join!`;
+  if (users.length === 1)
+    return `Currently ${getDisplayName(
+      users[0]
+    )} is the only member subscribed to this group.
+
+Click /subscribe to join them!`;
+
+  return `At update time, one of the following members will randomly be awarded the opportunity to submit the next update:
+
+${users.map((u) => `• ${getDisplayName(u)}`).join('\n')}
+
+To participate, click /subscribe and you might be chosen next!`;
+};

@@ -212,15 +212,15 @@ const getMembers = async (
   const { db } = await connectToDatabase();
   const users: Array<Member> = await db.collection('users').find({}).toArray();
 
-  const usernames = [];
+  const members: Member[] = [];
 
   users.forEach((u) =>
     u.groups.forEach(
-      (g) => g.chatId === chatId && usernames.push(u.about.username)
+      (g) => g.chatId === chatId && members.push(u)
     )
   );
 
-  return await sendMsg(SUBSCRIBERS_MESSAGE(usernames), chatId, messageId);
+  return await sendMsg(SUBSCRIBERS_MESSAGE(members), chatId, messageId);
 };
 
 const addToStandupGroup = async (
