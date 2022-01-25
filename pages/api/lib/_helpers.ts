@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import { createHash, createHmac } from 'crypto';
 import { connectToDatabase } from '@/pages/api/lib/_connectToDatabase';
 import memoize from 'fast-memoize';
-import { telegramTypes, UpdateArchive } from './_types';
+import { Member, telegramTypes, UpdateArchive } from './_types';
 
 const appendAuthor = (caption = '', postfix = '', createdAt = '') => {
   let response = '';
@@ -181,3 +181,15 @@ export const getSubmissionDates = () => {
 
   return { previousSubmitTimestamp, nextSubmitTimestamp };
 };
+
+export const getDisplayName = (user: Member) => {
+  const { first_name, last_name, username } = user.about;
+  if (username) {
+    return username;
+  }
+  const userFullName = `${first_name || ''} ${last_name || ''}`.trim();
+  if (userFullName !== '') {
+    return userFullName;
+  }
+  return 'Anonymous';
+}

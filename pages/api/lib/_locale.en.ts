@@ -1,3 +1,6 @@
+import { getDisplayName } from "./_helpers";
+import { Member } from "./_types";
+
 export const START_MESSAGE = `To get started, add this bot to your chat and type /subscribe to subscribe them to your updates.
 
 Afterwards, post a message here and it will automatically be sent to your chat at 11:00 am. You will receive a few reminders if you do not submit your standup before 8:00 am the day of.
@@ -56,8 +59,8 @@ If you want to change your update, edit your last message.
 
 ${getGroupsMessage(groups)}`;
 
-export const WINNER_GROUP_MESSAGE = (username: string) =>
-  `🎲 ${username} has won! They've been chosen to send an update to this group.
+export const WINNER_GROUP_MESSAGE = (user: Member) =>
+  `🎲 ${getDisplayName(user)} has won! They've been chosen to send an update to this group.
 Updates from others will be ignored.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
@@ -70,9 +73,9 @@ export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in 
 Your update was not saved.`;
 
 export const SUBSCRIBERS_MESSAGE = (
-  usernames: Array<string>
-) => `Stoodbot member${usernames.length > 1 ? 's' : ''} in this chat:
+  users: Array<Member>
+) => `A member, at random, will be awarded the opportunity to submit an update for this group. The member${users.length > 1 ? 's' : ''} currently subscribed in this chat:
 
-${usernames.map((g) => `• ${g}`).join('\n')}
+${users.map((u) => `• ${getDisplayName(u)}`).join('\n')}
 
-Type /subscribe to join!`;
+To have a chance of being chosen, type /subscribe to join!`;
