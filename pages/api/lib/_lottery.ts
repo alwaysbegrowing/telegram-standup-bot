@@ -61,7 +61,7 @@ export const setWinners = async () => {
   // These users should all get a reminder. When they post, it'll send to the groups they're winners in
   Object.keys(lotteryWinners).forEach((userId) => {
     const user: Member = users.find((u: Member) => u.userId === Number(userId));
-    const userFullName = `${user.about.first_name} ${user.about.last_name}`.trim();
+    const userFullName = `${user.about.first_name || ''} ${user.about.last_name || ''}`.trim();
     const userDisplayName = user.about.username ? user.about.username : userFullName;
     const winningGroups = lotteryWinners[userId];
     const groups = user.groups.filter((g) => winningGroups.includes(g.chatId));
