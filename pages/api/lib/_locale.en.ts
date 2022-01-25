@@ -28,6 +28,12 @@ export const INVALID_EDIT_MESSAGE =
 
 export const UPDATE_EDITED_MESSAGE = 'Your update has been edited.';
 
+export const SUBMISSION_NOTIFY_MESSAGE =
+  'An update from the winner has been submitted!';
+
+export const SUBMISSION_NOTIFY_EDIT_MESSAGE =
+  'An update from the winner has been edited!';
+
 export const NO_SUBSCRIBED_GROUPS_MESSAGE =
   "You haven't subscribed any chats to your daily updates yet! Add this bot to your chat, then type /subscribe to subscribe them.";
 
@@ -62,7 +68,9 @@ If you want to change your update, edit your last message.
 ${getGroupsMessage(groups)}`;
 
 export const WINNER_GROUP_MESSAGE = (user: Member) =>
-  `🎲 ${getDisplayName(user)} has won! They've been chosen to send an update to this group.
+  `🎲 ${getDisplayName(
+    user
+  )} has won! They've been chosen to send an update to this group.
 Updates from others will be ignored.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>

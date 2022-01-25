@@ -11,6 +11,8 @@ import {
   NO_SUBSCRIBED_GROUPS_MESSAGE,
   NO_WINNING_GROUPS_MESSAGE,
   START_MESSAGE,
+  SUBMISSION_NOTIFY_EDIT_MESSAGE,
+  SUBMISSION_NOTIFY_MESSAGE,
   SUBSCRIBED_MESSAGE,
   SUBSCRIBERS_MESSAGE,
   UNSUBSCRIBED_MESSAGE,
@@ -189,8 +191,12 @@ const submitStandup = async (
 
   if (dbResponse.modifiedCount || dbResponse.modifiedCount) {
     const winnerPromises = [];
+    const groupMsg = isEdit
+      ? SUBMISSION_NOTIFY_EDIT_MESSAGE
+      : SUBMISSION_NOTIFY_MESSAGE;
+
     groups.forEach((group) => {
-      winnerPromises.push(sendMsg(SUCCESS_MESSAGE, group.chatId));
+      winnerPromises.push(sendMsg(groupMsg, group.chatId));
     });
     return await sendMsg(SUCCESS_MESSAGE, chatId, messageId, true);
   }
@@ -215,9 +221,7 @@ const getMembers = async (
   const members: Member[] = [];
 
   users.forEach((u) =>
-    u.groups.forEach(
-      (g) => g.chatId === chatId && members.push(u)
-    )
+    u.groups.forEach((g) => g.chatId === chatId && members.push(u))
   );
 
   return await sendMsg(SUBSCRIBERS_MESSAGE(members), chatId, messageId);
