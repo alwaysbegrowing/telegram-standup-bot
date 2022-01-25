@@ -188,6 +188,10 @@ const submitStandup = async (
   }
 
   if (dbResponse.modifiedCount || dbResponse.modifiedCount) {
+    const winnerPromises = [];
+    groups.forEach((group) => {
+      winnerPromises.push(sendMsg(SUCCESS_MESSAGE, group.chatId));
+    });
     return await sendMsg(SUCCESS_MESSAGE, chatId, messageId, true);
   }
 
