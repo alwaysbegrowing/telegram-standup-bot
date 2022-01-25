@@ -106,13 +106,13 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   }
 
   // Get updates for one user
-  if (req.query.user) {
+  if (req.query.userId) {
     const page = req.query.page || 1;
-    const username = req.query.user;
+    const userId = req.query.userId;
     const updates = await db
       .collection('users')
       .find({
-        'about.username': username,
+        userId: Number(userId),
         // To make sure they're allowed to query this user ID
         'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) || [] },
       })

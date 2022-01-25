@@ -1,18 +1,12 @@
 import React from 'react';
-import {
-  Button,
-  User,
-  Card,
-  useTheme,
-  Display,
-  Tooltip,
-} from '@geist-ui/react';
+import { Button, User, Card, useTheme, Display } from '@geist-ui/react';
 import { Calendar, Lock } from '@geist-ui/react-icons';
 import timeUntil from 'time-until';
 import { useRouter } from 'next/router';
 
 interface Props {
   username: string;
+  id: string;
   name: string;
   photo: string;
   file_id: () => React.ReactNode;
@@ -26,6 +20,7 @@ export type ProjectProps = Props;
 const Project: React.FC<ProjectProps> = ({
   name,
   username,
+  id: userId,
   photo,
   locked,
   createdAt,
@@ -55,12 +50,15 @@ const Project: React.FC<ProjectProps> = ({
         <Card className="project__card" shadow>
           <div className="project__title">
             <User src={photo} name={name}>
-              <User.Link href={`https://t.me/${username}`}>
-                @{username}
-              </User.Link>
+              {username && (
+                <User.Link href={`https://t.me/${username}`}>
+                  @{username}
+                </User.Link>
+              )}
+              {!username && 'anonymous'}
             </User>
             <Button
-              onClick={() => router.push(username)}
+              onClick={() => router.push(`/${userId}`)}
               className="project__visit-button"
               auto
             >
