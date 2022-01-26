@@ -11,6 +11,7 @@ export const telegramTypes = {
   poll: 'sendPoll',
   video: 'sendVideo',
   photo: 'sendPhoto',
+  document: 'sendDocument',
   video_note: 'sendVideoNote',
   animation: 'sendAnimation',
   group: 'sendMediaGroup',

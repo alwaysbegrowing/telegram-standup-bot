@@ -1,7 +1,6 @@
 import TGVideo from './Video';
 import TGPhoto from './Photo';
-import useSWR from 'swr';
-import { fetchWithToken } from './../../lib/helpers';
+import { Link, Button } from '@geist-ui/react';
 
 const TGFile = ({ u }) => {
   if (!u.file_id) return null;
@@ -11,6 +10,12 @@ const TGFile = ({ u }) => {
   } else if (u.type === 'photo') {
     return <TGPhoto u={u} />;
   }
+
+  return (
+    <Link href={`/api/getFile/?file_id=${u.file_id}`}>
+      <Button>View file</Button>
+    </Link>
+  );
 };
 
 export default TGFile;
