@@ -46,64 +46,35 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   };
 
   let groupUpdates = [];
-  if (
-    process.env.NODE_ENV === 'production' &&
-    req.query.key !== process.env.TELEGRAM_API_KEY
-  ) {
-    groupUpdates = await db
-      .collection('users')
-      .aggregate([
-        {
-          $project: { updateArchive: 1, groups: 1, about: 1 },
-        },
-        {
-          $unwind: '$updateArchive',
-        },
-        {
-          $match: {
-            'updateArchive.createdAt': {
-              $gt: previousSubmitTimestamp,
-              $lt: nextSubmitTimestamp,
-            },
-            'updateArchive.sent': false,
+
+  groupUpdates = await db
+    .collection('users')
+    .aggregate([
+      {
+        $project: { updateArchive: 1, groups: 1, about: 1 },
+      },
+      {
+        $unwind: '$updateArchive',
+      },
+      {
+        $match: {
+          'updateArchive.createdAt': {
+            $gt: previousSubmitTimestamp,
+            $lt: nextSubmitTimestamp,
           },
+          'updateArchive.sent': false,
         },
-        {
-          $group: {
-            _id: '$about.id',
-            about: { $first: '$about' },
-            groups: { $first: '$groups' },
-            updateArchive: { $push: '$updateArchive' },
-          },
+      },
+      {
+        $group: {
+          _id: '$about.id',
+          about: { $first: '$about' },
+          groups: { $first: '$groups' },
+          updateArchive: { $push: '$updateArchive' },
         },
-      ])
-      .toArray();
-  } else {
-    groupUpdates = await db
-      .collection('users')
-      .aggregate([
-        {
-          $project: { updateArchive: 1, groups: 1, about: 1 },
-        },
-        {
-          $unwind: '$updateArchive',
-        },
-        {
-          $match: {
-            'updateArchive.sent': false,
-          },
-        },
-        {
-          $group: {
-            _id: '$about.id',
-            about: { $first: '$about' },
-            groups: { $first: '$groups' },
-            updateArchive: { $push: '$updateArchive' },
-          },
-        },
-      ])
-      .toArray();
-  }
+      },
+    ])
+    .toArray();
 
   const sent = {};
   const sendUpdatePromises = [];
