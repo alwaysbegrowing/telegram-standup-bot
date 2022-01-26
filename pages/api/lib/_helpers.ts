@@ -108,6 +108,14 @@ export const sendMsg = async (
     return false;
   }
 
+  const sendChatAction = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/sendChatAction`;
+
+  await fetch(sendChatAction, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id, action: 'typing' }),
+  });
+
   if (type === 'group') {
     sent[chat_id] = Array.isArray(sent[chat_id])
       ? [...sent[chat_id], groupId]
@@ -184,12 +192,9 @@ export const getSubmissionDates = () => {
 
 export const getDisplayName = (user: Member) => {
   const { first_name, last_name, username } = user.about;
-  if (username) {
-    return username;
-  }
   const userFullName = `${first_name || ''} ${last_name || ''}`.trim();
-  if (userFullName !== '') {
-    return userFullName;
-  }
+  if (userFullName) return userFullName;
+  if (username) return username;
+
   return ANONYMOUS;
-}
+};

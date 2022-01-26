@@ -215,6 +215,7 @@ const getMembers = async (
   about: About,
   messageId: number
 ) => {
+  const getChatMemberCountEndpoint = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/getChatMemberCount`;
   const { db } = await connectToDatabase();
   const users: Array<Member> = await db.collection('users').find({}).toArray();
 
@@ -224,7 +225,18 @@ const getMembers = async (
     u.groups.forEach((g) => g.chatId === chatId && members.push(u))
   );
 
-  return await sendMsg(SUBSCRIBERS_MESSAGE(members), chatId, messageId);
+  const res = await fetch(getChatMemberCountEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, emoji: '🎰' }),
+  });
+  const json = await res.json();
+  const chatMemberCount = (json?.ok === true && json.result) || 0;
+  return await sendMsg(
+    SUBSCRIBERS_MESSAGE(members, chatMemberCount),
+    chatId,
+    messageId
+  );
 };
 
 const addToStandupGroup = async (

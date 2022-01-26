@@ -68,13 +68,12 @@ If you want to change your update, edit your last message.
 ${getGroupsMessage(groups)}`;
 
 export const WINNER_GROUP_MESSAGE = (user: Member) =>
-  `🎲 ${getDisplayName(
-    user
-  )} has won! They've been chosen to send an update to this group.
-Updates from others will be ignored.`;
+  `Holy moly! ${getDisplayName(user)} has won an update!
+
+They've been chosen to send an update to this group. Updates from others will be ignored.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
-  `🎲 We rolled the dice for you and by golly - you won! 🎲
+  `We hit the slots for you, and by golly...you won!
 
 ${getGroupsMessage(groups)}`;
 
@@ -82,22 +81,29 @@ export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in 
 
 Your update was not saved.`;
 
-export const SUBSCRIBERS_MESSAGE = (users: Array<Member>) => {
-  if (users.length === 0)
+export const SUBSCRIBERS_MESSAGE = (
+  users: Array<Member>,
+  chatMemberCount: number
+) => {
+  if (users.length === 0) {
     return `There are no subscribers yet.
 
-Click /subscribe to join!`;
+Click /subscribe to be the first to join!`;
+  }
 
-  if (users.length === 1)
+  if (users.length === 1) {
     return `Currently ${getDisplayName(
       users[0]
-    )} is the only member subscribed to this group.
+    )} is the only member subscribed to this group, out of ${chatMemberCount} total members!.
 
 Click /subscribe to join them!`;
+  }
 
   return `At update time, one of the following members will randomly be awarded the opportunity to submit the next update:
 
 ${users.map((u) => `• ${getDisplayName(u)}`).join('\n')}
 
-To participate, click /subscribe and you might be chosen next!`;
+To participate, click /subscribe and you might be chosen next!
+
+${users.length}/${chatMemberCount} subscribed.`;
 };
