@@ -32,6 +32,8 @@
     "time-until": "^1.0.0"
   },
   "devDependencies": {
+    "@swc/cli": "^0.1.55",
+    "@swc/core": "^1.2.135",
     "@types/react": "^17.0.38",
     "dotenv-cli": "^4.1.1",
     "eslint": "^8.7.0",
