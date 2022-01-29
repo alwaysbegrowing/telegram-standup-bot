@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="bfg">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/bfg.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

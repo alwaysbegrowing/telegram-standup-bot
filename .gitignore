@@ -36,3 +36,4 @@ yarn-error.log*
 bfg.jar
 
 debug.log
+.idea/
