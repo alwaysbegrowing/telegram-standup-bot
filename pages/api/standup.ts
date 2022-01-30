@@ -222,7 +222,7 @@ const getMembers = async (
   const members: Member[] = [];
 
   users.forEach((u) =>
-    u.groups.forEach((g) => g.chatId === chatId && members.push(u))
+    u.groups.filter(g => !!g).forEach((g) => g.chatId === chatId && members.push(u))
   );
 
   const res = await fetch(getChatMemberCountEndpoint, {

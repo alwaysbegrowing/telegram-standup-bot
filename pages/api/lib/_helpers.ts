@@ -142,7 +142,8 @@ export const sendMsg = async (
     }
   }
 
-  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiEndpoint}`;
+  // Adding chat_id at the end even tho tg ignores it, for our own debugging when an endpoint fails in send.ts
+  const url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/${apiEndpoint}?chat_id=${data?.chat_id}`;
 
   return fetch(url, {
     method: 'POST',

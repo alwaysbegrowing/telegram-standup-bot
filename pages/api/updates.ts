@@ -114,7 +114,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       .find({
         userId: Number(userId),
         // To make sure they're allowed to query this user ID
-        'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) || [] },
+        'groups.chatId': { $in: user?.groups?.filter(g => !!g).map((g) => g.chatId) || [] },
       })
       .project({ updateArchive: { $slice: -10 } })
       .toArray();
@@ -132,7 +132,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   const groupUpdates = await db
     .collection('users')
     .find({
-      'groups.chatId': { $in: user?.groups?.map((g) => g.chatId) || [] },
+      'groups.chatId': { $in: user?.groups?.filter(g => !!g).map((g) => g.chatId) || [] },
     })
     .project({ updateArchive: { $slice: -10 } })
     .toArray();

@@ -16,5 +16,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     return res.status(404).json({ statusText: 'User not found' });
   }
 
-  return res.status(200).json(user.groups.map((g) => g.title));
+  return res
+    .status(200)
+    .json(user.groups.filter((g) => !!g).map((g) => g.title));
 };
