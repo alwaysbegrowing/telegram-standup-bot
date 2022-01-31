@@ -6,7 +6,7 @@ import { WINNER_DM_MESSAGE, WINNER_GROUP_MESSAGE } from './_locale.en';
 export const getWinningGroupsForUser = async (userId: number) => {
   const { db } = await connectToDatabase();
   const user: Member = await db.collection('users').findOne({ userId });
-  const winners = user.groups.filter((g: StandupGroup) => g.winner);
+  const winners = user.groups.filter(g => !!g).filter((g: StandupGroup) => g.winner);
   return winners;
 };
 
@@ -24,25 +24,29 @@ export const setWinners = async () => {
   users
     .filter((u) => !!u.groups.length)
     .forEach((user: Member) => {
-      user.groups.forEach((g) => {
-        if (!groups.find((group) => group.chatId === g.chatId)) {
-          groups.push({ chatId: g.chatId, users: [] });
-        }
-      });
+      user.groups
+        .filter((g) => !!g)
+        .forEach((g) => {
+          if (!groups.find((group) => group.chatId === g.chatId)) {
+            groups.push({ chatId: g.chatId, users: [] });
+          }
+        });
     });
 
   groups.forEach((group) => {
     users
       .filter((u) => !!u.groups.length)
       .forEach((user: Member) => {
-        user.groups.forEach((ugroup) => {
-          if (ugroup.chatId === group.chatId) {
-            const users = group.users;
-            if (!users.includes(user.userId)) {
-              users.push(user.userId);
+        user.groups
+          .filter((g) => !!g)
+          .forEach((ugroup) => {
+            if (ugroup.chatId === group.chatId) {
+              const users = group.users;
+              if (!users.includes(user.userId)) {
+                users.push(user.userId);
+              }
             }
-          }
-        });
+          });
       });
   });
 
@@ -63,7 +67,9 @@ export const setWinners = async () => {
   Object.keys(lotteryWinners).forEach((userId) => {
     const user: Member = users.find((u: Member) => u.userId === Number(userId));
     const winningGroups = lotteryWinners[userId];
-    const groups = user.groups.filter((g) => winningGroups.includes(g.chatId));
+    const groups = user.groups
+      .filter((g) => !!g)
+      .filter((g) => winningGroups.includes(g.chatId));
     const groupTitles = groups.map((group) => group.title);
 
     winningGroups.forEach((chatId) => {

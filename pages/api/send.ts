@@ -21,20 +21,12 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
     const response = await db.collection('users').updateMany(
       {
-        'updateArchive.createdAt': {
-          $gt: previousSubmitTimestamp,
-          $lt: nextSubmitTimestamp,
-        },
         'updateArchive.sent': false,
       },
       { $set: { 'updateArchive.$[elem].sent': true, submitted: false } },
       {
         arrayFilters: [
           {
-            'elem.createdAt': {
-              $gt: previousSubmitTimestamp,
-              $lt: nextSubmitTimestamp,
-            },
             'elem.sent': false,
           },
         ],
@@ -58,10 +50,6 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       },
       {
         $match: {
-          'updateArchive.createdAt': {
-            $gt: previousSubmitTimestamp,
-            $lt: nextSubmitTimestamp,
-          },
           'updateArchive.sent': false,
         },
       },
@@ -104,56 +92,122 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   groupUpdates
     .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
     .forEach((user: Member) => {
-      user.groups.forEach((group: StandupGroup) => {
-        // only send update to this group if the user won for this group!
-        if (!group.winner) {
-          return;
-        }
-
-        const chat_id = group.chatId;
-        let total = user.updateArchive.length;
-        let prefixTotal = 1;
-
-        user.updateArchive.forEach((update: UpdateArchive) => {
-          total = totalMedia[user.about.id].length;
-
-          const body = update?.body || {};
-          const groupId = body?.message?.media_group_id;
-          const type = groupId ? 'group' : update?.type || 'text';
-
-          if (Array.isArray(sent[chat_id]) && sent[chat_id].includes(groupId)) {
-            console.log(groupId, 'already sent');
-            return true;
+      user.groups
+        .filter((g) => !!g)
+        .forEach((group: StandupGroup) => {
+          // only send update to this group if the user won for this group!
+          if (!group || !group?.winner) {
+            return;
           }
 
-          if (type === 'group') {
-            sent[chat_id] = Array.isArray(sent[chat_id])
-              ? [...sent[chat_id], groupId]
-              : [groupId];
-          }
+          const chat_id = group.chatId;
+          let total = user.updateArchive.length;
+          let prefixTotal = 1;
 
-          const prefix =
-            total > 1
-              ? `${prefixTotal}/${total}: ${user.about.first_name}`
-              : `- ${user.about.first_name}`;
+          user.updateArchive.forEach((update: UpdateArchive) => {
+            total = totalMedia[user.about.id].length;
 
-          sendUpdatePromises.push(
-            sendMsg(
-              prefix,
-              group.chatId,
-              null,
-              true,
-              update,
-              user.updateArchive
-            )
-          );
+            const body = update?.body || {};
+            const groupId = body?.message?.media_group_id;
+            const type = groupId ? 'group' : update?.type || 'text';
 
-          prefixTotal += 1;
+            if (
+              Array.isArray(sent[chat_id]) &&
+              sent[chat_id].includes(groupId)
+            ) {
+              console.log(groupId, 'already sent');
+              return true;
+            }
+
+            if (type === 'group') {
+              sent[chat_id] = Array.isArray(sent[chat_id])
+                ? [...sent[chat_id], groupId]
+                : [groupId];
+            }
+
+            const prefix =
+              total > 1
+                ? `${prefixTotal}/${total}: ${user.about.first_name}`
+                : `- ${user.about.first_name}`;
+
+            sendUpdatePromises.push(
+              sendMsg(
+                prefix,
+                group.chatId,
+                null,
+                true,
+                update,
+                user.updateArchive
+              )
+            );
+
+            prefixTotal += 1;
+          });
         });
-      });
     });
 
-  await Promise.all(sendUpdatePromises);
+  const ok = await Promise.all(sendUpdatePromises);
+
+  const migrations = [];
+  const deletions = [];
+
+  for await (const kk of ok) {
+    if (!kk?.url?.includes('chat_id=')) continue;
+
+    const responseJson = await kk.json();
+    let splitids = kk.url.split('chat_id=');
+    const chatId =
+      Array.isArray(splitids) &&
+      splitids.length &&
+      Number(splitids[splitids.length - 1]);
+
+    // Bad Request: group chat was upgraded to a supergroup chat
+    const to = responseJson?.parameters?.migrate_to_chat_id;
+    const exists = migrations.find((m) => m.from === chatId);
+    if (!exists) migrations.push({ from: chatId, to });
+
+    // Forbidden: bot was kicked from the group chat
+    // Bad Request: chat not found
+    const chatnotfound = responseJson?.description?.includes('chat not found');
+    if (
+      (responseJson?.error_code === 403 || chatnotfound) &&
+      !deletions.includes(chatId)
+    )
+      deletions.push(chatId);
+
+    console.log(responseJson);
+  }
+  for await (const del of deletions) {
+    await db.collection('users').updateMany(
+      {
+        'groups.chatId': del,
+      },
+      { $set: { 'groups.$[elem]': null } },
+      {
+        arrayFilters: [
+          {
+            'elem.chatId': del,
+          },
+        ],
+      }
+    );
+  }
+  for await (const migrate of migrations) {
+    await db.collection('users').updateMany(
+      {
+        'groups.chatId': migrate.from,
+      },
+      { $set: { 'groups.$[elem].chatId': migrate.to } },
+      {
+        arrayFilters: [
+          {
+            'elem.chatId': migrate.from,
+          },
+        ],
+      }
+    );
+  }
+
   if (sendUpdatePromises.length) {
     await markAllSent();
   } else {

@@ -19,7 +19,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   users
     .filter((u) => !!u.groups.length)
     .forEach((user: Member) => {
-      const winners = user.groups.filter((g: StandupGroup) => g.winner);
+      const winners = user.groups.filter(g => !!g).filter((g: StandupGroup) => g.winner);
 
       if (winners.length) {
         const winnerTitles = winners.map((g) => g.title);
