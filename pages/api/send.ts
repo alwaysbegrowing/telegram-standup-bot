@@ -146,68 +146,6 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         });
     });
 
-  const ok = await Promise.all(sendUpdatePromises);
-
-  const migrations = [];
-  const deletions = [];
-
-  for await (const kk of ok) {
-    if (!kk?.url?.includes('chat_id=')) continue;
-
-    const responseJson = await kk.json();
-    let splitids = kk.url.split('chat_id=');
-    const chatId =
-      Array.isArray(splitids) &&
-      splitids.length &&
-      Number(splitids[splitids.length - 1]);
-
-    // Bad Request: group chat was upgraded to a supergroup chat
-    const to = responseJson?.parameters?.migrate_to_chat_id;
-    const exists = migrations.find((m) => m.from === chatId);
-    if (!exists) migrations.push({ from: chatId, to });
-
-    // Forbidden: bot was kicked from the group chat
-    // Bad Request: chat not found
-    const chatnotfound = responseJson?.description?.includes('chat not found');
-    if (
-      (responseJson?.error_code === 403 || chatnotfound) &&
-      !deletions.includes(chatId)
-    )
-      deletions.push(chatId);
-
-    console.log(responseJson);
-  }
-  for await (const del of deletions) {
-    await db.collection('users').updateMany(
-      {
-        'groups.chatId': del,
-      },
-      { $set: { 'groups.$[elem]': null } },
-      {
-        arrayFilters: [
-          {
-            'elem.chatId': del,
-          },
-        ],
-      }
-    );
-  }
-  for await (const migrate of migrations) {
-    await db.collection('users').updateMany(
-      {
-        'groups.chatId': migrate.from,
-      },
-      { $set: { 'groups.$[elem].chatId': migrate.to } },
-      {
-        arrayFilters: [
-          {
-            'elem.chatId': migrate.from,
-          },
-        ],
-      }
-    );
-  }
-
   if (sendUpdatePromises.length) {
     await markAllSent();
   } else {
