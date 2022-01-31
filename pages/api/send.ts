@@ -146,6 +146,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         });
     });
 
+  await Promise.all(sendUpdatePromises);
+
   if (sendUpdatePromises.length) {
     await markAllSent();
   } else {
