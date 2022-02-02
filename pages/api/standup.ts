@@ -70,7 +70,7 @@ const submitStandup = async (
 
   // only winners get to submit an update
   const groups = await getWinningGroupsForUser(userId);
-  if (!groups.length) {
+  if (!groups || !groups.length) {
     return await sendMsg(NO_WINNING_GROUPS_MESSAGE, chatId, messageId);
   }
 
@@ -222,7 +222,9 @@ const getMembers = async (
   const members: Member[] = [];
 
   users.forEach((u) =>
-    u.groups.filter(g => !!g).forEach((g) => g.chatId === chatId && members.push(u))
+    u.groups
+      .filter((g) => !!g)
+      .forEach((g) => g.chatId === chatId && members.push(u))
   );
 
   const res = await fetch(getChatMemberCountEndpoint, {

@@ -46,7 +46,7 @@ export const GROUP_MEDIA_SUBMITTED_MESSAGE =
 const getGroupsMessage = (
   groups: Array<string>
 ) => `Your update will be sent to the following group${
-  groups.length > 1 ? 's' : ''
+  groups && groups.length > 1 ? 's' : ''
 }:
 ${groups.map((g) => `• ${g}`).join('\n')}`;
 

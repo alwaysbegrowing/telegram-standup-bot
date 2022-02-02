@@ -6,7 +6,10 @@ import { WINNER_DM_MESSAGE, WINNER_GROUP_MESSAGE } from './_locale.en';
 export const getWinningGroupsForUser = async (userId: number) => {
   const { db } = await connectToDatabase();
   const user: Member = await db.collection('users').findOne({ userId });
-  const winners = user.groups.filter(g => !!g).filter((g: StandupGroup) => g.winner);
+  const winners =
+    (Array.isArray(user.groups) &&
+      user.groups.filter((g) => !!g).filter((g: StandupGroup) => g.winner)) ||
+    [];
   return winners;
 };
 
@@ -68,8 +71,8 @@ export const setWinners = async () => {
     const user: Member = users.find((u: Member) => u.userId === Number(userId));
     const winningGroups = lotteryWinners[userId];
     const groups = user.groups
-      .filter((g) => !!g)
-      .filter((g) => winningGroups.includes(g.chatId));
+    .filter((g) => !!g)
+    .filter((g) => winningGroups.includes(g.chatId));
     const groupTitles = groups.map((group) => group.title);
 
     winningGroups.forEach((chatId) => {
@@ -116,21 +119,16 @@ export const unsetWinners = async () => {
   console.log('Unsetting all lottery winners');
 
   const { db } = await connectToDatabase();
-  const promises = [];
-  promises.push(
-    db.collection('users').updateMany(
-      { 'groups.winner': true },
-      { $set: { 'groups.$[elem].winner': false } },
-      {
-        arrayFilters: [
-          {
-            'elem.winner': true,
-          },
-        ],
-        multi: true,
-      }
-    )
+  await db.collection('users').updateMany(
+    { 'groups.winner': true },
+    { $set: { 'groups.$[elem].winner': false } },
+    {
+      arrayFilters: [
+        {
+          'elem.winner': true,
+        },
+      ],
+      multi: true,
+    }
   );
-
-  return await Promise.all(promises);
 };
