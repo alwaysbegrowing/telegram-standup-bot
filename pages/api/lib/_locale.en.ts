@@ -38,23 +38,21 @@ export const NO_SUBSCRIBED_GROUPS_MESSAGE =
   "You haven't subscribed any chats to your daily updates yet! Add this bot to your chat, then type /subscribe to subscribe them.";
 
 export const UPDATE_SUBMITTED_MESSAGE =
-  'Your update has been submitted. Congrats on winning the lottery!';
+  'Your update has been submitted.';
 
 export const GROUP_MEDIA_SUBMITTED_MESSAGE =
-  'Your group media has been submitted. Congrats on winning the lottery!';
+  'Your group media has been submitted.';
 
 const getGroupsMessage = (
   groups: Array<string>
-) => `Your update will be sent to the following group${
+) => `The following group${
   groups && groups.length > 1 ? 's' : ''
-}:
+} will receive your update:
 ${groups.map((g) => `• ${g}`).join('\n')}`;
 
 export const NOT_SUBMITTED_MESSAGE = (
   groups: Array<string>
 ) => `(1 hour reminder) Tick tock. Ready to submit an update?
-
-Send me a message, or spice it up with some photos! Afterall, pictures tell a thousand words. Can you guess how many a video could tell?
 
 ${getGroupsMessage(groups)}
 `;
@@ -68,16 +66,14 @@ If you want to change your update, edit your last message.
 ${getGroupsMessage(groups)}`;
 
 export const WINNER_GROUP_MESSAGE = (user: Member) =>
-  `Holy moly! ${getDisplayName(user)} has won an update!
-
-They've been chosen to send an update to this group. Updates from others will be ignored.`;
+  `Winner winner! ${getDisplayName(user)} has been chosen to send an update to this group.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
-  `We hit the slots for you, and by golly...you won!
+  `You are the chosen one!
 
 ${getGroupsMessage(groups)}`;
 
-export const NO_WINNING_GROUPS_MESSAGE = `You haven't won the update lottery in any groups yet! Check back tomorrow 🤞
+export const NO_WINNING_GROUPS_MESSAGE = `You haven't won in any groups yet! Check back tomorrow 🤞
 
 Your update was not saved.`;
 
