@@ -16,7 +16,6 @@ export const getWinningGroupsForUser = async (userId: number) => {
 export const setWinners = async () => {
   console.log('Setting new lottery winners');
   await unsetWinners();
-  const sendDiceEndpoint = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/sendDice`;
 
   const { db } = await connectToDatabase();
   const users = await db.collection('users').find({}).toArray();
@@ -92,23 +91,9 @@ export const setWinners = async () => {
         )
       );
 
-      promises.push(
-        fetch(sendDiceEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, emoji: '🎰' }),
-        })
-      );
       promises.push(sendMsg(WINNER_GROUP_MESSAGE(user), chatId));
     });
 
-    promises.push(
-      fetch(sendDiceEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: user.userId, emoji: '🎰' }),
-      })
-    );
     promises.push(sendMsg(WINNER_DM_MESSAGE(groupTitles), user.userId));
   });
 
