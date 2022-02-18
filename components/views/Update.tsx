@@ -79,7 +79,7 @@ const Update = ({ initialData, initialDataError }) => {
       <div className="page__wrapper">
         <div className="page__content">
           <div className="projects">
-            {prefers?.userInfo?.photo_url && (
+            {prefers?.userInfo?.first_name && (
               <div>
                 {prefers?.userInfo && initialDataError && (
                   <Note>
