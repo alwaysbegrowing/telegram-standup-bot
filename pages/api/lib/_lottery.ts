@@ -7,7 +7,7 @@ export const getWinningGroupsForUser = async (userId: number) => {
   const { db } = await connectToDatabase();
   const user: Member = await db.collection('users').findOne({ userId });
   const winners =
-    (Array.isArray(user.groups) &&
+    (Array.isArray(user?.groups) &&
       user.groups.filter((g) => !!g).filter((g: StandupGroup) => g.winner)) ||
     [];
   return winners;
