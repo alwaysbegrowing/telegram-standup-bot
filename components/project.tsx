@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Button, User, Card, useTheme, Display } from '@geist-ui/react';
 import { Calendar, Lock } from '@geist-ui/react-icons';
 import timeUntil from 'time-until';
@@ -9,8 +9,8 @@ interface Props {
   id: string;
   name: string;
   photo: string;
-  file_id: () => React.ReactNode;
-  message: () => React.ReactNode;
+  file_id: ReactElement;
+  message: ReactElement;
   locked: boolean;
   createdAt: string;
 }

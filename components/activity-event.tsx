@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Avatar, Text, useTheme } from '@geist-ui/react';
 
 interface Props {
   username: string;
   avatar: string;
   createdAt: string;
-  children: string | React.ReactNode;
+  children: ReactElement;
 }
 
 export type ActivityEventProps = Props;
