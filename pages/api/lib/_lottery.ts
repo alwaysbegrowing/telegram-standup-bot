@@ -90,8 +90,6 @@ export const setWinners = async () => {
           }
         )
       );
-
-      promises.push(sendMsg(WINNER_GROUP_MESSAGE(user), chatId));
     });
 
     promises.push(sendMsg(WINNER_DM_MESSAGE(groupTitles), user.userId));
