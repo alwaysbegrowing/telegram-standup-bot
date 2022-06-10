@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { createHash, createHmac } from 'crypto';
 import memoize from 'fast-memoize';
 import { Member, telegramTypes, UpdateArchive } from './_types';
