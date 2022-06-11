@@ -104,7 +104,7 @@ export const sendMsg = async (
 
   if (Array.isArray(sent[chat_id]) && sent[chat_id].includes(groupId)) {
     console.log(groupId, 'already sent');
-    return false;
+    return { status: 200 };
   }
 
   const sendChatAction = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/sendChatAction`;
