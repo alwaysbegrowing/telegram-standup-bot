@@ -24,18 +24,18 @@ export const ALREADY_SUBSCRIBED_MESSAGE =
   'This chat is already subscribed to your daily updates.';
 
 export const INVALID_EDIT_MESSAGE =
-  "You can only edit a message that hasn't been sent yet!";
+  "You can only edit a message that hasn't been sent yet.";
 
 export const UPDATE_EDITED_MESSAGE = 'Your update has been edited.';
 
 export const SUBMISSION_NOTIFY_MESSAGE =
-  'An update from the winner has been submitted!';
+  'An update from the winner has been submitted 🧸.';
 
 export const SUBMISSION_NOTIFY_EDIT_MESSAGE =
-  'An update from the winner has been edited!';
+  'The updater has edited their message 👀.';
 
 export const NO_SUBSCRIBED_GROUPS_MESSAGE =
-  "You haven't subscribed any chats to your daily updates yet! Add this bot to your chat, then type /subscribe to subscribe them.";
+  "You haven't subscribed any chats to your daily updates yet. Add this bot to your chat, then type /subscribe to subscribe them.";
 
 export const UPDATE_SUBMITTED_MESSAGE =
   'Your update has been submitted.';
@@ -59,21 +59,21 @@ ${getGroupsMessage(groups)}
 
 export const SUBMITTED_MESSAGE = (
   groups: Array<string>
-) => `(1 hour reminder) The update you previously submitted will be posted soon!
+) => `(1 hour reminder) The update you previously submitted will be posted soon.
 
 If you want to change your update, edit your last message.
 
 ${getGroupsMessage(groups)}`;
 
 export const WINNER_GROUP_MESSAGE = (user: Member) =>
-  `Winner winner! ${getDisplayName(user)} has been chosen to send an update to this group.`;
+  `Winner winner. ${getDisplayName(user)} has been chosen to send an update to this group.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
-  `You are the chosen one!
+  `You are the chosen one.
 
 ${getGroupsMessage(groups)}`;
 
-export const NO_WINNING_GROUPS_MESSAGE = `You haven't won in any groups yet! Check back tomorrow 🤞
+export const NO_WINNING_GROUPS_MESSAGE = `You haven't won in any groups yet. Check back tomorrow 🤞
 
 Your update was not saved.`;
 
@@ -84,22 +84,22 @@ export const SUBSCRIBERS_MESSAGE = (
   if (users.length === 0) {
     return `There are no subscribers yet.
 
-Click /subscribe to be the first to join!`;
+Click /subscribe to be the first to join.`;
   }
 
   if (users.length === 1) {
     return `Currently ${getDisplayName(
       users[0]
-    )} is the only member subscribed to this group, out of ${chatMemberCount} total members!.
+    )} is the only member subscribed to this group, out of ${chatMemberCount} total members.
 
-Click /subscribe to join them!`;
+Click /subscribe to join them.`;
   }
 
   return `At update time, one of the following members will randomly be awarded the opportunity to submit the next update:
 
 ${users.map((u) => `• ${getDisplayName(u)}`).join('\n')}
 
-To participate, click /subscribe and you might be chosen next!
+To participate, click /subscribe and you might be chosen next.
 
 ${users.length}/${chatMemberCount} subscribed.`;
 };
