@@ -12,7 +12,7 @@ You can send me videos / photos with captions, gifs, voice messages, and video m
 export const INVALID_PRIVATE_MESSAGE =
   'Add me to a chat, then send this command in that chat instead.';
 
-export const SUBSCRIBED_MESSAGE = `This chat is now subscribed to your daily updates. Send me a message  @${process.env.NEXT_PUBLIC_BOT_NAME} to get started.`;
+export const SUBSCRIBED_MESSAGE = `This chat is now subscribed to your daily updates. Send me a message @${process.env.NEXT_PUBLIC_BOT_NAME} to get started.`;
 
 export const UNSUBSCRIBED_MESSAGE =
   'This chat is now unsubscribed from your daily updates.';
@@ -24,24 +24,24 @@ export const ALREADY_SUBSCRIBED_MESSAGE =
   'This chat is already subscribed to your daily updates.';
 
 export const INVALID_EDIT_MESSAGE =
-  "You can only edit a message that hasn't been sent yet.";
+  "You can only edit a message that hasn't been sent yet ☹️";
 
-export const UPDATE_EDITED_MESSAGE = 'Your update has been edited.';
+export const UPDATE_EDITED_MESSAGE = 'Message edited 😎';
 
 export const SUBMISSION_NOTIFY_MESSAGE =
-  'An update from the winner has been submitted 🧸.';
+  `There's a new update coming 🧸`;
 
 export const SUBMISSION_NOTIFY_EDIT_MESSAGE =
-  'The updater has edited their message 👀.';
+  'The update was edited 👀';
 
 export const NO_SUBSCRIBED_GROUPS_MESSAGE =
   "You haven't subscribed any chats to your daily updates yet. Add this bot to your chat, then type /subscribe to subscribe them.";
 
 export const UPDATE_SUBMITTED_MESSAGE =
-  'Your update has been submitted.';
+  'Submitted';
 
 export const GROUP_MEDIA_SUBMITTED_MESSAGE =
-  'Your group media has been submitted.';
+  'All that media has been submitted';
 
 const getGroupsMessage = (
   groups: Array<string>
