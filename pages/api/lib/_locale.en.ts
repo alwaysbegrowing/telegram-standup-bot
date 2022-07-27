@@ -69,7 +69,7 @@ export const WINNER_GROUP_MESSAGE = (user: Member) =>
   `Winner winner. ${getDisplayName(user)} has been chosen to send an update to this group.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
-  `You are the chosen one.
+  `It's your turn 🐼
 
 ${getGroupsMessage(groups)}`;
 
