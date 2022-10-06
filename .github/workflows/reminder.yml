@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Reminder API
-        run: |
+      - uses: actions/checkout@v2
+      - run: |
           curl --request GET \
           --url 'https://${{ secrets.MAIN_SITE }}/api/reminder?key=${{ secrets.TELEGRAM_API_KEY }}'
+      - uses: gautamkrishnar/keepalive-workflow@v1 
