@@ -190,14 +190,6 @@ const submitStandup = async (
   }
 
   if (dbResponse.modifiedCount || dbResponse.modifiedCount) {
-    const winnerPromises = [];
-    const groupMsg = isEdit
-      ? SUBMISSION_NOTIFY_EDIT_MESSAGE
-      : SUBMISSION_NOTIFY_MESSAGE;
-
-    groups.forEach((group) => {
-      winnerPromises.push(sendMsg(groupMsg, group.chatId));
-    });
     return await sendMsg(SUCCESS_MESSAGE, chatId, messageId, true);
   }
 
