@@ -5,6 +5,13 @@ import { promisify } from 'util';
 
 const pipeline = promisify(stream.pipeline);
 
+interface TelegramResponse {
+  ok?: boolean;
+  result?: {
+    file_path: string;
+  };
+}
+
 async function downloadFile(req, res) {
   if (!req.query.file_id) {
     return res.status(400).json({ statusText: 'Bad Request' });
@@ -12,14 +19,14 @@ async function downloadFile(req, res) {
 
   const downloadUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/getFile?file_id=${req.query.file_id}`;
   const fileResponse = await fetch(downloadUrl);
-  const jsonResponse = await fileResponse.json();
+  const jsonResponse: TelegramResponse = await fileResponse.json();
 
-  if (!jsonResponse?.ok) {
+  if (!jsonResponse.ok) {
     return res.status(400).json({ statusText: 'File not found' });
   }
 
-  const filePath = `https://api.telegram.org/file/bot${process.env.TELEGRAM_API_KEY}/${jsonResponse?.result?.file_path}`;
-  const fileSegments = jsonResponse?.result?.file_path.split('/');
+  const filePath = `https://api.telegram.org/file/bot${process.env.TELEGRAM_API_KEY}/${jsonResponse.result?.file_path}`;
+  const fileSegments = jsonResponse.result?.file_path.split('/');
   const fileDownloadResponse = await fetch(filePath);
 
   res.setHeader(
