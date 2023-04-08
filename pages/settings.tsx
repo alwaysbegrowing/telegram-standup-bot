@@ -1,5 +1,5 @@
+import { Button, Fieldset, Grid, Page, Spacer } from '@geist-ui/react';
 import { useRouter } from 'next/router';
-import { Button, Fieldset, Grid, Link, Page, Spacer } from '@geist-ui/react';
 
 const SettingsPage = () => {
   const router = useRouter();

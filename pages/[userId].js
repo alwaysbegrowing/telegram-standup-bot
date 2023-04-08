@@ -1,10 +1,10 @@
-import { useRouter } from 'next/router';
-import styles from '../styles/Home.module.css';
-import useSWR from 'swr';
-import { fetchWithToken } from '../lib/helpers';
 import { Loading } from '@geist-ui/react';
-import { usePrefers } from '../lib/use-prefers';
+import { useRouter } from 'next/router';
+import useSWR from 'swr';
 import Update from '../components/views/Update';
+import { fetchWithToken } from '../lib/helpers';
+import { usePrefers } from '../lib/use-prefers';
+import styles from '../styles/Home.module.css';
 
 const UserPage = () => {
   const prefers = usePrefers();

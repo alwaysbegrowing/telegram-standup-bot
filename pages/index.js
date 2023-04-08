@@ -1,15 +1,15 @@
-import ReactTimeAgo from 'react-time-ago';
-import ReactMarkdown from 'react-markdown';
-import { Note, Loading, Tooltip, Image, useTheme, Grid } from '@geist-ui/react';
-import useSWR from 'swr';
-import gfm from 'remark-gfm';
 import Heading from '@/components/heading';
 import Project from '@/components/project';
-import { usePrefers } from '../lib/use-prefers';
-import HomePage from './home';
+import { Grid, Tooltip, useTheme } from '@geist-ui/react';
+import ReactMarkdown from 'react-markdown';
+import ReactTimeAgo from 'react-time-ago';
+import gfm from 'remark-gfm';
+import useSWR from 'swr';
 import { fetchWithToken } from '../lib/helpers';
+import { usePrefers } from '../lib/use-prefers';
 import TGFile from './../components/views/File';
 import Update from './../components/views/Update';
+import HomePage from './home';
 
 const TooltipContainer = ({ verboseDate, children }) => (
   <Tooltip text={verboseDate}>{children}</Tooltip>

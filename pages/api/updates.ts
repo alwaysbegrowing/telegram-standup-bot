@@ -3,28 +3,28 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { fillMarkdownEntitiesMarkup } from 'telegram-text-entities-filler';
 import { connectToDatabase } from './lib/_connectToDatabase';
 
-const transformUpdate = (g, response) => {
-  const latestMessages = g?.updateArchive?.reverse();
+const transformUpdate = (group, response) => {
+  const latestMessages = group?.updateArchive?.reverse();
   if (!latestMessages) return;
 
-  return latestMessages.map((u, i) => {
+  return latestMessages.map((message, index) => {
     let data = {
-      id: g.userId,
-      name: g.about.first_name,
-      username: g.about.username,
-      photo: g.about.photo_url,
-      type: u.type,
-      createdAt: u.createdAt,
-      groupId: u?.body?.message?.media_group_id,
-      message: u?.body?.message?.text || u?.body?.message?.caption,
-      file_id: u?.file_id,
-      locked: g.submitted && !i,
+      id: group.userId,
+      name: group.about.first_name,
+      username: group.about.username,
+      photo: group.about.photo_url,
+      type: message.type,
+      createdAt: message.createdAt,
+      groupId: message?.body?.message?.media_group_id,
+      message: message?.body?.message?.text || message?.body?.message?.caption,
+      file_id: message?.file_id,
+      locked: group.submitted && !index,
       entities: false,
     };
 
     if (
       latestMessages?.[0]?.body?.message?.media_group_id === data.groupId &&
-      g.submitted
+      group.submitted
     ) {
       data = {
         ...data,
@@ -35,21 +35,22 @@ const transformUpdate = (g, response) => {
     }
 
     const entities =
-      u?.body?.message?.entities || u?.body?.message?.caption_entities;
+      message?.body?.message?.entities ||
+      message?.body?.message?.caption_entities;
 
     // Don't convert entities if it isn't submitted
-    if (!g.submitted && Array.isArray(entities)) {
+    if (!group.submitted && Array.isArray(entities)) {
       data.message = fillMarkdownEntitiesMarkup(data.message, entities);
       data.entities = true;
     }
 
-    if (i) {
+    if (index) {
       // See if any other photos from this group have a caption
       // Really bad, this should be set some how else
-      if (!response.find((u) => u?.id === g?.userId)?.message) {
+      if (!response.find((u) => u?.id === group?.userId)?.message) {
         response = response.map((b) => {
           if (
-            b?.id === g?.userId &&
+            b?.id === group?.userId &&
             !b.message &&
             data.message &&
             data.groupId === b.groupId
@@ -71,17 +72,61 @@ const transformUpdate = (g, response) => {
         });
       }
 
-      response.find((u) => u?.id === g?.userId)?.archive.push(data);
+      response.find((u) => u?.id === group?.userId)?.archive.push(data);
       return;
     }
 
     response.push({
       archive: [],
       ...data,
-      message: !g.submitted && data.message,
-      file_id: !g.submitted && data.file_id,
+      message: !group.submitted && data.message,
+      file_id: !group.submitted && data.file_id,
     });
   });
+};
+
+const getUpdatesForOneUser = async (req, res, user) => {
+  const page = req.query.page || 1;
+  const userId = req.query.userId;
+  const { db } = await connectToDatabase();
+  const updates = await db
+    .collection('users')
+    .find({
+      userId: Number(userId),
+      // To make sure they're allowed to query this user ID
+      'groups.chatId': {
+        $in: user?.groups?.map((g) => g?.chatId).filter((g) => !!g) || [],
+      },
+    })
+    .project({ updateArchive: { $slice: -10 } })
+    .toArray();
+
+  if (updates && Array.isArray(updates)) {
+    let response = [];
+    updates.forEach((r) => transformUpdate(r, response));
+
+    return res.status(200).json(response);
+  }
+
+  return res.status(404).json({ statusText: 'User not found' });
+};
+
+const getAllGroupUpdates = async (req, res, user) => {
+  const { db } = await connectToDatabase();
+  const groupUpdates = await db
+    .collection('users')
+    .find({
+      'groups.chatId': {
+        $in: user?.groups?.map((g) => g?.chatId).filter((g) => !!g) || [],
+      },
+    })
+    .project({ updateArchive: { $slice: -10 } })
+    .toArray();
+
+  let response = [];
+  groupUpdates.map((r) => transformUpdate(r, response));
+
+  return res.status(200).json(response);
 };
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
@@ -105,44 +150,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     return res.status(404).json({ statusText: 'User not found' });
   }
 
-  // Get updates for one user
   if (req.query.userId) {
-    const page = req.query.page || 1;
-    const userId = req.query.userId;
-    const updates = await db
-      .collection('users')
-      .find({
-        userId: Number(userId),
-        // To make sure they're allowed to query this user ID
-        'groups.chatId': {
-          $in: user?.groups?.map((g) => g?.chatId).filter((g) => !!g) || [],
-        },
-      })
-      .project({ updateArchive: { $slice: -10 } })
-      .toArray();
-
-    if (updates && Array.isArray(updates)) {
-      let response = [];
-      updates.forEach((r) => transformUpdate(r, response));
-
-      return res.status(200).json(response);
-    }
-
-    return res.status(404).json({ statusText: 'User not found' });
+    await getUpdatesForOneUser(req, res, user);
+  } else {
+    await getAllGroupUpdates(req, res, user);
   }
-
-  const groupUpdates = await db
-    .collection('users')
-    .find({
-      'groups.chatId': {
-        $in: user?.groups?.map((g) => g?.chatId).filter((g) => !!g) || [],
-      },
-    })
-    .project({ updateArchive: { $slice: -10 } })
-    .toArray();
-
-  let response = [];
-  groupUpdates.map((r) => transformUpdate(r, response));
-
-  return res.status(200).json(response);
 };

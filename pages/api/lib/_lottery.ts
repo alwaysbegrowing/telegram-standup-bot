@@ -3,6 +3,7 @@ import { Member, StandupGroup } from '../lib/_types';
 import { sendMsg } from './_helpers';
 import { WINNER_DM_MESSAGE } from './_locale.en';
 
+// Get winning groups for a user
 export const getWinningGroupsForUser = async (userId: number) => {
   const { db } = await connectToDatabase();
   const user: Member = await db.collection('users').findOne({ userId });
@@ -13,6 +14,7 @@ export const getWinningGroupsForUser = async (userId: number) => {
   return winners;
 };
 
+// Set new lottery winners
 export const setWinners = async () => {
   console.log('Setting new lottery winners');
   await unsetWinners();
@@ -20,8 +22,21 @@ export const setWinners = async () => {
   const { db } = await connectToDatabase();
   const users = await db.collection('users').find({}).toArray();
 
+  // Get all groups from the users
+  const groups = getUsersGroups(users);
+
+  // Get lottery winners
+  const lotteryWinners = getLotteryWinners(groups, users);
+
+  // Update database with winners and send messages
+  const promises = updateWinnersAndSendMessages(lotteryWinners, users, db);
+
+  return await Promise.all(promises);
+};
+
+// Get all groups from the users
+function getUsersGroups(users) {
   let groups = [];
-  const promises = [];
 
   users
     .filter((u) => !!u.groups.length)
@@ -52,8 +67,13 @@ export const setWinners = async () => {
       });
   });
 
-  // { userId: [ groupId, groupId ], ... }
+  return groups;
+}
+
+// Get lottery winners
+function getLotteryWinners(groups, users) {
   const lotteryWinners = {};
+
   groups.forEach((group) => {
     const randomUser =
       group.users[Math.floor(Math.random() * group.users.length)];
@@ -65,7 +85,13 @@ export const setWinners = async () => {
     }
   });
 
-  // These users should all get a reminder. When they post, it'll send to the groups they're winners in
+  return lotteryWinners;
+}
+
+// Update database with winners and send messages
+function updateWinnersAndSendMessages(lotteryWinners, users, db) {
+  const promises = [];
+
   Object.keys(lotteryWinners).forEach((userId) => {
     const user: Member = users.find((u: Member) => u.userId === Number(userId));
     const winningGroups = lotteryWinners[userId];
@@ -95,9 +121,10 @@ export const setWinners = async () => {
     promises.push(sendMsg(WINNER_DM_MESSAGE(groupTitles), user.userId));
   });
 
-  return await Promise.all(promises);
-};
+  return promises;
+}
 
+// Unset all lottery winners
 export const unsetWinners = async () => {
   console.log('Unsetting all lottery winners');
 
