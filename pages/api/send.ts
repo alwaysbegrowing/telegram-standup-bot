@@ -1,45 +1,115 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './lib/_connectToDatabase';
-import { getSubmissionDates, sendMsg } from './lib/_helpers';
+import { sendMsg } from './lib/_helpers';
 import { setWinners } from './lib/_lottery';
-import { Member, StandupGroup, UpdateArchive } from './lib/_types';
+import { validateApiKey } from './lib/validateApiKey';
+
+const markAllSent = async (db) => {
+  console.log('Marking as sent');
+
+  const response = await db
+    .collection('users')
+    .updateMany(
+      { 'updateArchive.sent': false },
+      { $set: { 'updateArchive.$[elem].sent': true, submitted: false } },
+      { arrayFilters: [{ 'elem.sent': false }], multi: true }
+    );
+
+  console.log(response);
+};
+
+const getMediaIdsByUserId = (userId, groupUpdates) => {
+  const mediaIds = [];
+
+  groupUpdates
+    .filter((user) => user.about.id === userId)
+    .forEach((user) => {
+      user.updateArchive.forEach((update) => {
+        const id =
+          update?.body?.message?.media_group_id ||
+          update?.body?.message?.message_id;
+
+        if (!mediaIds.includes(id)) {
+          mediaIds.push(id);
+        }
+      });
+    });
+
+  return mediaIds;
+};
+
+const sendUpdatesToGroups = async (
+  user,
+  group,
+  sendUpdatePromises,
+  mediaIds
+) => {
+  if (!group || !group?.winner) {
+    return;
+  }
+
+  const chatId = group.chatId;
+  const updates = user.updateArchive;
+  const userTotalUpdates = updates.length;
+  const groupTotalUpdates = mediaIds.length;
+
+  let prefixTotal = 1;
+
+  updates.forEach((update) => {
+    const body = update?.body || {};
+    const groupId = body?.message?.media_group_id;
+    const type = groupId ? 'group' : update?.type || 'text';
+
+    if (type === 'group' && mediaIds.includes(groupId)) {
+      console.log(groupId, 'already sent');
+      return true;
+    }
+
+    const total = groupTotalUpdates || userTotalUpdates;
+
+    const prefix =
+      total > 1
+        ? `${prefixTotal}/${total}: ${user.about.first_name}`
+        : `- ${user.about.first_name}`;
+
+    sendUpdatePromises.push(
+      sendMsg(prefix, chatId, null, true, update, updates)
+    );
+
+    if (type === 'group') {
+      mediaIds.push(groupId);
+    }
+
+    prefixTotal += 1;
+  });
+};
+
+const sendUpdatesToAllGroups = async (groupUpdates) => {
+  const sendUpdatePromises = [];
+
+  groupUpdates.forEach(async (user) => {
+    const mediaIds = getMediaIdsByUserId(user.about.id, groupUpdates);
+
+    user.groups
+      .filter((group) => !!group)
+      .forEach((group) =>
+        sendUpdatesToGroups(user, group, sendUpdatePromises, mediaIds)
+      );
+  });
+
+  await Promise.all(sendUpdatePromises);
+};
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
-  if (
-    process.env.NODE_ENV === 'production' &&
-    req.query.key !== process.env.TELEGRAM_API_KEY
-  ) {
+  if (!validateApiKey(req)) {
     return res.status(401).json({ status: 'invalid api key' });
   }
 
-  const { previousSubmitTimestamp, nextSubmitTimestamp } = getSubmissionDates();
-
   const { db } = await connectToDatabase();
 
-  const markAllSent = async () => {
-    console.log('Marking as sent');
+  await markAllSent(db);
 
-    const response = await db.collection('users').updateMany(
-      {
-        'updateArchive.sent': false,
-      },
-      { $set: { 'updateArchive.$[elem].sent': true, submitted: false } },
-      {
-        arrayFilters: [
-          {
-            'elem.sent': false,
-          },
-        ],
-        multi: true,
-      }
-    );
-
-    console.log(response);
-  };
-
-  let groupUpdates = [];
-
-  groupUpdates = await db
+  const groupUpdates = await db
     .collection('users')
     .aggregate([
       {
@@ -49,9 +119,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
         $unwind: '$updateArchive',
       },
       {
-        $match: {
-          'updateArchive.sent': false,
-        },
+        $match: { 'updateArchive.sent': false },
       },
       {
         $group: {
@@ -64,95 +132,12 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
     ])
     .toArray();
 
-  const sent = {};
-  const sendUpdatePromises = [];
-
-  const totalMedia = {};
-
-  groupUpdates
-    .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
-    .forEach((user: Member) => {
-      user.updateArchive.forEach((update: UpdateArchive) => {
-        const id =
-          update.body?.message?.media_group_id ||
-          update.body?.message?.message_id;
-
-        if (
-          Array.isArray(totalMedia[user.about.id]) &&
-          totalMedia[user.about.id].includes(id)
-        )
-          return;
-
-        totalMedia[user.about.id] = Array.isArray(totalMedia[user.about.id])
-          ? [...totalMedia[user.about.id], id]
-          : [id];
-      });
-    });
-
-  groupUpdates
-    .filter((g: Member) => !!g.groups.length && !!g.updateArchive)
-    .forEach((user: Member) => {
-      user.groups
-        .filter((g) => !!g)
-        .forEach((group: StandupGroup) => {
-          // only send update to this group if the user won for this group!
-          if (!group || !group?.winner) {
-            return;
-          }
-
-          const chat_id = group.chatId;
-          let total = user.updateArchive.length;
-          let prefixTotal = 1;
-
-          user.updateArchive.forEach((update: UpdateArchive) => {
-            total = totalMedia[user.about.id].length;
-
-            const body = update?.body || {};
-            const groupId = body?.message?.media_group_id;
-            const type = groupId ? 'group' : update?.type || 'text';
-
-            if (
-              Array.isArray(sent[chat_id]) &&
-              sent[chat_id].includes(groupId)
-            ) {
-              console.log(groupId, 'already sent');
-              return true;
-            }
-
-            if (type === 'group') {
-              sent[chat_id] = Array.isArray(sent[chat_id])
-                ? [...sent[chat_id], groupId]
-                : [groupId];
-            }
-
-            const prefix =
-              total > 1
-                ? `${prefixTotal}/${total}: ${user.about.first_name}`
-                : `- ${user.about.first_name}`;
-
-            sendUpdatePromises.push(
-              sendMsg(
-                prefix,
-                group.chatId,
-                null,
-                true,
-                update,
-                user.updateArchive
-              )
-            );
-
-            prefixTotal += 1;
-          });
-        });
-    });
-
-  await Promise.all(sendUpdatePromises);
-
-  if (sendUpdatePromises.length) {
-    await markAllSent();
-  } else {
+  if (!groupUpdates || groupUpdates.length === 0) {
     console.log('nothing to send');
+    return res.status(200).json({ status: 'ok' });
   }
+
+  await sendUpdatesToAllGroups(groupUpdates);
 
   // Next round of users getting chosen!
   await setWinners();

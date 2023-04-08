@@ -3,38 +3,45 @@ import { connectToDatabase } from './lib/_connectToDatabase';
 import { sendMsg } from './lib/_helpers';
 import { NOT_SUBMITTED_MESSAGE, SUBMITTED_MESSAGE } from './lib/_locale.en';
 import { Member, StandupGroup } from './lib/_types';
+import { validateApiKey } from './lib/validateApiKey';
 
-module.exports = async (req: VercelRequest, res: VercelResponse) => {
-  if (
-    process.env.NODE_ENV === 'production' &&
-    req.query.key !== process.env.TELEGRAM_API_KEY
-  ) {
+async function sendReminders(req: VercelRequest, res: VercelResponse) {
+  if (!validateApiKey(req)) {
     return res.status(401).json({ status: 'invalid api key' });
   }
 
-  const { db } = await connectToDatabase();
-  const users = await db.collection('users').find({}).toArray();
+  try {
+    const { db } = await connectToDatabase();
+    const users = await db.collection('users').find({}).toArray();
 
-  const reminders = [];
-  users
-    .filter((u) => !!u.groups.length)
-    .forEach((user: Member) => {
-      const winners = user.groups
-        .filter((g) => !!g)
-        .filter((g: StandupGroup) => g.winner);
+    // Filter users with groups and map them to reminders
+    const reminders = users
+      .filter((user: Member) => user.groups?.length)
+      .flatMap((user: Member) => {
+        const winners = user.groups
+          .filter((group: StandupGroup) => group?.winner)
+          .map((group) => group.title);
 
-      if (winners.length) {
-        const winnerTitles = winners.map((g) => g.title);
+        if (winners.length) {
+          const message = user.submitted
+            ? SUBMITTED_MESSAGE(winners)
+            : NOT_SUBMITTED_MESSAGE(winners);
 
-        const message = user.submitted
-          ? SUBMITTED_MESSAGE(winnerTitles)
-          : NOT_SUBMITTED_MESSAGE(winnerTitles);
+          return sendMsg(message, user.userId);
+        }
 
-        reminders.push(sendMsg(message, user.userId));
-      }
-    });
+        return [];
+      });
 
-  await Promise.all(reminders);
+    await Promise.all(reminders);
 
-  return res.status(200).json({ status: 'ok', sendCount: reminders.length });
-};
+    return res.status(200).json({ status: 'ok', sendCount: reminders.length });
+  } catch (error) {
+    console.error('Error sending reminders:', error);
+    return res
+      .status(500)
+      .json({ status: 'error', message: 'Internal Server Error' });
+  }
+}
+
+export default sendReminders;
