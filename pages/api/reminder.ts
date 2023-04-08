@@ -6,7 +6,7 @@ import { Member, StandupGroup } from './lib/_types';
 import { validateApiKey } from './lib/validateApiKey';
 
 async function sendReminders(req: VercelRequest, res: VercelResponse) {
-  if (!validateApiKey(req)) {
+  if (validateApiKey(req)) {
     return res.status(401).json({ status: 'invalid api key' });
   }
 

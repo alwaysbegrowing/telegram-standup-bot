@@ -101,7 +101,7 @@ const sendUpdatesToAllGroups = async (groupUpdates) => {
 };
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
-  if (!validateApiKey(req)) {
+  if (validateApiKey(req)) {
     return res.status(401).json({ status: 'invalid api key' });
   }
 
