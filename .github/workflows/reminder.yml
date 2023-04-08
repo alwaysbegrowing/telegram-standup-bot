@@ -1,0 +1,24 @@
+name: Reminder and Keepalive Workflow
+
+# Schedule this workflow to run daily at 2 PM (UTC)
+on:
+  schedule:
+    - cron: '0 14 * * *'
+
+jobs:
+  # Define a job named 'cron'
+  cron:
+    # Run the job on the latest version of Ubuntu
+    runs-on: ubuntu-latest
+    # Define the steps for the job
+    steps:
+      # Checkout the repository code
+      - uses: actions/checkout@v2
+      # Call an API endpoint to trigger the reminder
+      - name: Reminder API
+        run: |
+          curl --request GET \
+          --url 'https://${{ secrets.MAIN_SITE }}/api/reminder?key=${{ secrets.TELEGRAM_API_KEY }}'
+      # Keep the workflow alive to prevent it from timing out
+      - name: Keepalive Workflow
+        uses: gautamkrishnar/keepalive-workflow@v1
