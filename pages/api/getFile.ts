@@ -1,27 +1,37 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import fetch from 'node-fetch';
 import stream from 'stream';
 import { promisify } from 'util';
 
 const pipeline = promisify(stream.pipeline);
 
-module.exports = async (req: VercelRequest, res: VercelResponse) => {
-  let file_path = '';
+async function downloadFile(req, res) {
   if (!req.query.file_id) {
     return res.status(400).json({ statusText: 'Bad Request' });
   }
 
-  var download_url = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/getFile?file_id=${req.query.file_id}`;
-  const file = await fetch(download_url);
-  const json = await file.json();
-  if (json?.ok) {
-    file_path = `https://api.telegram.org/file/bot${process.env.TELEGRAM_API_KEY}/${json?.result?.file_path}`;
+  const downloadUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_API_KEY}/getFile?file_id=${req.query.file_id}`;
+  const fileResponse = await fetch(downloadUrl);
+  const jsonResponse = await fileResponse.json();
+
+  if (!jsonResponse?.ok) {
+    return res.status(400).json({ statusText: 'File not found' });
   }
 
-  var tmp = json?.result?.file_path.split('/');
-  const response = await fetch(file_path);
+  const filePath = `https://api.telegram.org/file/bot${process.env.TELEGRAM_API_KEY}/${jsonResponse?.result?.file_path}`;
+  const fileSegments = jsonResponse?.result?.file_path.split('/');
+  const fileDownloadResponse = await fetch(filePath);
 
-  res.setHeader('content-disposition', `attachment; filename=${tmp.pop()}`);
+  res.setHeader(
+    'content-disposition',
+    `attachment; filename=${fileSegments.pop()}`
+  );
 
-  // @ts-ignore - pipeline weird issue
-  await pipeline(response.body, res);
+  await pipeline(fileDownloadResponse.body, res);
+}
+
+const handleRequest = async (req: VercelRequest, res: VercelResponse) => {
+  await downloadFile(req, res);
 };
+
+export default handleRequest;
