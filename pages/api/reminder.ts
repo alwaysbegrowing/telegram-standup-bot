@@ -3,7 +3,7 @@ import { connectToDatabase } from './lib/_connectToDatabase';
 import { sendMsg } from './lib/_helpers';
 import { NOT_SUBMITTED_MESSAGE, SUBMITTED_MESSAGE } from './lib/_locale.en';
 import { Member, StandupGroup } from './lib/_types';
-import { validateApiKey } from './lib/validateApiKey';
+import { validateApiKey } from './lib/_validateApiKey';
 
 async function sendReminders(req: VercelRequest, res: VercelResponse) {
   if (validateApiKey(req)) {

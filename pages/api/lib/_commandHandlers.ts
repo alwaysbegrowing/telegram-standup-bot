@@ -1,10 +1,10 @@
 import { sendMsg } from './_helpers';
 import { startBot } from './_init';
 import { INVALID_PRIVATE_MESSAGE, START_MESSAGE } from './_locale.en';
-import { addToStandupGroup } from './command-helpers/addToStandupGroup';
-import { getMembers } from './command-helpers/getMembers';
-import { leaveStandupGroup } from './command-helpers/leaveStandupGroup';
-import { submitStandup } from './command-helpers/submitStandup';
+import { addToStandupGroup } from './command-helpers/_addToStandupGroup';
+import { getMembers } from './command-helpers/_getMembers';
+import { leaveStandupGroup } from './command-helpers/_leaveStandupGroup';
+import { submitStandup } from './command-helpers/_submitStandup';
 
 // Command handling functions
 export const handleStartCommand = async (userId, chatId, messageId, res) => {

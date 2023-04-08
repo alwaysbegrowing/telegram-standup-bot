@@ -7,8 +7,8 @@ import {
   handleSubscribeCommand,
   handleUnsubscribeCommand,
 } from './_commandHandlers';
-import { getCommandType } from './command-helpers/getCommandType';
-import { isValidMessage } from './isValidMessage';
+import { getCommandType } from './command-helpers/_getCommandType';
+import { isValidMessage } from './_isValidMessage';
 
 /**
  * The beginning

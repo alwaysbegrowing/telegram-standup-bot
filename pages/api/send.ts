@@ -2,7 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './lib/_connectToDatabase';
 import { sendMsg } from './lib/_helpers';
 import { setWinners } from './lib/_lottery';
-import { validateApiKey } from './lib/validateApiKey';
+import { validateApiKey } from './lib/_validateApiKey';
 
 const markAllSent = async (db) => {
   console.log('Marking as sent');

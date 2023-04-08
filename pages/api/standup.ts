@@ -1,5 +1,5 @@
 import { processMessage } from './lib/_init';
-import { validateApiKey } from './lib/validateApiKey';
+import { validateApiKey } from './lib/_validateApiKey';
 
 module.exports = async (req, res) => {
   if (validateApiKey(req)) {
