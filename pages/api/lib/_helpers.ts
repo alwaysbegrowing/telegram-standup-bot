@@ -1,7 +1,7 @@
 import { createHash, createHmac } from 'crypto';
 import memoize from 'fast-memoize';
-import { Member, telegramTypes, UpdateArchive } from './_types';
 import { ANONYMOUS } from './_locale.en';
+import { Member, UpdateArchive, telegramTypes } from './_types';
 
 const appendAuthor = (caption = '', postfix = '', createdAt = '') => {
   let response = '';

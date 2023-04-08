@@ -1,7 +1,7 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { connectToDatabase } from './lib/_connectToDatabase';
 import { checkSignature } from '@/pages/api/lib/_helpers';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import { fillMarkdownEntitiesMarkup } from 'telegram-text-entities-filler';
+import { connectToDatabase } from './lib/_connectToDatabase';
 
 const transformUpdate = (g, response) => {
   const latestMessages = g?.updateArchive?.reverse();

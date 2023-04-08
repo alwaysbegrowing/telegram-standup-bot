@@ -28,24 +28,19 @@ export const INVALID_EDIT_MESSAGE =
 
 export const UPDATE_EDITED_MESSAGE = 'Message edited 😎';
 
-export const SUBMISSION_NOTIFY_MESSAGE =
-  `There's a new update coming 🧸`;
+export const SUBMISSION_NOTIFY_MESSAGE = `There's a new update coming 🧸`;
 
-export const SUBMISSION_NOTIFY_EDIT_MESSAGE =
-  'The update was edited 👀';
+export const SUBMISSION_NOTIFY_EDIT_MESSAGE = 'The update was edited 👀';
 
 export const NO_SUBSCRIBED_GROUPS_MESSAGE =
   "You haven't subscribed any chats to your daily updates yet. Add this bot to your chat, then type /subscribe to subscribe them.";
 
-export const UPDATE_SUBMITTED_MESSAGE =
-  'Submitted';
+export const UPDATE_SUBMITTED_MESSAGE = 'Submitted';
 
 export const GROUP_MEDIA_SUBMITTED_MESSAGE =
   'All that media has been submitted';
 
-const getGroupsMessage = (
-  groups: Array<string>
-) => `The following group${
+const getGroupsMessage = (groups: Array<string>) => `The following group${
   groups && groups.length > 1 ? 's' : ''
 } will receive your update:
 ${groups.map((g) => `• ${g}`).join('\n')}`;
@@ -66,7 +61,9 @@ If you want to change your update, edit your last message.
 ${getGroupsMessage(groups)}`;
 
 export const WINNER_GROUP_MESSAGE = (user: Member) =>
-  `Winner winner. ${getDisplayName(user)} has been chosen to send an update to this group.`;
+  `Winner winner. ${getDisplayName(
+    user
+  )} has been chosen to send an update to this group.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
   `It's your turn 🐼

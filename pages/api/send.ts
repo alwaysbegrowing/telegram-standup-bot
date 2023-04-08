@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './lib/_connectToDatabase';
-import { sendMsg, getSubmissionDates } from './lib/_helpers';
+import { getSubmissionDates, sendMsg } from './lib/_helpers';
 import { setWinners } from './lib/_lottery';
 import { Member, StandupGroup, UpdateArchive } from './lib/_types';
 

@@ -1,7 +1,7 @@
 import { connectToDatabase } from '../lib/_connectToDatabase';
-import { Member, StandupGroup } from '..//lib/_types';
+import { Member, StandupGroup } from '../lib/_types';
 import { sendMsg } from './_helpers';
-import { WINNER_DM_MESSAGE, WINNER_GROUP_MESSAGE } from './_locale.en';
+import { WINNER_DM_MESSAGE } from './_locale.en';
 
 export const getWinningGroupsForUser = async (userId: number) => {
   const { db } = await connectToDatabase();
@@ -70,8 +70,8 @@ export const setWinners = async () => {
     const user: Member = users.find((u: Member) => u.userId === Number(userId));
     const winningGroups = lotteryWinners[userId];
     const groups = user.groups
-    .filter((g) => !!g)
-    .filter((g) => winningGroups.includes(g.chatId));
+      .filter((g) => !!g)
+      .filter((g) => winningGroups.includes(g.chatId));
     const groupTitles = groups.map((group) => group.title);
 
     winningGroups.forEach((chatId) => {

@@ -1,5 +1,4 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { checkSignature } from '@/pages/api/lib/_helpers';
 import stream from 'stream';
 import { promisify } from 'util';
 

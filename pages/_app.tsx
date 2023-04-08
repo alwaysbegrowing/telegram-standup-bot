@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { GeistProvider, CssBaseline } from '@geist-ui/react';
+import Footer from '@/components/footer';
+import Menu from '@/components/navigation/menu';
+import { PrefersContext, ThemeType, UserType, themes } from '@/lib/use-prefers';
+import { CssBaseline, GeistProvider } from '@geist-ui/react';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
-import Head from 'next/head';
 import type { AppProps } from 'next/app';
-import { PrefersContext, themes, ThemeType, UserType } from '@/lib/use-prefers';
-import Menu from '@/components/navigation/menu';
-import Footer from '@/components/footer';
+import Head from 'next/head';
 
 TimeAgo.addDefaultLocale(en);
 

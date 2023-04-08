@@ -1,8 +1,8 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { connectToDatabase } from './lib/_connectToDatabase';
 import { sendMsg } from './lib/_helpers';
-import { Member, StandupGroup } from './lib/_types';
 import { NOT_SUBMITTED_MESSAGE, SUBMITTED_MESSAGE } from './lib/_locale.en';
+import { Member, StandupGroup } from './lib/_types';
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (
@@ -19,7 +19,9 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   users
     .filter((u) => !!u.groups.length)
     .forEach((user: Member) => {
-      const winners = user.groups.filter(g => !!g).filter((g: StandupGroup) => g.winner);
+      const winners = user.groups
+        .filter((g) => !!g)
+        .filter((g: StandupGroup) => g.winner);
 
       if (winners.length) {
         const winnerTitles = winners.map((g) => g.title);
