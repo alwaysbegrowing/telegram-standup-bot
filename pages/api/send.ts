@@ -107,8 +107,6 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   const { db } = await connectToDatabase();
 
-  await markAllSent(db);
-
   const groupUpdates = await db
     .collection('users')
     .aggregate([
@@ -138,6 +136,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   }
 
   await sendUpdatesToAllGroups(groupUpdates);
+
+  await markAllSent(db);
 
   // Next round of users getting chosen!
   await setWinners();
