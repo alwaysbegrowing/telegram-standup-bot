@@ -54,15 +54,17 @@ const sendUpdatesToGroups = async (
   const groupTotalUpdates = mediaIds.length;
 
   let prefixTotal = 1;
-
+  let sent = {};
   updates.forEach((update) => {
     const body = update?.body || {};
     const groupId = body?.message?.media_group_id;
     const type = groupId ? 'group' : update?.type || 'text';
 
-    if (type === 'group' && mediaIds.includes(groupId)) {
+    if (type === 'group' && mediaIds.includes(groupId) && sent[groupId]) {
       console.log(groupId, 'already sent');
       return true;
+    } else {
+      sent[groupId] = true;
     }
 
     const total = groupTotalUpdates || userTotalUpdates;
@@ -132,12 +134,10 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
 
   if (!groupUpdates || groupUpdates.length === 0) {
     console.log('nothing to send');
-    return res.status(200).json({ status: 'ok' });
+  } else {
+    await sendUpdatesToAllGroups(groupUpdates);
+    await markAllSent(db);
   }
-
-  await sendUpdatesToAllGroups(groupUpdates);
-
-  await markAllSent(db);
 
   // Next round of users getting chosen!
   await setWinners();
