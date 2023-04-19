@@ -47,14 +47,14 @@ ${groups.map((g) => `• ${g}`).join('\n')}`;
 
 export const NOT_SUBMITTED_MESSAGE = (
   groups: Array<string>
-) => `(1 hour reminder) Tick tock. Ready to submit an update?
+) => `**(1 hour reminder)** Tick tock. Ready to submit an update?
 
 ${getGroupsMessage(groups)}
 `;
 
 export const SUBMITTED_MESSAGE = (
   groups: Array<string>
-) => `(1 hour reminder) The update you previously submitted will be posted soon.
+) => `**(1 hour reminder)** The update you previously submitted will be posted soon.
 
 If you want to change your update, edit your last message.
 

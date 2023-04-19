@@ -142,7 +142,7 @@ export const submitStandup = async (
   }
 
   if (dbResponse.modifiedCount || dbResponse.modifiedCount) {
-    return await sendMsg(SUCCESS_MESSAGE, chatId, messageId, true);
+    return await sendMsg(SUCCESS_MESSAGE, chatId, messageId);
   }
 
   if (isEdit && dbResponse.modifiedCount === 0) {
