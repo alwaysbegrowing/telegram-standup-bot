@@ -76,7 +76,9 @@ function getLotteryWinners(groups, users) {
 
   groups.forEach((group) => {
     const randomUser =
-      group.users[Math.floor(Math.random() * group.users.length)];
+      process.env.NODE_ENV === 'development'
+        ? JSON.parse(process.env.NEXT_PUBLIC_TELEGRAM_USER)?.id
+        : group.users[Math.floor(Math.random() * group.users.length)];
 
     if (lotteryWinners[randomUser]) {
       lotteryWinners[randomUser].push(group.chatId);
