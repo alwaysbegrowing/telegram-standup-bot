@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_FULL_URI")
+}
+
+type UsersAbout {
+  auth_date  Int
+  first_name String
+  hash       String
+  id         Int
+  photo_url  String?
+  username   String
+}
+
+type UsersGroups {
+  chatId Float
+  title  String
+  winner Boolean
+}
+
+type UsersUpdateArchive {
+  body      UsersUpdateArchiveBody
+  caption   String?
+  createdAt Float
+  /// Could not determine type: the field only had null or empty values in the sample set.
+  entities  Json?
+  file_id   String?
+  sent      Boolean
+  type      String
+}
+
+type UsersUpdateArchiveBody {
+  message   UsersUpdateArchiveBodyMessage
+  update_id Int
+}
+
+type UsersUpdateArchiveBodyMessage {
+  caption        String?
+  chat           UsersUpdateArchiveBodyMessageChat
+  date           Int
+  forward_date   Int?
+  forward_from   UsersUpdateArchiveBodyMessageForwardFrom?
+  from           UsersUpdateArchiveBodyMessageFrom
+  media_group_id String?
+  message_id     Int
+  photo          UsersUpdateArchiveBodyMessagePhoto[]
+  text           String?
+}
+
+type UsersUpdateArchiveBodyMessageChat {
+  first_name String
+  id         Int
+  type       String
+  username   String
+}
+
+type UsersUpdateArchiveBodyMessageForwardFrom {
+  first_name    String
+  id            Int
+  is_bot        Boolean
+  is_premium    Boolean
+  language_code String
+  username      String
+}
+
+type UsersUpdateArchiveBodyMessageFrom {
+  first_name    String
+  id            Int
+  is_bot        Boolean
+  is_premium    Boolean?
+  language_code String
+  username      String
+}
+
+type UsersUpdateArchiveBodyMessagePhoto {
+  file_id        String
+  file_size      Int
+  file_unique_id String
+  height         Int
+  width          Int
+}
+
+model users {
+  id            String               @id @default(auto()) @map("_id") @db.ObjectId
+  about         UsersAbout
+  botCanMessage Boolean
+  groups        UsersGroups[]
+  submitted     Boolean
+  updateArchive UsersUpdateArchive[]
+  userId        Int
+}
