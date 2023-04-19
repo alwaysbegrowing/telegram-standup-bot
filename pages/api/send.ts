@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import client from './lib/_client';
 import { connectToDatabase } from './lib/_connectToDatabase';
-import { sendMsg } from './lib/_helpers';
 import { setWinners } from './lib/_lottery';
 import { validateApiKey } from './lib/_validateApiKey';
 
@@ -18,71 +18,21 @@ const markAllSent = async (db) => {
   console.log(response);
 };
 
-const getMediaIdsByUserId = (userId, groupUpdates) => {
-  const mediaIds = [];
-
-  groupUpdates
-    .filter((user) => user.about.id === userId)
-    .forEach((user) => {
-      user.updateArchive.forEach((update) => {
-        const id =
-          update?.body?.message?.media_group_id ||
-          update?.body?.message?.message_id;
-
-        if (!mediaIds.includes(id)) {
-          mediaIds.push(id);
-        }
-      });
-    });
-
-  return mediaIds;
-};
-
-const sendUpdatesToGroups = async (
-  user,
-  group,
-  sendUpdatePromises,
-  mediaIds
-) => {
+const sendUpdatesToGroups = async ({ user, group }: { user; group }) => {
   if (!group || !group?.winner) {
     return;
   }
 
   const chatId = group.chatId;
   const updates = user.updateArchive;
-  const userTotalUpdates = updates.length;
-  const groupTotalUpdates = mediaIds.length;
 
-  let prefixTotal = 1;
-  let sent = {};
-  updates.forEach((update) => {
-    const body = update?.body || {};
-    const groupId = body?.message?.media_group_id;
-    const type = groupId ? 'group' : update?.type || 'text';
+  const ids = updates
+    .map((update) => update?.body?.message?.message_id)
+    .filter((id) => !!id);
 
-    if (type === 'group' && mediaIds.includes(groupId) && sent[groupId]) {
-      console.log(groupId, 'already sent');
-      return true;
-    } else {
-      sent[groupId] = true;
-    }
-
-    const total = groupTotalUpdates || userTotalUpdates;
-
-    const prefix =
-      total > 1
-        ? `${prefixTotal}/${total}: ${user.about.first_name}`
-        : `- ${user.about.first_name}`;
-
-    sendUpdatePromises.push(
-      sendMsg(prefix, chatId, null, true, update, updates)
-    );
-
-    if (type === 'group') {
-      mediaIds.push(groupId);
-    }
-
-    prefixTotal += 1;
+  return client.forwardMessages(chatId, {
+    messages: ids,
+    fromPeer: user.about.id,
   });
 };
 
@@ -90,16 +40,14 @@ const sendUpdatesToAllGroups = async (groupUpdates) => {
   const sendUpdatePromises = [];
 
   groupUpdates.forEach(async (user) => {
-    const mediaIds = getMediaIdsByUserId(user.about.id, groupUpdates);
-
     user.groups
       .filter((group) => !!group)
       .forEach((group) =>
-        sendUpdatesToGroups(user, group, sendUpdatePromises, mediaIds)
+        sendUpdatePromises.push(sendUpdatesToGroups({ user, group }))
       );
   });
 
-  await Promise.all(sendUpdatePromises);
+  return Promise.all(sendUpdatePromises);
 };
 
 module.exports = async (req: VercelRequest, res: VercelResponse) => {
@@ -135,6 +83,8 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   if (!groupUpdates || groupUpdates.length === 0) {
     console.log('nothing to send');
   } else {
+    if (!client.connected) await client.connect();
+
     await sendUpdatesToAllGroups(groupUpdates);
     await markAllSent(db);
   }
