@@ -33,7 +33,7 @@ async function sendReminders(req: VercelRequest, res: VercelResponse) {
         return [];
       });
 
-    const done = await Promise.all(reminders);
+    const done: { status: number }[] = await Promise.all(reminders);
     return res.status(200).json({
       status: 'ok',
       sendCount: done.filter((r) => r.status === 200).length,
