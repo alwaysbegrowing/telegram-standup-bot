@@ -16,6 +16,7 @@
   "dependencies": {
     "@geist-ui/react": "^2.2.5",
     "@geist-ui/react-icons": "^1.0.1",
+    "@vercel/analytics": "^1.0.0",
     "@vercel/node": "^2.1.0",
     "fast-memoize": "^2.5.2",
     "javascript-time-ago": "^2.5.4",

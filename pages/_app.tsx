@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
+import { Analytics } from '@vercel/analytics/react';
 import Footer from '@/components/footer';
 import Menu from '@/components/navigation/menu';
 import { PrefersContext, ThemeType, UserType, themes } from '@/lib/use-prefers';
@@ -83,6 +84,7 @@ const StoodBotApp = ({ Component }: AppProps) => {
         >
           <Menu />
           <Component />
+          <Analytics />
           <Footer />
         </PrefersContext.Provider>
       </GeistProvider>
