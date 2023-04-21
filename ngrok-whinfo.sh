@@ -18,17 +18,17 @@ if ! [ -x "./node_modules/.bin/dotenv" ]; then
   exit 1
 fi
 
-# Ensure .env.local file exists
-if ! [ -f .env.local ]; then
-  echo "Error: .env.local file not found. Please create one and try again."
+# Ensure .env file exists
+if ! [ -f .env ]; then
+  echo "Error: .env file not found. Please create one and try again."
   exit 1
 fi
 
-KEY=$(./node_modules/.bin/dotenv -e .env.local -p TELEGRAM_API_KEY)
+KEY=$(./node_modules/.bin/dotenv -e .env -p TELEGRAM_API_KEY)
 
 # Check if KEY is not empty
 if [ -z "$KEY" ]; then
-  echo "Error: TELEGRAM_API_KEY is not set in .env.local. Please set it and try again."
+  echo "Error: TELEGRAM_API_KEY is not set in .env. Please set it and try again."
   exit 1
 fi
 
