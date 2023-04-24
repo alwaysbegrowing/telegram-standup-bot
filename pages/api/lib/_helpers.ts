@@ -10,10 +10,15 @@ export const sendMsg = async (
   reply_to_message_id: number = null
 ) => {
   if (!client.connected) await client.connect();
-  await client.sendMessage(chat_id, {
-    message: postfix,
-    replyTo: reply_to_message_id,
-  });
+  try {
+    await client.sendMessage(chat_id, {
+      message: postfix,
+      replyTo: reply_to_message_id,
+    });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    return { status: 500 };
+  }
 
   return { status: 200 };
 };

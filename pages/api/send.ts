@@ -30,10 +30,16 @@ const sendUpdatesToGroups = async ({ user, group }: { user; group }) => {
     .map((update) => update?.body?.message?.message_id)
     .filter((id) => !!id);
 
-  return client.forwardMessages(chatId, {
-    messages: ids,
-    fromPeer: user.about.id,
-  });
+  try {
+    await client.forwardMessages(chatId, {
+      messages: ids,
+      fromPeer: user.about.id,
+    });
+    return true;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
 };
 
 const sendUpdatesToAllGroups = async (groupUpdates) => {
