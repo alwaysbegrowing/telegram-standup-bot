@@ -37,3 +37,4 @@ bfg.jar
 
 debug.log
 .idea/
+.env*.local
