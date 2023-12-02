@@ -11,4 +11,22 @@ const client = new TelegramClient(
   { connectionRetries: 5 }
 );
 
+function getNewStringSession() {
+  const stringSession = ''; // leave this empty for now
+  const BOT_TOKEN = process.env.TELEGRAM_API_KEY; // put your bot token here
+  (async () => {
+    const client = new TelegramClient(
+      new StringSession(stringSession),
+      apiId,
+      apiHash,
+      { connectionRetries: 5 }
+    );
+    await client.start({
+      botAuthToken: BOT_TOKEN,
+    });
+    console.log(client.session.save());
+  })();
+}
+
+// getNewStringSession();
 export default client;
