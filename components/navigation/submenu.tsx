@@ -33,7 +33,7 @@ const Submenu: React.FC = () => {
           </div>
         </div>
       </nav>
-      <style jsx>{`
+      <style>{`
         .submenu__wrapper {
           height: 48px;
           position: relative;
@@ -50,9 +50,11 @@ const Submenu: React.FC = () => {
           right: 0;
           left: 0;
           background: ${theme.palette.background};
-          box-shadow: ${theme.type === 'dark'
-            ? `inset 0 -1px ${theme.palette.border}`
-            : 'rgba(0, 0, 0, 0.1) 0 0 15px 0'};
+          box-shadow: ${
+            theme.type === 'dark'
+              ? `inset 0 -1px ${theme.palette.border}`
+              : 'rgba(0, 0, 0, 0.1) 0 0 15px 0'
+          };
         }
         .submenu__inner {
           display: flex;

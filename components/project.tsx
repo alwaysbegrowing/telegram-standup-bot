@@ -88,7 +88,7 @@ const Project: React.FC<ProjectProps> = ({
           </Card.Footer>
         </Card>
       </div>
-      <style jsx>{`
+      <style>{`
         .project__wrapper :global(.project__card) {
           padding: 0 !important;
         }

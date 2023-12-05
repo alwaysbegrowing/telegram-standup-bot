@@ -46,7 +46,7 @@ export const Pager = ({ initialData: data }) => {
 
           if (u.groupId) {
             const groupMedia = u?.archive?.filter(
-              (b) => b.groupId === u.groupId
+              (b) => b.groupId === u.groupId,
             );
             if (groupMedia?.length) {
               return (
@@ -100,7 +100,7 @@ const Update = ({ initialData, initialDataError }) => {
           </div>
         </div>
       </div>
-      <style jsx>{`
+      <style>{`
         .page__wrapper {
           background-color: ${theme.palette.accents_1};
           margin-bottom: 60px;

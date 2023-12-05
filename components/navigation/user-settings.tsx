@@ -2,7 +2,7 @@ import React from 'react';
 import { Popover, Link } from '@geist-ui/react';
 import { usePrefers } from '@/lib/use-prefers';
 
-const UserSettings: React.FC = () => {
+const UserSettings = () => {
   const prefers = usePrefers();
   const logout = () => {
     prefers.setUserDetails(null);

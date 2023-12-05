@@ -31,7 +31,6 @@ const Menu: React.FC = () => {
           </Button>
           {prefers?.userInfo && (
             <Popover
-              content={<UserSettings />}
               placement="bottomEnd"
               portalClassName="user-settings__popover"
             >
@@ -50,7 +49,7 @@ const Menu: React.FC = () => {
         </div>
       </nav>
       <Submenu />
-      <style jsx>{`
+      <style>{`
         .menu-nav {
           display: flex;
           align-items: center;

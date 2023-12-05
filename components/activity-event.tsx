@@ -29,7 +29,7 @@ const ActivityEvent: React.FC<ActivityEventProps> = ({
         <Text className="activity-event__message">{children}</Text>
         <Text className="activity-event__created-at">{createdAt}</Text>
       </div>
-      <style jsx>{`
+      <style>{`
         .activity-event {
           display: flex;
           align-items: center;

@@ -48,7 +48,7 @@ const Heading: React.FC<HeadingProps> = ({ user }) => {
           </div>
         </div>
       </div>
-      <style jsx>{`
+      <style>{`
         .heading__wrapper {
           border-bottom: 1px solid ${theme.palette.border};
         }

@@ -13,7 +13,6 @@ const Footer: React.FC = () => {
             <Text>Powered by </Text>
           </div>
           <div style={{ display: 'inline-block' }}>
-            
             <Link
               href="https://vercel.com?utm_source=alwaysbegrowing&utm_campaign=oss"
               target="_blank"
@@ -33,8 +32,8 @@ const Footer: React.FC = () => {
           <div style={{ display: 'inline-block' }}>
             <Text> and </Text>
           </div>
-          <div style={{ display: 'inline-block' }}>          
-             <Link
+          <div style={{ display: 'inline-block' }}>
+            <Link
               href="http://www.bugsnag.com/"
               target="_blank"
               rel="noopener"
@@ -47,10 +46,10 @@ const Footer: React.FC = () => {
                 src="https://images.typeform.com/images/QKuaAssrFCq7/image/default-firstframe.png"
               />
             </Link>
-          </div>          
+          </div>
         </div>
       </footer>
-      <style jsx>{`
+      <style>{`
         footer {
           border-top: 1px solid ${theme.palette.border};
           padding: ${theme.layout.gapQuarter} ${theme.layout.gap};
