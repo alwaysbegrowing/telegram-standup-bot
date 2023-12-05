@@ -1,11 +1,14 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import prisma from './lib/_connectToDatabase';
 import { sendMsg } from './lib/_helpers';
 import { NOT_SUBMITTED_MESSAGE, SUBMITTED_MESSAGE } from './lib/_locale.en';
 import { StandupGroup } from './lib/_types';
 import { validateApiKey } from './lib/_validateApiKey';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-async function sendReminders(req: VercelRequest, res: VercelResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (validateApiKey(req)) {
     return res.status(401).json({ status: 'invalid api key' });
   }
@@ -57,5 +60,3 @@ async function sendReminders(req: VercelRequest, res: VercelResponse) {
       .json({ status: 'error', message: 'Internal Server Error' });
   }
 }
-
-export default sendReminders;

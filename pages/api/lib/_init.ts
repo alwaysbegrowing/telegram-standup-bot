@@ -1,3 +1,4 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { connectToDatabase } from '../lib/_connectToDatabase';
 import {
   handleInvalidPrivateCommand,
@@ -24,11 +25,14 @@ export const startBot = async (userId: number) => {
       $set: {
         botCanMessage: true,
       },
-    }
+    },
   );
 };
 
-export const processMessage = async (req, res) => {
+export const processMessage = async (
+  req: NextApiRequest,
+  res: NextApiResponse<{ status: string }>,
+) => {
   const { body } = req;
   const message = body?.message || body?.edited_message;
   const { chat, entities, text, message_id, from } = message || {};
@@ -55,7 +59,7 @@ export const processMessage = async (req, res) => {
         chat.title,
         from,
         message_id,
-        res
+        res,
       );
     case 'members':
       return await handleMembersCommand(
@@ -64,7 +68,7 @@ export const processMessage = async (req, res) => {
         chat.title,
         from,
         message_id,
-        res
+        res,
       );
     case 'unsubscribe':
       return await handleUnsubscribeCommand(chat.id, from.id, message_id, res);

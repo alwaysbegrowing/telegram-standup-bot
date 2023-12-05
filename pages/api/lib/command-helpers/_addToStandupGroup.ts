@@ -1,5 +1,5 @@
 import { connectToDatabase } from '../_connectToDatabase';
-import { sendMsg } from '../_helpers';
+import { sendMsg, sendReaction } from '../_helpers';
 import { ALREADY_SUBSCRIBED_MESSAGE, SUBSCRIBED_MESSAGE } from '../_locale.en';
 import { About, Member, StandupGroup } from '../_types';
 
@@ -8,7 +8,7 @@ export const addToStandupGroup = async (
   userId: number,
   title: string,
   about: About,
-  messageId: number
+  messageId: number,
 ) => {
   const { db } = await connectToDatabase();
 
@@ -20,7 +20,13 @@ export const addToStandupGroup = async (
   console.log('adding');
 
   if (userExistsInGroup) {
-    return await sendMsg(ALREADY_SUBSCRIBED_MESSAGE, chatId, messageId);
+    console.log({
+      chatId,
+      messageId,
+      userId,
+    });
+    return await sendReaction({ chat: { id: `${chatId}` }, messageId });
+    // return await sendMsg(ALREADY_SUBSCRIBED_MESSAGE, chatId, messageId);
   }
 
   const group: StandupGroup = {

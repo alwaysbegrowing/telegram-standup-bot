@@ -1,7 +1,7 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import fetch from 'node-fetch';
 import stream from 'stream';
 import { promisify } from 'util';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const pipeline = promisify(stream.pipeline);
 
@@ -31,14 +31,14 @@ async function downloadFile(req, res) {
 
   res.setHeader(
     'content-disposition',
-    `attachment; filename=${fileSegments.pop()}`
+    `attachment; filename=${fileSegments.pop()}`,
   );
 
-  await pipeline(fileDownloadResponse.body, res);
+  return await pipeline(fileDownloadResponse.body, res);
 }
-
-const handleRequest = async (req: VercelRequest, res: VercelResponse) => {
-  await downloadFile(req, res);
-};
-
-export default handleRequest;
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
+  return await downloadFile(req, res);
+}

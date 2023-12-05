@@ -1,8 +1,11 @@
 import { checkSignature } from '@/pages/api/lib/_helpers';
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import prisma from './lib/_connectToDatabase';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-async function handleRequest(req: VercelRequest, res: VercelResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const isValid = checkSignature(req?.body || {});
 
   if (!isValid && process.env.NODE_ENV === 'production') {
@@ -26,5 +29,3 @@ async function handleRequest(req: VercelRequest, res: VercelResponse) {
 
   return res.status(200).json(groupTitles);
 }
-
-export default handleRequest;

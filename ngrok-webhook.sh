@@ -19,13 +19,13 @@ if ! [ -x "./node_modules/.bin/dotenv" ]; then
 fi
 
 # Ensure .env file exists
-if ! [ -f .env ]; then
+if ! [ -f .env ] && ! [ -f .env.local ]; then
     echo "Error: .env file not found. Please create one and try again."
     exit 1
 fi
 
 if curl -s --head --request GET http://localhost:4040 | grep "302 Found" >/dev/null; then
-    KEY=$(./node_modules/.bin/dotenv -e .env -p TELEGRAM_API_KEY)
+    KEY=$(./node_modules/.bin/dotenv -e .env -e .env.local -p TELEGRAM_API_KEY)
     URL=$(curl -s localhost:4040/api/tunnels | jq -r '.tunnels[] | select(.proto == "https") | .public_url')
 
     # Check if KEY is not empty

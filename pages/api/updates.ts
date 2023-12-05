@@ -1,7 +1,7 @@
 import { checkSignature } from '@/pages/api/lib/_helpers';
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import { fillMarkdownEntitiesMarkup } from 'telegram-text-entities-filler';
 import { connectToDatabase } from './lib/_connectToDatabase';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const transformUpdate = (group, response) => {
   const latestMessages = group?.updateArchive?.reverse();
@@ -129,7 +129,10 @@ const getAllGroupUpdates = async (req, res, user) => {
   return res.status(200).json(response);
 };
 
-module.exports = async (req: VercelRequest, res: VercelResponse) => {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const isValid = checkSignature(req?.body || {});
 
   if (!isValid && process.env.NODE_ENV === 'production') {
@@ -143,7 +146,7 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
       $set: {
         about: req?.body,
       },
-    }
+    },
   );
 
   if (!user) {
@@ -155,4 +158,4 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   } else {
     await getAllGroupUpdates(req, res, user);
   }
-};
+}

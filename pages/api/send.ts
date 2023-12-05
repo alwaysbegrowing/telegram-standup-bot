@@ -1,8 +1,8 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import client from './lib/_client';
 import { connectToDatabase } from './lib/_connectToDatabase';
 import { setWinners } from './lib/_lottery';
 import { validateApiKey } from './lib/_validateApiKey';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const markAllSent = async (db) => {
   console.log('Marking as sent');
@@ -12,7 +12,7 @@ const markAllSent = async (db) => {
     .updateMany(
       { 'updateArchive.sent': false },
       { $set: { 'updateArchive.$[elem].sent': true, submitted: false } },
-      { arrayFilters: [{ 'elem.sent': false }], multi: true }
+      { arrayFilters: [{ 'elem.sent': false }], multi: true },
     );
 
   console.log(response);
@@ -49,14 +49,17 @@ const sendUpdatesToAllGroups = async (groupUpdates) => {
     user.groups
       .filter((group) => !!group)
       .forEach((group) =>
-        sendUpdatePromises.push(sendUpdatesToGroups({ user, group }))
+        sendUpdatePromises.push(sendUpdatesToGroups({ user, group })),
       );
   });
 
   return Promise.all(sendUpdatePromises);
 };
 
-module.exports = async (req: VercelRequest, res: VercelResponse) => {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (validateApiKey(req)) {
     return res.status(401).json({ status: 'invalid api key' });
   }
@@ -99,4 +102,4 @@ module.exports = async (req: VercelRequest, res: VercelResponse) => {
   await setWinners();
 
   return res.status(200).json({ status: 'ok' });
-};
+}
