@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "preinstall": "prisma generate",
     "prebuild": "prisma generate",
     "dev": "next dev",
     "local": "echo '\n\nrun the following in order on separate terminals:\n\nyarn dev\nyarn ngrok\nyarn webhook\n\n'",
