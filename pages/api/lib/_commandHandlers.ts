@@ -23,7 +23,7 @@ export const handleSubmitStandup = async (
   userId,
   messageId,
   body,
-  res
+  res,
 ) => {
   const response = await submitStandup(chatId, userId, messageId, body);
   const status = response?.status || 200;
@@ -36,14 +36,14 @@ export const handleSubscribeCommand = async (
   chatTitle,
   from,
   messageId,
-  res
+  res,
 ) => {
   const response = await addToStandupGroup(
     chatId,
     userId,
     chatTitle,
     from,
-    messageId
+    messageId,
   );
   return res.json({ status: response.status });
 };
@@ -54,7 +54,7 @@ export const handleMembersCommand = async (
   chatTitle,
   from,
   messageId,
-  res
+  res,
 ) => {
   const response = await getMembers(chatId, userId, chatTitle, from, messageId);
   return res.json({ status: response.status });
@@ -64,7 +64,7 @@ export const handleUnsubscribeCommand = async (
   chatId,
   userId,
   messageId,
-  res
+  res,
 ) => {
   const response = await leaveStandupGroup(chatId, userId, messageId);
   return res.json({ status: response.status });

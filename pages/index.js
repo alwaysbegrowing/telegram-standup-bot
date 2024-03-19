@@ -78,12 +78,12 @@ export default function Home() {
 
   const { data: initialData, error: initialDataError } = useSWR(
     [`/api/updates`],
-    fetchWithToken
+    fetchWithToken,
   );
 
   const { data: groups, error: groupsError } = useSWR(
     [`/api/groups`],
-    fetchWithToken
+    fetchWithToken,
   );
 
   if (!prefers?.userInfo) {

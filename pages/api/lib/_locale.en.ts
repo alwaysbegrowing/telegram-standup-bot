@@ -46,14 +46,14 @@ const getGroupsMessage = (groups: Array<string>) => `The following group${
 ${groups.map((g) => `• ${g}`).join('\n')}`;
 
 export const NOT_SUBMITTED_MESSAGE = (
-  groups: Array<string>
+  groups: Array<string>,
 ) => `**(1 hour reminder)** Tick tock. Ready to submit an update?
 
 ${getGroupsMessage(groups)}
 `;
 
 export const SUBMITTED_MESSAGE = (
-  groups: Array<string>
+  groups: Array<string>,
 ) => `**(1 hour reminder)** The update you previously submitted will be posted soon.
 
 If you want to change your update, edit your last message.
@@ -62,7 +62,7 @@ ${getGroupsMessage(groups)}`;
 
 export const WINNER_GROUP_MESSAGE = (user: Member) =>
   `Winner winner. ${getDisplayName(
-    user
+    user,
   )} has been chosen to send an update to this group.`;
 
 export const WINNER_DM_MESSAGE = (groups: Array<string>) =>
@@ -76,7 +76,7 @@ Your update was not saved.`;
 
 export const SUBSCRIBERS_MESSAGE = (
   users: Array<Member>,
-  chatMemberCount: number
+  chatMemberCount: number,
 ) => {
   if (users.length === 0) {
     return `There are no subscribers yet.
@@ -86,7 +86,7 @@ Click /subscribe to be the first to join.`;
 
   if (users.length === 1) {
     return `Currently ${getDisplayName(
-      users[0]
+      users[0],
     )} is the only member subscribed to this group, out of ${chatMemberCount} total members.
 
 Click /subscribe to join them.`;

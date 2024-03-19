@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 
 export const themes = ['light', 'dark'] as const;
-export type ThemeType = typeof themes[number];
+export type ThemeType = (typeof themes)[number];
 export type UserType = {
   photo_url: string;
   first_name: string;

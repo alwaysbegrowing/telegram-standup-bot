@@ -3,17 +3,21 @@
 A Telegram bot that helps you stay on track with daily updates! All members of a chat can participate and stay in the loop.
 
 ## 💡 How to use
+
 1. Add [@stood_bot](https://t.me/stood_bot) to the chats you want to receive updates in.
 2. Type `/subscribe` in each of those chats to start receiving updates.
 
 ## 🗓️ Schedule
+
 - Reminders to submit updates sent at 10AM EST.
 - Updates posted at 11AM EST.
 
 ## 🔧 Support
+
 If you're having trouble with the bot, feel free to [create a GitHub issue](https://github.com/alwaysbegrowing/telegram-standup-bot/issues/new/choose).
 
 ## 🛠️ Self-Hosting Setup
+
 1. Install Vercel CLI: `yarn global add vercel`
 2. Set up the project with Vercel: `vercel deploy` (accept all default settings)
 3. Create a Telegram bot with BotFather: https://core.telegram.org/bots#6-botfather
@@ -24,6 +28,7 @@ If you're having trouble with the bot, feel free to [create a GitHub issue](http
 8. Set up a webhook to your Vercel standup URL: https://api.telegram.org/bot${TELEGRAM_API_KEY}/setWebhook?url=https://.../api/standup?key=${TELEGRAM_API_KEY}
 
 ## 💻 Local Development
+
 ```bash
 yarn
 vercel dev

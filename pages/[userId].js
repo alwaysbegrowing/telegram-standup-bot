@@ -13,7 +13,7 @@ const UserPage = () => {
 
   const { data: initialData, error: initialDataError } = useSWR(
     [`/api/updates/?userId=${userId}`],
-    fetchWithToken
+    fetchWithToken,
   );
 
   return (

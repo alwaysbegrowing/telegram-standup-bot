@@ -8,7 +8,7 @@ const client = new TelegramClient(
   new StringSession(stringSession),
   apiId,
   apiHash,
-  { connectionRetries: 5 }
+  { connectionRetries: 5 },
 );
 
 function getNewStringSession() {
@@ -19,7 +19,7 @@ function getNewStringSession() {
       new StringSession(stringSession),
       apiId,
       apiHash,
-      { connectionRetries: 5 }
+      { connectionRetries: 5 },
     );
     await client.start({
       botAuthToken: BOT_TOKEN,
