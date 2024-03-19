@@ -18,11 +18,11 @@ export const addToStandupGroup = async (
   });
 
   if (userExistsInGroup) {
-    await sendReaction({
-      chat: { id: `${chatId}` },
-      messageId,
-      reactions: ['⚠️'],
-    });
+    // await sendReaction({
+    //   chat: { id: `${chatId}` },
+    //   messageId,
+    //   reactions: ['⚠️'],
+    // });
     return await sendMsg(ALREADY_SUBSCRIBED_MESSAGE, chatId, messageId);
   }
 
@@ -51,10 +51,10 @@ export const addToStandupGroup = async (
     );
   }
 
-  return await sendReaction({
-    chat: { id: `${chatId}` },
-    messageId,
-    reactions: ['✅'],
-  });
-  // return await sendMsg(SUBSCRIBED_MESSAGE, chatId, messageId);
+  // return await sendReaction({
+  //   chat: { id: `${chatId}` },
+  //   messageId,
+  //   reactions: ['✅'],
+  // });
+  return await sendMsg(SUBSCRIBED_MESSAGE, chatId, messageId);
 };

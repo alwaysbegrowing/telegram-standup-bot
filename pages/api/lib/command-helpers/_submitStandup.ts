@@ -11,6 +11,7 @@ import {
 import { getWinningGroupsForUser } from '../_lottery';
 import { telegramTypes } from '../_types';
 import type { Member } from '@/pages/api/lib/_types';
+import { sendReaction } from '@/pages/api/lib/_helpers';
 
 // A message is sent to the bot
 export const submitStandup = async (
@@ -142,6 +143,11 @@ export const submitStandup = async (
   }
 
   if (dbResponse.modifiedCount || dbResponse.modifiedCount) {
+    // return await sendReaction({
+    //   chat: { id: `${chatId}` },
+    //   messageId,
+    //   reactions: ['👍'],
+    // });
     return await sendMsg(SUCCESS_MESSAGE, chatId, messageId);
   }
 
