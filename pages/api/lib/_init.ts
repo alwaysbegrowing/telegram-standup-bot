@@ -44,7 +44,6 @@ export const processMessage = async (
   }
 
   const commandType = getCommandType(chat, entities, text);
-
   switch (commandType) {
     case 'start':
       return await handleStartCommand(from.id, chat.id, message_id, res);

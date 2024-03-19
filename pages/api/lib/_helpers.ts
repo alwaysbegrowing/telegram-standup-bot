@@ -3,7 +3,7 @@ import { createHash, createHmac } from 'crypto';
 import memoize from 'fast-memoize';
 import client from './_client';
 import { ANONYMOUS } from './_locale.en';
-import { Member } from './_types';
+import type { Member } from './_types';
 import { Api } from 'telegram';
 
 export const CHANNEL_ID_LENGTH = 14; // 14 symbols, including -100 prefix
@@ -20,11 +20,13 @@ function checkIfChannelId(id: string) {
 export function getEntityTypeById(chatOrUserId: string) {
   if (!chatOrUserId.startsWith('-')) {
     return 'user';
-  } else if (checkIfChannelId(chatOrUserId)) {
-    return 'channel';
-  } else {
-    return 'chat';
   }
+
+  if (checkIfChannelId(chatOrUserId)) {
+    return 'channel';
+  }
+
+  return 'chat';
 }
 export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
   if (type === 'user') {
@@ -52,18 +54,18 @@ export function buildInputPeer(
   if (type === 'user') {
     return new Api.InputPeerUser({
       userId: buildMtpPeerId(chatOrUserId, 'user'),
-      accessHash: BigInt(accessHash!),
-    });
-  } else if (type === 'channel') {
-    return new Api.InputPeerChannel({
-      channelId: buildMtpPeerId(chatOrUserId, 'channel'),
-      accessHash: BigInt(accessHash!),
-    });
-  } else {
-    return new Api.InputPeerChat({
-      chatId: buildMtpPeerId(chatOrUserId, 'chat'),
+      accessHash: BigInt(accessHash),
     });
   }
+  if (type === 'channel') {
+    return new Api.InputPeerChannel({
+      channelId: buildMtpPeerId(chatOrUserId, 'channel'),
+      accessHash: BigInt(accessHash),
+    });
+  }
+  return new Api.InputPeerChat({
+    chatId: buildMtpPeerId(chatOrUserId, 'chat'),
+  });
 }
 export type ApiReaction = Api.ReactionEmoji | Api.ReactionCustomEmoji;
 
@@ -90,16 +92,19 @@ export async function sendReaction({
 }: {
   chat: { id: string; accessHash?: string };
   messageId: number;
-  reactions?: ApiReaction[];
+  reactions?: string[];
   shouldAddToRecent?: boolean;
 }) {
   if (!client.connected) await client.connect();
+  if (!reactions || !reactions.length) return { status: 200 };
 
   try {
     await client.invoke(
       new Api.messages.SendReaction({
-        reaction: reactions?.map((r) => buildInputReaction(r)),
-        peer: buildInputPeer(chat.id, chat.accessHash),
+        reaction: reactions?.map((r) =>
+          buildInputReaction(new Api.ReactionEmoji({ emoticon: r })),
+        ),
+        peer: chat.id,
         msgId: messageId,
         ...(shouldAddToRecent && { addToRecent: true }),
       }),
