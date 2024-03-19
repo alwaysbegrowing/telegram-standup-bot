@@ -10,13 +10,14 @@ import {
 } from '../_locale.en';
 import { getWinningGroupsForUser } from '../_lottery';
 import { telegramTypes } from '../_types';
+import type { Member } from '@/pages/api/lib/_types';
 
 // A message is sent to the bot
 export const submitStandup = async (
   chatId: number,
   userId: number,
   messageId: number,
-  body: any
+  body: any,
 ) => {
   console.log(body);
 
@@ -27,7 +28,7 @@ export const submitStandup = async (
   }
 
   const isEdit = !!body?.edited_message;
-  let message = body?.message || body?.edited_message;
+  const message = body?.message || body?.edited_message;
   const type = Object.keys(message).find((a) => telegramTypes[a]);
   let file_id = message[type]?.file_id;
 
@@ -82,7 +83,7 @@ export const submitStandup = async (
 
   let dbResponse;
   if (isEdit) {
-    dbResponse = await db.collection('users').updateOne(
+    dbResponse = await db.collection<Member>('users').updateOne(
       {
         'updateArchive.body.message.message_id': message.message_id,
       },
@@ -110,11 +111,10 @@ export const submitStandup = async (
             'elem.sent': false,
           },
         ],
-        multi: true,
-      }
+      },
     );
   } else {
-    dbResponse = await db.collection('users').updateOne(
+    dbResponse = await db.collection<Member>('users').updateOne(
       { userId },
       {
         $set: {
@@ -128,11 +128,11 @@ export const submitStandup = async (
             entities,
             caption: message?.caption,
             type,
-            createdAt: Date.now(),
+            createdAt: Date.now().toString(),
             body,
           },
         },
-      }
+      },
     );
   }
 

@@ -14,13 +14,24 @@ const UserSettings = () => {
         <span>User Settings</span>
       </Popover.Item>
       <Popover.Item>
-        <Link href="https://github.com/alwaysbegrowing/telegram-standup-bot">
+        <Link
+          href="https://github.com/alwaysbegrowing/telegram-standup-bot"
+          placeholder={undefined}
+          onPointerEnterCapture={undefined}
+          onPointerLeaveCapture={undefined}
+        >
           GitHub
         </Link>
       </Popover.Item>
       <Popover.Item line />
       <Popover.Item>
-        <Link href="#" onClick={logout}>
+        <Link
+          href="#"
+          onClick={logout}
+          placeholder={undefined}
+          onPointerEnterCapture={undefined}
+          onPointerLeaveCapture={undefined}
+        >
           Logout
         </Link>
       </Popover.Item>

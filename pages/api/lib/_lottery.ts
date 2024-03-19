@@ -1,12 +1,12 @@
 import { connectToDatabase } from '../lib/_connectToDatabase';
-import { Member, StandupGroup } from '../lib/_types';
+import type { Member, StandupGroup } from '../lib/_types';
 import { sendMsg } from './_helpers';
 import { WINNER_DM_MESSAGE } from './_locale.en';
 
 // Get winning groups for a user
 export const getWinningGroupsForUser = async (userId: number) => {
   const { db } = await connectToDatabase();
-  const user: Member = await db.collection('users').findOne({ userId });
+  const user = await db.collection<Member>('users').findOne({ userId });
   const winners =
     (Array.isArray(user?.groups) &&
       user.groups.filter((g) => !!g).filter((g: StandupGroup) => g.winner)) ||
@@ -20,7 +20,7 @@ export const setWinners = async () => {
   await unsetWinners();
 
   const { db } = await connectToDatabase();
-  const users = await db.collection('users').find({}).toArray();
+  const users = await db.collection<Member>('users').find({}).toArray();
 
   // Get all groups from the users
   const groups = getUsersGroups(users);
@@ -36,7 +36,7 @@ export const setWinners = async () => {
 
 // Get all groups from the users
 function getUsersGroups(users) {
-  let groups = [];
+  const groups = [];
 
   users
     .filter((u) => !!u.groups.length)
@@ -115,8 +115,8 @@ function updateWinnersAndSendMessages(lotteryWinners, users, db) {
                 'elem.chatId': chatId,
               },
             ],
-          }
-        )
+          },
+        ),
       );
     });
 
@@ -131,7 +131,7 @@ export const unsetWinners = async () => {
   console.log('Unsetting all lottery winners');
 
   const { db } = await connectToDatabase();
-  await db.collection('users').updateMany(
+  await db.collection<Member>('users').updateMany(
     { 'groups.winner': true },
     { $set: { 'groups.$[elem].winner': false } },
     {
@@ -140,7 +140,6 @@ export const unsetWinners = async () => {
           'elem.winner': true,
         },
       ],
-      multi: true,
-    }
+    },
   );
 };

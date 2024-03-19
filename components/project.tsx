@@ -1,4 +1,5 @@
-import React, { ReactElement } from 'react';
+import type React from 'react';
+import type { ReactElement } from 'react';
 import { Button, User, Card, useTheme, Display } from '@geist-ui/react';
 import { Calendar, Lock } from '@geist-ui/react-icons';
 import timeUntil from 'time-until';
@@ -61,6 +62,9 @@ const Project: React.FC<ProjectProps> = ({
               onClick={() => router.push(`/${userId}`)}
               className="project__visit-button"
               auto
+              placeholder={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
             >
               More
             </Button>

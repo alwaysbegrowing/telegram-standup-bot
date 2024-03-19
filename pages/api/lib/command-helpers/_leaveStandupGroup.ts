@@ -4,18 +4,19 @@ import {
   INVALID_UNSUBSCRIBE_MESSAGE,
   UNSUBSCRIBED_MESSAGE,
 } from '../_locale.en';
+import type { Member } from '@/pages/api/lib/_types';
 
 export const leaveStandupGroup = async (
   chatId: number,
   userId: number,
-  messageId: number
+  messageId: number,
 ) => {
   const { db } = await connectToDatabase();
-  const removedUserFromGroup = await db.collection('users').updateOne(
+  const removedUserFromGroup = await db.collection<Member>('users').updateOne(
     {
       userId,
     },
-    { $pull: { groups: { chatId } } }
+    { $pull: { groups: { chatId } } },
   );
 
   if (removedUserFromGroup.modifiedCount) {

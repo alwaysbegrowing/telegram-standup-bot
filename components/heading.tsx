@@ -1,6 +1,6 @@
-import React from 'react';
+import type React from 'react';
 import { Avatar, Button, Tag, Text, useTheme, Link } from '@geist-ui/react';
-import { UserType } from '@/lib/use-prefers';
+import type { UserType } from '@/lib/use-prefers';
 
 interface Props {
   user: UserType;
@@ -28,8 +28,19 @@ const Heading: React.FC<HeadingProps> = ({ user }) => {
               <Tag className="headding__user-role">{user.role}</Tag>
 
               <div className="heading__actions">
-                <Link href="https://t.me/stood_bot">
-                  <Button type="secondary" auto>
+                <Link
+                  href="https://t.me/stood_bot"
+                  placeholder={undefined}
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                >
+                  <Button
+                    type="secondary"
+                    auto
+                    placeholder={undefined}
+                    onPointerEnterCapture={undefined}
+                    onPointerLeaveCapture={undefined}
+                  >
                     Create Update
                   </Button>
                 </Link>

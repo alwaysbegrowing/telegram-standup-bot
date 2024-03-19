@@ -26,7 +26,9 @@ if (!cachedConnection) {
   cachedConnection = globalThis.mongo = { conn: null, promise: null };
 }
 
-export async function connectToDatabase() {
+export async function connectToDatabase(): Promise<{
+  db: ReturnType<MongoClient['db']>;
+}> {
   if (cachedConnection.conn) {
     return cachedConnection.conn;
   }
@@ -38,7 +40,7 @@ export async function connectToDatabase() {
 
     cachedConnection.promise = MongoClient.connect(
       process.env.MONGODB_FULL_URI,
-      options
+      options,
     ).then((client) => ({
       client,
       db: client.db(process.env.MONGODB_NAME),

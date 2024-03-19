@@ -23,7 +23,14 @@ const SettingsPage = () => {
               </Fieldset.Subtitle>
               <Fieldset.Footer>
                 {' '}
-                <Button auto scale={1 / 3} type="error">
+                <Button
+                  auto
+                  scale={1 / 3}
+                  type="error"
+                  placeholder={undefined}
+                  onPointerEnterCapture={undefined}
+                  onPointerLeaveCapture={undefined}
+                >
                   Pause Reminders
                 </Button>
               </Fieldset.Footer>

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import Image from 'next/image';
 import { Text, Link, useTheme } from '@geist-ui/react';
 
@@ -18,6 +18,9 @@ const Footer: React.FC = () => {
               target="_blank"
               rel="noopener"
               underline
+              placeholder={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
             >
               <Image
                 alt="Vercel Logo"
@@ -38,6 +41,9 @@ const Footer: React.FC = () => {
               target="_blank"
               rel="noopener"
               underline
+              placeholder={undefined}
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
             >
               <Image
                 alt="Bugsnag Logo"

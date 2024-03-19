@@ -12,17 +12,12 @@ export const addToStandupGroup = async (
 ) => {
   const { db } = await connectToDatabase();
 
-  const userExistsInGroup = await db.collection('users').findOne({
+  const userExistsInGroup = await db.collection<Member>('users').findOne({
     userId,
     'groups.chatId': chatId,
   });
 
   if (userExistsInGroup) {
-    console.log({
-      chatId,
-      messageId,
-      userId,
-    });
     await sendReaction({
       chat: { id: `${chatId}` },
       messageId,
@@ -37,7 +32,7 @@ export const addToStandupGroup = async (
     winner: false,
   };
 
-  const userExists = await db.collection('users').findOne({ userId });
+  const userExists = await db.collection<Member>('users').findOne({ userId });
   if (!userExists) {
     const member: Member = {
       userId,
@@ -48,10 +43,18 @@ export const addToStandupGroup = async (
       groups: [group],
     };
 
-    db.collection('users').insertOne(member);
+    db.collection<Member>('users').insertOne(member);
   } else {
-    db.collection('users').updateOne({ userId }, { $push: { groups: group } });
+    db.collection<Member>('users').updateOne(
+      { userId },
+      { $push: { groups: group } },
+    );
   }
 
-  return await sendMsg(SUBSCRIBED_MESSAGE, chatId, messageId);
+  return await sendReaction({
+    chat: { id: `${chatId}` },
+    messageId,
+    reactions: ['✅'],
+  });
+  // return await sendMsg(SUBSCRIBED_MESSAGE, chatId, messageId);
 };

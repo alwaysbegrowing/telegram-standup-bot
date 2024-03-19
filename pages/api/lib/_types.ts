@@ -1,7 +1,7 @@
 export enum Commands {
-  subscribe,
-  unsubscribe,
-  start,
+  subscribe = 0,
+  unsubscribe = 1,
+  start = 2,
 }
 
 export const telegramTypes = {
@@ -26,9 +26,12 @@ export interface StandupGroup {
 export interface UpdateArchive {
   createdAt: string;
   type: string;
-  file_path: string;
-  file_id: string;
+  file_path?: string;
+  file_id?: string;
   body: any;
+  entities: any;
+  caption?: string;
+  sent: boolean;
 }
 
 export interface About {

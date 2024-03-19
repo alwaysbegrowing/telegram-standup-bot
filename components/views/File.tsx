@@ -7,13 +7,25 @@ const TGFile = ({ u }) => {
 
   if (['voice', 'video', 'animation', 'audio', 'video_note'].includes(u.type)) {
     return <TGVideo u={u} />;
-  } else if (u.type === 'photo') {
+  }
+  if (u.type === 'photo') {
     return <TGPhoto u={u} />;
   }
 
   return (
-    <Link href={`/api/getFile/?file_id=${u.file_id}`}>
-      <Button>View file</Button>
+    <Link
+      href={`/api/getFile/?file_id=${u.file_id}`}
+      placeholder={undefined}
+      onPointerEnterCapture={undefined}
+      onPointerLeaveCapture={undefined}
+    >
+      <Button
+        placeholder={undefined}
+        onPointerEnterCapture={undefined}
+        onPointerLeaveCapture={undefined}
+      >
+        View file
+      </Button>
     </Link>
   );
 };

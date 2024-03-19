@@ -1,7 +1,8 @@
 import { checkSignature } from '@/pages/api/lib/_helpers';
 import { fillMarkdownEntitiesMarkup } from 'telegram-text-entities-filler';
 import { connectToDatabase } from './lib/_connectToDatabase';
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import type { Member } from '@/pages/api/lib/_types';
 
 const transformUpdate = (group, response) => {
   const latestMessages = group?.updateArchive?.reverse();
@@ -102,7 +103,7 @@ const getUpdatesForOneUser = async (req, res, user) => {
     .toArray();
 
   if (updates && Array.isArray(updates)) {
-    let response = [];
+    const response = [];
     updates.forEach((r) => transformUpdate(r, response));
 
     return res.status(200).json(response);
@@ -123,7 +124,7 @@ const getAllGroupUpdates = async (req, res, user) => {
     .project({ updateArchive: { $slice: -10 } })
     .toArray();
 
-  let response = [];
+  const response = [];
   groupUpdates.map((r) => transformUpdate(r, response));
 
   return res.status(200).json(response);
@@ -140,7 +141,7 @@ export default async function handler(
   }
 
   const { db } = await connectToDatabase();
-  const { value: user } = await db.collection('users').findOneAndUpdate(
+  const user = await db.collection<Member>('users').findOneAndUpdate(
     { userId: req.body.id },
     {
       $set: {

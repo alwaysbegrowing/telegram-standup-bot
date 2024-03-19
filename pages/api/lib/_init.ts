@@ -10,6 +10,7 @@ import {
 } from './_commandHandlers';
 import { getCommandType } from './command-helpers/_getCommandType';
 import { isValidMessage } from './_isValidMessage';
+import type { Member } from '@/pages/api/lib/_types';
 
 /**
  * The beginning
@@ -19,7 +20,7 @@ import { isValidMessage } from './_isValidMessage';
 export const startBot = async (userId: number) => {
   const { db } = await connectToDatabase();
 
-  await db.collection('users').updateOne(
+  await db.collection<Member>('users').updateOne(
     { userId },
     {
       $set: {

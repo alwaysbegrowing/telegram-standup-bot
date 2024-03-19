@@ -2,17 +2,19 @@ import client from './lib/_client';
 import { connectToDatabase } from './lib/_connectToDatabase';
 import { setWinners } from './lib/_lottery';
 import { validateApiKey } from './lib/_validateApiKey';
-import { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import type { Member } from '@/pages/api/lib/_types';
+import type { MongoClient } from 'mongodb';
 
-const markAllSent = async (db) => {
+const markAllSent = async (db: ReturnType<MongoClient['db']>) => {
   console.log('Marking as sent');
 
   const response = await db
-    .collection('users')
+    .collection<Member>('users')
     .updateMany(
       { 'updateArchive.sent': false },
       { $set: { 'updateArchive.$[elem].sent': true, submitted: false } },
-      { arrayFilters: [{ 'elem.sent': false }], multi: true },
+      { arrayFilters: [{ 'elem.sent': false }] },
     );
 
   console.log(response);

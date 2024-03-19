@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import TelegramLoginButton from 'react-telegram-login';
 import { Avatar, Button, useTheme, Popover } from '@geist-ui/react';
 import { Sun, Moon } from '@geist-ui/react-icons';
@@ -26,6 +26,9 @@ const Menu: React.FC = () => {
             onClick={() =>
               prefers.switchTheme(theme.type === 'dark' ? 'light' : 'dark')
             }
+            placeholder={undefined}
+            onPointerEnterCapture={undefined}
+            onPointerLeaveCapture={undefined}
           >
             {theme.type === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
           </Button>
